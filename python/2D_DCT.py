@@ -8,19 +8,19 @@ from scipy.fftpack import dct
 
 # 1.1 固定小数点スケール定義 (Q8.8)
 FIXED_ONE = np.int16(256)            # 1.0 => 256
-FIXED_SQRT_1_OVER_N = np.int16(181)  # sqrt(1/8)*256 ≈ 0.35355 * 256
-FIXED_SQRT_2_OVER_N = np.int16(362)  # sqrt(2/8)*256 ≈ 0.5 * 256
+FIXED_SQRT_1_OVER_N = np.int16(91)  # sqrt(1/8)*256 ≈ 0.35355 * 256
+FIXED_SQRT_2_OVER_N = np.int16(128)  # sqrt(2/8)*256 ≈ 0.5 * 256
 
 # 1.2 固定 DCT 係数 LUT (Q8.8, s16) 修正
 DCT_LUT = np.array([
-    [ 91,   91,   91,   91,   91,   91,   91,   91],  # k=0
-    [126,  106,   71,   25,  -25,  -71, -106, -126],  # k=1
-    [118,   49,  -49, -118, -118,  -49,   49,  118],  # k=2
-    [106,  -25, -126,  -71,   71,  126,   25, -106],  # k=3
-    [ 91,  -91,  -91,   91,   91,  -91,  -91,   91],  # k=4
-    [ 71, -126,  -25,  106,  106,  -25, -126,   71],  # k=5
-    [ 49, -118,   49,  118,  118,   49, -118,   49],  # k=6
-    [ 25,  -71,  106, -126, -126,  106,  -71,   25],  # k=7
+    [256,  256,  256,  256,  256,  256,  256,  256],  # k=0
+    [251,  213,  142,   50,  -50, -142, -213, -251],  # k=1
+    [236,   98,  -98, -236, -236,  -98,   98,  236],  # k=2
+    [213,  -50, -251, -142,  142,  251,   50, -213],  # k=3
+    [181, -181, -181,  181,  181, -181, -181,  181],  # k=4
+    [142, -251,  -50,  213,  213,  -50, -251,  142],  # k=5
+    [ 98, -236,   98,  236,  236,   98, -236,   98],  # k=6
+    [ 50, -142,  213, -251, -251,  213, -142,   50],  # k=7
 ], dtype=np.int16)
 
 def fixed_mul_q88(a: np.int16, b: np.int16) -> np.int16:
@@ -88,6 +88,7 @@ def dct_2d_fftpack(img_u8: np.ndarray) -> np.ndarray:
 if __name__ == "__main__":
     test_matrices = [
         (np.array([[i * j for j in range(8)] for i in range(8)], dtype=np.uint8), "パターン1"),
+        (np.array([[80 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.uint8), "左上 4x4 80"),
         (np.random.randint(0, 256, (8, 8), dtype=np.uint8), "ランダムパターン"),
         (np.array([[80 if (i + j) % 2 == 0 else 80 for j in range(8)] for i in range(8)], dtype=np.uint8), "ベタ"),
         (np.array([[80 if (i + j) % 2 == 0 else 0 for j in range(8)] for i in range(8)], dtype=np.uint8), "チェッカーパターン")
