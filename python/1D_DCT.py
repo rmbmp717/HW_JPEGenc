@@ -104,6 +104,7 @@ if __name__ == "__main__":
         (np.array([8,70,6,5,4,3,25,12], dtype=np.uint8), "通常入力"), 
         (np.array([8,70,63,55,42,3,2,1], dtype=np.uint8), "通常入力"), 
         (np.array([80,0,80,0,80,0,80,0], dtype=np.uint8), "通常入力"), 
+        (np.array([80,80,80,80,80,80,80,80], dtype=np.uint8), "通常入力"), 
         (np.array([8,70,6,56,43,3,120,1], dtype=np.uint8), "通常入力"), 
         (np.array([4,3,20,70,12,6,12,8], dtype=np.uint8), "異常入力")
     ]
