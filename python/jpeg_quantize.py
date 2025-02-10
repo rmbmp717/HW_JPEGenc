@@ -13,7 +13,7 @@ LUMINANCE_QUANT_TBL = np.array([
 ], dtype=np.int16)
 
 # 量子化対象のブロック
-test_block = np.array([
+test_block1 = np.array([
     [400, 300, 200, 100,  50,  25,  10,   5],
     [300, 250, 150,  75,  30,  20,  10,   5],
     [200, 150, 100,  50,  25,  15,  10,   5],
@@ -24,8 +24,24 @@ test_block = np.array([
     [  5,   5,   5,   3,   2,   2,   1,   1]
 ], dtype=np.int16)
 
+test_block2 = np.array([
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128],
+    [128, 128, 128, 128, 128, 128, 128, 128]
+], dtype=np.int16)
+
 # 量子化処理
-quantized_block = np.round(test_block / LUMINANCE_QUANT_TBL).astype(np.int16)
+quantized_block1 = np.round(test_block1 / LUMINANCE_QUANT_TBL).astype(np.int16)
+quantized_block2 = np.round(test_block2 / LUMINANCE_QUANT_TBL).astype(np.int16)
 
 print("=== 量子化後の結果 ===")
-print(quantized_block)
+print(test_block1)
+print(quantized_block1)
+print("=== 量子化後の結果 ===")
+print(test_block2)
+print(quantized_block2)
