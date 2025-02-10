@@ -1,93 +1,139 @@
 // NISHIHARU
 
-// DCT サイズ（N = 8 固定）
+// Q8.8 固定小数点版 DCT (サイズ=8)
+// ※ この例では s16 型 (16ビット符号付き整数) を用いて Q8.8 表現を実現します。
+// 　（Q8.8 では 1.0 == 256 (= 1 << 8) となります）
+
+// DCT サイズ（固定: 8）
 pub const N = u32:8;
 
-// Q32.32 固定小数点スケール定義
-pub const FIXED_ONE = u64:1 << 32;  // 1.0
-pub const FIXED_SQRT_1_OVER_N = u64:3037000499; // sqrt(1/N) = sqrt(1/8) ≈ 0.353553 * 2^32
-pub const FIXED_SQRT_2_OVER_N = u64:4294967296; // sqrt(2/N) = sqrt(2/8) ≈ 0.5 * 2^32
+// Q8.8 固定小数点スケール定義
+pub const FIXED_ONE: s16 = s16:256;             // 1.0 = 256 (Q8.8)
+pub const FIXED_SQRT_1_OVER_N: s16 = s16:91;      // sqrt(1/8)*256 ≈ 0.35355*256 ≒ 91
+pub const FIXED_SQRT_2_OVER_N: s16 = s16:128;     // sqrt(2/8)*256 = 0.5*256 = 128
 
-// **固定 DCT 係数 LUT (Q32.32)**
-//   C[k][n] = cos(π (n + 0.5) k / N) を Q32.32 固定小数点で事前計算
-pub const DCT_LUT: u64[N][N] = [
-  [u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499], // k=0
-  [u64:4265047728, u64:3518437209, u64:2160026241, u64:759250124, u64:759250124, u64:2160026241, u64:3518437209, u64:4265047728], // k=1
-  [u64:3996160608, u64:1717986918, u64:1717986918, u64:3996160608, u64:3996160608, u64:1717986918, u64:1717986918, u64:3996160608], // k=2
-  [u64:3518437209, u64:759250124, u64:4265047728, u64:2160026241, u64:2160026241, u64:4265047728, u64:759250124, u64:3518437209], // k=3
-  [u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499, u64:3037000499], // k=4
-  [u64:2160026241, u64:4265047728, u64:759250124, u64:3518437209, u64:3518437209, u64:759250124, u64:4265047728, u64:2160026241], // k=5
-  [u64:1717986918, u64:3996160608, u64:3996160608, u64:1717986918, u64:1717986918, u64:3996160608, u64:3996160608, u64:1717986918], // k=6
-  [u64:759250124, u64:2160026241, u64:3518437209, u64:4265047728, u64:4265047728, u64:3518437209, u64:2160026241, u64:759250124], // k=7
+// 固定 DCT 係数 LUT (Q8.8 表現)
+// 各係数は C[k][n] = cos(π*(n+0.5)*k/8) を Q8.8 に変換した値です。
+pub const DCT_LUT: s16[N][N] = [
+  // k = 0 : 全要素 1.0 → 256
+  [s16:256, s16:256, s16:256, s16:256, s16:256, s16:256, s16:256, s16:256],
+  [s16:251, s16:213, s16:142, s16:50,  s16:-50, s16:-142, s16:-213, s16:-251],
+  [s16:236, s16:98,  s16:-98, s16:-236, s16:-236, s16:-98, s16:98,  s16:236],
+  [s16:213, s16:-50, s16:-251, s16:-142, s16:142, s16:251, s16:50,  s16:-213],
+  [s16:181, s16:-181, s16:-181, s16:181,  s16:181, s16:-181, s16:-181, s16:181],
+  [s16:142, s16:-251, s16:-50, s16:213,  s16:213, s16:-50, s16:-251, s16:142],
+  [s16:98,  s16:-236, s16:98,  s16:236,  s16:236, s16:98,  s16:-236, s16:98],
+  [s16:50,  s16:-142, s16:213, s16:-251, s16:-251, s16:213, s16:-142, s16:50],
 ];
 
-// **固定小数点の乗算 (Q32.32)**
-fn fixed_mul(a: u64, b: u64) -> u64 {
-  let result = ((a * b) + (u64:1 << 31)) >> 32;
-  //trace!(a);
-  //trace!(b);
-  //trace!(result);
+//----------------------------------------------------------------------
+// 固定小数点の乗算 (Q8.8)
+fn fixed_mul(a: s16, b: s16) -> s16 {
+  let prod: s32 = (a as s32) * (b as s32);
+  let result: s32 = (prod + (s32:1 << 7)) >> 8;
+  result as s16
+}
+
+//----------------------------------------------------------------------
+// 1D DCT 計算 (Q8.8 固定小数点)
+// 入出力は Q8.8 表現 (s16[N]) の配列となる。
+// ※ DCT 計算は、各 k について
+//     sum = Σₙ fixed_mul(x[n], DCT_LUT[k][n])
+//     scaled_sum = (sum * α + 128) >> 8
+//   となっています。
+//   ここで、α = FIXED_SQRT_1_OVER_N (k==0) あるいは FIXED_SQRT_2_OVER_N (k≠0)
+pub fn dct_1d(x: s16[N]) -> s16[N] {
+  for (k, result): (u32, s16[N]) in range(u32:0, N) {
+    let sum: s32 = for (n, acc): (u32, s32) in range(u32:0, N) {
+      acc + (fixed_mul(x[n], DCT_LUT[k][n]) as s32)  // ← 修正
+    }(s32:0);
+
+    let alpha: s32 = if k == u32:0 {
+      FIXED_SQRT_1_OVER_N as s32
+    } else {
+      FIXED_SQRT_2_OVER_N as s32
+    };
+    let sum_scaled: s32 = (sum * alpha + (s32:1 << 7)) >> 8;
+
+    let clipped: s16 = if sum_scaled < s32:-32768 {
+      s16:-32768
+    } else if sum_scaled > s32:32767 {
+      s16:32767
+    } else {
+      sum_scaled as s16
+    };
+    update(result, k, clipped)
+  }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0])
+}
+
+pub fn dct_1d_u8(x: u8[N]) -> u8[N] {
+  let x_q88: s16[N] = for (i, arr): (u32, s16[N]) in range(u32:0, N) {
+    let shifted: s16 = (x[i] as s16) << 8;
+    update(arr, i, shifted)
+  }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0]);
+
+  let y_q88: s16[N] = dct_1d(x_q88);
+
+  let y_int32: s32[N] = for (i, arr): (u32, s32[N]) in range(u32:0, N) {
+    let val: s32 = y_q88[i] as s32;
+    let rounded: s32 = (val + (s32:1 << 7)) >> 8;
+    update(arr, i, rounded)
+  }(s32[N]:[ s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0]);
+
+  let result: u8[N] = for (i, arr): (u32, u8[N]) in range(u32:0, N) {
+    let clipped: u8 = if y_int32[i] < s32:0 {
+      u8:0
+    } else if y_int32[i] > s32:255 {
+      u8:255
+    } else {
+      y_int32[i] as u8
+    };
+    update(arr, i, clipped)
+  }(u8[N]:[ u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]);
   result
 }
 
-// **1D DCT 計算**
-pub fn dct_1d(x: u64[N]) -> u64[N] {
-  for (k, result): (u32, u64[N]) in range(u32:0, N) {
-    let sum = for (n, acc): (u32, u64) in range(u32:0, N) {
-      let mul_result = fixed_mul(x[n], DCT_LUT[k][n]);
-      let new_acc = acc + mul_result;
-      new_acc
-    }(u64:0);
+// Test function
+#[test]
+fn test1_dct_1d_allzero() {
+  let x = u8[8]:[0, 0, 0, 0, 0, 0, 0, 0]; // テスト用の入力データ
+  let expected = u8[8]:[0, 0, 0, 0, 0, 0, 0, 0];
 
-    // **スケール係数の適用**
-    let scaled_sum = if k == u32:0 {
-      fixed_mul(sum, FIXED_SQRT_1_OVER_N)
-    } else {
-      fixed_mul(sum, FIXED_SQRT_2_OVER_N)
-    };
-    trace!(sum);
-
-    let new_result = update(result, k, scaled_sum);
-    new_result
-  }(u64[N]:[u64:0, u64:0, u64:0, u64:0, u64:0, u64:0, u64:0, u64:0])
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
 }
 
 #[test]
-fn test1_dct_1d() {
-  let x = u64[8]:[1, 2, 3, 4, 5, 6, 7, 8]; // テスト用の入力データ
-  let expected = u64[8]:[18, 24, 24, 23, 26, 23, 25, 22];
+fn test0_dct_1d() {
+  let x = u8[8]:[8, 70, 6, 5, 4, 3, 25, 12]; // テスト用の入力データ
+  let expected = u8[8]:[47, 18, 22, 0, 0, 0, 0, 0];
 
-  let result = dct_1d(x); // 実際の計算結果
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
+#[test]
+fn test11_dct_1d() {
+  let x = u8[8]:[80, 0, 80, 0, 80, 0, 80, 0]; // テスト用の入力データ
+  let expected = u8[8]:[114, 20, 0, 24, 0, 8, 31, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(expected);
+  trace!(result);
   assert_eq(result, expected);
 }
 
 #[test]
 fn test2_dct_1d() {
-  let x = u64[8]:[0, 0, 0, 0, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = u64[8]:[0, 0, 0, 0, 0, 0, 0, 0];
+  let x = u8[8]:[8, 70, 63, 55, 42, 3, 2, 1]; // テスト用の入力データ
+  let expected = u8[8]:[87, 50, 0, 0, 0, 1, 26, 0];
 
-  let result = dct_1d(x); // 実際の計算結果
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(expected);
+  trace!(result);
   assert_eq(result, expected);
 }
-
-#[test]
-fn test3_dct_1d() {
-  let x = u64[8]:[10, 20, 30, 40, 50, 60, 70, 80]; // テスト用の入力データ
-  let expected = u64[8]:[179,223, 239, 225, 253, 225, 240, 225];
-
-  let result = dct_1d(x); // 実際の計算結果
-  assert_eq(result, expected);
-}
-
-#[test]
-fn test4_dct_1d() {
-  let x = u64[8]:[8, 7, 6, 5, 4, 3, 2, 1]; // テスト用の入力データ
-  let expected = u64[8]:[18, 24, 24, 23, 26, 23, 25, 22];
-
-  let result = dct_1d(x); // 実際の計算結果
-  assert_eq(result, expected);
-}
-
-
-
-
