@@ -137,3 +137,15 @@ fn test2_dct_1d() {
   trace!(result);
   assert_eq(result, expected);
 }
+
+#[test]
+fn test3_dct_1d() {
+  let x = u8[8]:[80, 80, 80, 80, 80, 80, 80, 80]; // テスト用の入力データ
+  let expected = u8[8]:[128, 0, 0, 0, 0, 17, 61, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
