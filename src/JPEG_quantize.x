@@ -1,3 +1,5 @@
+// NISHIHARU
+
 pub const N: u32 = u32:8;
 
 // JPEG 標準の輝度量子化テーブル (s16)
