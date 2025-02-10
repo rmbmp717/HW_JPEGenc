@@ -43,18 +43,19 @@ def main():
     # example:
     # ./lena.bmp ./output.jpg 80 0
 
-    if(len(sys.argv)!=5):
+    #if(len(sys.argv)!=5):
+    if(len(sys.argv)!=4):
         print('inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1)')
         print('example:')
         print('./lena.bmp ./output.jpg 80 0')
         return
 
-    srcFileName = sys.argv[1]
-    outputJPEGFileName = sys.argv[2]
-    quality = float(sys.argv[3])
-    DEBUG_MODE = int(sys.argv[4])
+    #srcFileName = sys.argv[1]
+    outputJPEGFileName = sys.argv[1]
+    quality = float(sys.argv[2])
+    DEBUG_MODE = int(sys.argv[3])
 
-
+    '''
     numpy.set_printoptions(threshold=numpy.inf)
     srcImage = Image.open(srcFileName)
     srcImageWidth, srcImageHeight = srcImage.size
@@ -71,12 +72,24 @@ def main():
         imageHeight = srcImageHeight // 8 * 8 + 8
 
     print('added to: ', imageWidth, imageHeight)
+    '''
 
+    '''
     # copy data from srcImageMatrix to addedImageMatrix
     addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
     for y in range(srcImageHeight):
         for x in range(srcImageWidth):
             addedImageMatrix[y][x] = srcImageMatrix[y][x]
+    '''
+    
+    srcImageWidth  = 8
+    srcImageHeight = 8
+    imageWidth  = 8
+    imageHeight = 8
+    addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
+
+    #addedImageMatrix = numpy.full((imageHeight, imageWidth, 3), 255, dtype=numpy.uint8)     // All pixel White
+    addedImageMatrix[:4, :4] = 255
 
 
     # split y u v
@@ -87,8 +100,8 @@ def main():
     vImageMatrix = numpy.asarray(vImage).astype(int)
     if(DEBUG_MODE==1):
         print('yImageMatrix:\n', yImageMatrix)
-        print('uImageMatrix:\n', uImageMatrix)
-        print('vImageMatrix:\n', vImageMatrix)
+        #print('uImageMatrix:\n', uImageMatrix)
+        #print('vImageMatrix:\n', vImageMatrix)
 
 
     yImageMatrix = yImageMatrix - 127
@@ -113,7 +126,7 @@ def main():
     chrominanceQuantTbl[chrominanceQuantTbl == 0] = 1
     chrominanceQuantTbl[chrominanceQuantTbl > 255] = 255
     chrominanceQuantTbl = chrominanceQuantTbl.reshape([8, 8]).astype(int)
-    print('chrominanceQuantTbl:\n', chrominanceQuantTbl)
+    #print('chrominanceQuantTbl:\n', chrominanceQuantTbl)
     blockSum = imageWidth // 8 * imageHeight // 8
 
     yDC = numpy.zeros([blockSum], dtype=int)
@@ -137,16 +150,16 @@ def main():
             vDctMatrix = fftpack.dct(fftpack.dct(vImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
             if(blockSum<=8):
                 print('yDctMatrix:\n',yDctMatrix)
-                print('uDctMatrix:\n',uDctMatrix)
-                print('vDctMatrix:\n',vDctMatrix)
+                #print('uDctMatrix:\n',uDctMatrix)
+                #print('vDctMatrix:\n',vDctMatrix)
 
             yQuantMatrix = numpy.rint(yDctMatrix / luminanceQuantTbl)
             uQuantMatrix = numpy.rint(uDctMatrix / chrominanceQuantTbl)
             vQuantMatrix = numpy.rint(vDctMatrix / chrominanceQuantTbl)
             if(DEBUG_MODE==1):
                 print('yQuantMatrix:\n',yQuantMatrix)
-                print('uQuantMatrix:\n',uQuantMatrix)
-                print('vQuantMatrix:\n',vQuantMatrix)
+                #print('uQuantMatrix:\n',uQuantMatrix)
+                #print('vQuantMatrix:\n',vQuantMatrix)
 
 
             yZCode = yQuantMatrix.reshape([64])[zigzagOrder]
@@ -169,8 +182,6 @@ def main():
                 dyDC[blockNum] = yDC[blockNum] - yDC[blockNum-1]
                 duDC[blockNum] = uDC[blockNum] - uDC[blockNum-1]
                 dvDC[blockNum] = vDC[blockNum] - vDC[blockNum-1]
-
-
 
             # huffman encode https://www.impulseadventure.com/photo/jpeg-huffman-coding.html
             # encode yDC

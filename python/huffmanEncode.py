@@ -1720,10 +1720,17 @@ def encodeDCToBoolList(value,isLuminance,debugMode = 0):
 
 def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
+    print("enAC start")
+    print("isLuminance=", isLuminance)
+
     i = 0
     maxI = numpy.size(ACArray)
+    print("maxI", maxI)
     while 1:
+        print("==============================")
+        print("i=", i)
         if(i==maxI):
+            print("maxI")
             break
         run = 0
 
@@ -1731,8 +1738,10 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         j = i
         while 1:
             if(ACArray[j]!=0):
+                print("ACArray")
                 break
             if(j==maxI - 1):
+                print("i=", i, "j=", j)
                 if (isLuminance == 1):
                     bitStream.append(ACLuminanceSizeToCode['00'])  # EOB
                     if (debugMode == 1):
@@ -1743,11 +1752,13 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
                         print('EOB', ACChrominanceToCode['00'])
                 return
             j = j + 1
+            #print("j=", j)
 
-
+        print("next while")
 
         while 1:
             if(ACArray[i]!=0 or i==maxI - 1 or run==15):
+                print("run15")
                 break
             else:
                 run = run + 1
@@ -1756,12 +1767,14 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         value = ACArray[i]
 
         if(value==0 and run!=15):
+            print("runt!15")
             break # Rest of the components are zeros therefore we simply put the EOB to signify this fact
 
         size = int(value).bit_length()
 
         runSizeStr = str.upper(str(hex(run))[2:]) + str.upper(str(hex(size))[2:])
 
+        print("test runSizeStr:", runSizeStr)
 
         if (isLuminance == 1):
             bitStream.append(ACLuminanceSizeToCode[runSizeStr])
@@ -1783,7 +1796,8 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
                     codeList[k] = 0
                 else:
                     codeList[k] = 1
-        bitStream.write(codeList, bool)
+        #bitStream.write(codeList, bool)
+        bitStream.append(codeList)
         if(debugMode == 1):
             if(isLuminance==1):
                 print('isLuminance=',isLuminance,'(run,size,value)=',run,size,value,'code=',ACLuminanceSizeToCode[runSizeStr],codeList)
@@ -1795,3 +1809,47 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
 
 
+
+def main():
+
+    '''
+    Code = [0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0]
+    '''
+    Code = [2, 2, 1, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0]
+
+    print("Code:", Code)
+
+    sosBitStream = BitStream()
+    encodeACBlock(sosBitStream,Code[1:], 1, 1)
+
+    print("output")
+
+    # 必要なパディングビットを計算
+    bit_length = len(sosBitStream)
+    print("bit_length:", bit_length)
+    padding_bits = (8 - (bit_length % 8)) % 8
+
+    # パディングを追加
+    if padding_bits > 0:
+        sosBitStream.append([0] * padding_bits)  # 0 を埋める
+
+    print("============ Final Output ==================")
+    print("sosBitStream (binary):", " ".join(f"{byte:08b}" for byte in sosBitStream.bytes))
+
+if __name__ == '__main__':
+    print("huffmanEncode Test:")
+    main()
