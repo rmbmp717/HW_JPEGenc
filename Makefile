@@ -1,10 +1,15 @@
 # Variables
-TOP = rgb_to_ycbcr
-INPUT_FILE = ./src/rgb_ycbcr.x
-IR_FILE = $(TOP).ir
-OPT_IR_FILE = $(TOP)_opt.ir
+TOP = zigzag_reorder
+#INPUT_FILE = ./src/rgb_ycbcr.x
+#INPUT_FILE = ./src/JPEG_quantize.x
+#INPUT_FILE = ./src/DCT_1D.x
+#INPUT_FILE = ./src/DCT_2D.x
+#INPUT_FILE = ./src/Zigzag_scan.x
+INPUT_FILE = ./src/Huffman_enc.x
+IR_FILE = ./ir_dir/$(TOP).ir
+OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
 TOOL_DIR = /home/haruhiko/xls/bazel-bin
-OUTPUT_FILE = rgb_ycbcr.v
+OUTPUT_FILE = ./verilog/zigzag_reorder.v
 
 SIM = icarus
 COCOTB_DIR = /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
@@ -33,7 +38,7 @@ codegen: optimize
 	$(CODEGEN_MAIN) \
 	--module_name=$(TOP) \
 	--multi_proc \
-	--pipeline_stages=36 \
+	--pipeline_stages=1 \
 	--delay_model=unit \
 	--use_system_verilog=false \
 	$(OPT_IR_FILE) > $(OUTPUT_FILE)
