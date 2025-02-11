@@ -104,40 +104,200 @@ fn get_ac(flat: u8[64]) -> u8[63] {
 }
 
 // AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする
+// AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする関数
+// 最大で15個までカウントし、途中で0以外の値が出たらそこで打ち切る
 fn count_run(ac: u8[63], start: u32) -> u32 {
-    let counts: u32[15] = [
-        if ac[start + u32:0] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:1] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:2] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:3] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:4] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:5] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:6] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:7] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:8] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:9] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:10] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:11] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:12] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:13] == u8:0 { u32:1 } else { u32:0 },
-        if ac[start + u32:14] == u8:0 { u32:1 } else { u32:0 }
-    ];
-    let total: u32 = counts[0] + counts[1] + counts[2] + counts[3] + counts[4] +
-                     counts[5] + counts[6] + counts[7] + counts[8] + counts[9] +
-                     counts[10] + counts[11] + counts[12] + counts[13] + counts[14];
+    if start >= u32:63 {
+      u32:0
+    } else if ac[start] != u8:0 {
+      u32:0
+    } else if start + u32:1 >= u32:63 || ac[start + u32:1] != u8:0 {
+      u32:1
+    } else if start + u32:2 >= u32:63 || ac[start + u32:2] != u8:0 {
+      u32:2
+    } else if start + u32:3 >= u32:63 || ac[start + u32:3] != u8:0 {
+      u32:3
+    } else if start + u32:4 >= u32:63 || ac[start + u32:4] != u8:0 {
+      u32:4
+    } else if start + u32:5 >= u32:63 || ac[start + u32:5] != u8:0 {
+      u32:5
+    } else if start + u32:6 >= u32:63 || ac[start + u32:6] != u8:0 {
+      u32:6
+    } else if start + u32:7 >= u32:63 || ac[start + u32:7] != u8:0 {
+      u32:7
+    } else if start + u32:8 >= u32:63 || ac[start + u32:8] != u8:0 {
+      u32:8
+    } else if start + u32:9 >= u32:63 || ac[start + u32:9] != u8:0 {
+      u32:9
+    } else if start + u32:10 >= u32:63 || ac[start + u32:10] != u8:0 {
+      u32:10
+    } else if start + u32:11 >= u32:63 || ac[start + u32:11] != u8:0 {
+      u32:11
+    } else if start + u32:12 >= u32:63 || ac[start + u32:12] != u8:0 {
+      u32:12
+    } else if start + u32:13 >= u32:63 || ac[start + u32:13] != u8:0 {
+      u32:13
+    } else if start + u32:14 >= u32:63 || ac[start + u32:14] != u8:0 {
+      u32:14
+    } else {
+      u32:15
+    }
+  }
+  
+// ビット数を求める関数
+fn bit_length(x: u8) -> u32 {
+    if x == u8:0 {
+        u32:0
+    } else if x >= u8:128 {
+        u32:8
+    } else if x >= u8:64 {
+        u32:7
+    } else if x >= u8:32 {
+        u32:6
+    } else if x >= u8:16 {
+        u32:5
+    } else if x >= u8:8 {
+        u32:4
+    } else if x >= u8:4 {
+        u32:3
+    } else if x >= u8:2 {
+        u32:2
+    } else {
+        u32:1
+    }
+}
 
-    total
+// 0〜15 の整数を 16 進数の文字 (0-9, A-F) に変換
+fn to_hex_digit(x: u32) -> u8 {
+    if x < u32:10 {
+        u8:48 + (x as u8)  // '0' (48) 〜 '9' (57)
+    } else {
+        u8:55 + (x as u8)  // 'A' (65) 〜 'F' (70)
+    }
+}
+
+// run_size_str を符号化
+fn encode_run_size(run: u32, size: u32) -> u8[2] {
+    [to_hex_digit(run), to_hex_digit(size)]
+}
+
+// Luminance 用の Huffman 符号を取得
+fn lookup_huffman_lum(run_size: u8[2]) -> bits[16] {
+    if run_size == [u8:48, u8:48] {  // "00" → EOB
+        bits[16]:0b1010
+    } else if run_size == [u8:48, u8:49] {  // "01"
+        bits[16]:0b00
+    } else if run_size == [u8:48, u8:50] {  // "02"
+        bits[16]:0b01
+    } else if run_size == [u8:48, u8:51] {  // "03"
+        bits[16]:0b100
+    } else if run_size == [u8:48, u8:52] {  // "04"
+        bits[16]:0b1011
+    } else if run_size == [u8:48, u8:53] {  // "05"
+        bits[16]:0b11010
+    } else if run_size == [u8:48, u8:54] {  // "06"
+        bits[16]:0b1111000
+    } else if run_size == [u8:48, u8:55] {  // "07"
+        bits[16]:0b11111000
+    } else if run_size == [u8:48, u8:56] {  // "08"
+        bits[16]:0b1111110110
+    } else if run_size == [u8:48, u8:57] {  // "09"
+        bits[16]:0b1111111110000010
+    } else if run_size == [u8:48, u8:65] {  // "0A"
+        bits[16]:0b1111111110000011
+    } else if run_size == [u8:49, u8:49] {  // "11"
+        bits[16]:0b1100
+    } else if run_size == [u8:49, u8:50] {  // "12"
+        bits[16]:0b11011
+    } else if run_size == [u8:49, u8:51] {  // "13"
+        bits[16]:0b1111001
+    } else if run_size == [u8:49, u8:52] {  // "14"
+        bits[16]:0b111110110
+    } else if run_size == [u8:49, u8:53] {  // "15"
+        bits[16]:0b11111110110
+    } else if run_size == [u8:49, u8:54] {  // "16"
+        bits[16]:0b1111111110000100
+    } else if run_size == [u8:49, u8:55] {  // "17"
+        bits[16]:0b1111111110000101
+    } else if run_size == [u8:49, u8:56] {  // "18"
+        bits[16]:0b1111111110000110
+    } else if run_size == [u8:49, u8:57] {  // "19"
+        bits[16]:0b1111111110000111
+    } else if run_size == [u8:49, u8:65] {  // "1A"
+        bits[16]:0b1111111110001000
+    } else {
+        bits[16]:0b0000  // 仮のエンコード結果（未登録）
+    }
+}
+
+// Chrominance 用の Huffman 符号を取得
+fn lookup_huffman_chrom(run_size: u8[2]) -> bits[16] {
+    if run_size[0] == u8:48 && run_size[1] == u8:48 {
+        bits[16]:0b1110  // "00" → EOB
+    } else {
+        bits[16]:0b0000  // 仮のエンコード結果
+    }
+}
+
+// value を符号反転して符号化
+fn encode_value(value: u8) -> bits[8] {
+    let bit_0: bits[1] = ((value >> u8:7) & u8:1) as bits[1];
+    let bit_1: bits[1] = ((value >> u8:6) & u8:1) as bits[1];
+    let bit_2: bits[1] = ((value >> u8:5) & u8:1) as bits[1];
+    let bit_3: bits[1] = ((value >> u8:4) & u8:1) as bits[1];
+    let bit_4: bits[1] = ((value >> u8:3) & u8:1) as bits[1];
+    let bit_5: bits[1] = ((value >> u8:2) & u8:1) as bits[1];
+    let bit_6: bits[1] = ((value >> u8:1) & u8:1) as bits[1];
+    let bit_7: bits[1] = ((value >> u8:0) & u8:1) as bits[1];
+
+    let bits_value: bits[8] =
+        (bit_0 as bits[8] << bits[8]:7) |
+        (bit_1 as bits[8] << bits[8]:6) |
+        (bit_2 as bits[8] << bits[8]:5) |
+        (bit_3 as bits[8] << bits[8]:4) |
+        (bit_4 as bits[8] << bits[8]:3) |
+        (bit_5 as bits[8] << bits[8]:2) |
+        (bit_6 as bits[8] << bits[8]:1) |
+        (bit_7 as bits[8]);
+
+    bits_value
 }
 
 // AC 成分の Huffman 符号化（ループなし）
 fn encode_ac(ac: u8[63], is_luminance: bool) -> bits[128] {
     let run: u32 = count_run(ac, u32:0);
+    trace!(ac);
+    trace!(run);
 
     // すべて 0 なら EOB を返す
     if run == u32:63 {
         EOB_LUM_EXT
     } else {
-        bits[128]:0x10  // 仮のエンコード結果（本来は Huffman 符号化を行う）
+        let value: u8 = ac[run];  // `run` の次の非ゼロ値
+        let size: u32 = bit_length(value);
+        let run_size_str: u8[2] = encode_run_size(run, size);
+
+        trace!(value);
+        trace!(size);
+        trace!(run_size_str);
+
+        // Huffman テーブルを参照
+        let huffman_code: bits[16] =
+            if is_luminance {
+                lookup_huffman_lum(run_size_str)
+            } else {
+                lookup_huffman_chrom(run_size_str)
+            };
+
+        let encoded_value: bits[8] = encode_value(value);
+        let current_code: bits[24] = huffman_code ++ encoded_value;
+
+        trace!(encoded_value);
+        trace!(current_code);
+
+        // 残りのデータを Huffman 符号化（仮の処理）
+        let rest: bits[104] = bits[104]:0;
+        current_code ++ rest
     }
 }
  
@@ -153,7 +313,92 @@ fn Huffman_enc(matrix: u8[8][8]) -> bits[128] {
     }
 }
 
-// テストケース
+// =======================
+// 以下はテストケース
+// =======================
+#[test]
+fn test_count_run() {
+    let ac1: u8[63] = [ // 先頭 10 個が 0
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:5, u8:6, u8:7, u8:8, u8:9, u8:10, u8:11, u8:12, u8:13, u8:14,
+        u8:15, u8:16, u8:17, u8:18, u8:19, u8:20, u8:21, u8:22, u8:23, u8:24,
+        u8:25, u8:26, u8:27, u8:28, u8:29, u8:30, u8:31, u8:32, u8:33, u8:34,
+        u8:35, u8:36, u8:37, u8:38, u8:39, u8:40, u8:41, u8:42, u8:43, u8:44,
+        u8:45, u8:46, u8:47, u8:48, u8:49, u8:50, u8:51, u8:52, u8:53, u8:3,
+        u8:45, u8:46, u8:47
+    ];
+    
+    let ac2: u8[63] = [ // 先頭 15 個が 0
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:1, u8:2, u8:3, u8:4, u8:5, u8:6, u8:7, u8:8, u8:9, u8:10,
+        u8:11, u8:12, u8:13, u8:14, u8:15, u8:16, u8:17, u8:18, u8:19, u8:20,
+        u8:21, u8:22, u8:23, u8:24, u8:25, u8:26, u8:27, u8:28, u8:29, u8:30,
+        u8:31, u8:32, u8:33, u8:34, u8:35, u8:36, u8:37, u8:38, u8:39, u8:40,
+        u8:41, u8:42, u8:43, u8:44, u8:45, u8:43, u8:44, u8:45
+    ];
+
+    let ac3: u8[63] = [ // すべて 0
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:43, u8:44, u8:45, u8:5
+    ];
+    
+    let ac4: u8[63] = [ // すべて 0 ではない
+        u8:1, u8:2, u8:3, u8:4, u8:5, u8:6, u8:7, u8:8, u8:9, u8:10,
+        u8:11, u8:12, u8:13, u8:14, u8:15, u8:16, u8:17, u8:18, u8:19, u8:20,
+        u8:21, u8:22, u8:23, u8:24, u8:25, u8:26, u8:27, u8:28, u8:29, u8:30,
+        u8:31, u8:32, u8:33, u8:34, u8:35, u8:36, u8:37, u8:38, u8:39, u8:40,
+        u8:41, u8:42, u8:43, u8:44, u8:45, u8:46, u8:47, u8:48, u8:49, u8:50,
+        u8:51, u8:52, u8:53, u8:54, u8:55, u8:56, u8:57, u8:58, u8:59, u8:5,
+        u8:51, u8:52, u8:53
+    ];
+
+    let ac5: u8[63] = [ // 先頭 2個が 0
+        u8:0, u8:0, u8:1, u8:1, u8:1, u8:0, u8:0, u8:0, u8:0, u8:0,
+        u8:5, u8:6, u8:7, u8:8, u8:9, u8:10, u8:11, u8:12, u8:13, u8:14,
+        u8:15, u8:16, u8:17, u8:18, u8:19, u8:20, u8:21, u8:22, u8:23, u8:24,
+        u8:25, u8:26, u8:27, u8:28, u8:29, u8:30, u8:31, u8:32, u8:33, u8:34,
+        u8:35, u8:36, u8:37, u8:38, u8:39, u8:40, u8:41, u8:42, u8:43, u8:44,
+        u8:45, u8:46, u8:47, u8:48, u8:49, u8:50, u8:51, u8:52, u8:53, u8:3,
+        u8:45, u8:46, u8:47
+    ];
+
+    // 各テストケース
+    let result1: u32 = count_run(ac1, u32:0);
+    let result2: u32 = count_run(ac2, u32:0);
+    let result3: u32 = count_run(ac3, u32:0);
+    let result4: u32 = count_run(ac4, u32:0);
+    let result5: u32 = count_run(ac5, u32:0);
+
+    trace!(result1);
+    trace!(result2);
+    trace!(result3);
+    trace!(result4);
+    trace!(result5);
+
+    // 期待値と比較
+    assert_eq(result1, u32:10); // 最初の 10 個が 0
+    assert_eq(result2, u32:15); // 最初の 15 個が 0
+    assert_eq(result3, u32:15); // すべて 0 でも最大 15 まで
+    assert_eq(result4, u32:0);  // すべて 0 でない
+    assert_eq(result5, u32:2);  
+}
+
+#[test]
+fn test_encode_run_size() {
+  let run: u32 = u32:10;
+  let size: u32 = u32:2;
+  let result: u8[2] = encode_run_size(run, size);
+  // 期待される結果は ['A', '2'] つまり [u8:65, u8:50]
+  let expected: u8[2] = [u8:65, u8:50];
+  assert_eq(result, expected);
+}
+
 #[test]
 fn test0_Huffman_enc() {
     let test_matrix: u8[8][8] = [
@@ -177,7 +422,7 @@ fn test0_Huffman_enc() {
 #[test]
 fn test1_Huffman_enc() {
     let test_matrix: u8[8][8] = [
-        [u8:2, u8:2, u8:1, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:2, u8:0, u8:0, u8:8, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
@@ -187,7 +432,7 @@ fn test1_Huffman_enc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[128]  = bits[128]:0x0010;
+    let expected_output: bits[128]  = bits[128]:0x800_0000_0000_0000_0000_0000_0000;
     let actual_output: bits[128]  = Huffman_enc(test_matrix);
 
     trace!(actual_output);
