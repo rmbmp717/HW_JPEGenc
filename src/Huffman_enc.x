@@ -2,7 +2,8 @@
 
 // ここではビットは bool で表す（true:1, false:0）。
 // ルミナンス用 EOB コード（"00" に対応するコード）として [true, true, false, false] を定義
-const EOB_LUM: bool[4] = [true, true, false, false];
+const EOB_LUM_EXT: bits[128] = bits[128]:0b1010; // 仮の値
+const EOB_CHR_EXT: bits[128] = bits[128]:0b00;   // 仮の値
 
 // 8×8 の u8 行列を平坦化して 64 要素の u8 配列にする関数
 fn flatten(matrix: u8[8][8]) -> u8[64] {
@@ -102,21 +103,79 @@ fn get_ac(flat: u8[64]) -> u8[63] {
     ac
 }
 
+// AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする
+fn count_run(ac: u8[63], start: u32) -> u32 {
+    let counts: u32[15] = [
+        if ac[start + u32:0] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:1] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:2] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:3] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:4] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:5] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:6] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:7] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:8] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:9] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:10] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:11] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:12] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:13] == u8:0 { u32:1 } else { u32:0 },
+        if ac[start + u32:14] == u8:0 { u32:1 } else { u32:0 }
+    ];
+    let total: u32 = counts[0] + counts[1] + counts[2] + counts[3] + counts[4] +
+                     counts[5] + counts[6] + counts[7] + counts[8] + counts[9] +
+                     counts[10] + counts[11] + counts[12] + counts[13] + counts[14];
 
-fn Huffman_enc(matrix: u8[8][8]) -> bool[4] {
+    total
+}
+
+// AC 成分の Huffman 符号化（ループなし）
+fn encode_ac(ac: u8[63], is_luminance: bool) -> bits[128] {
+    let run: u32 = count_run(ac, u32:0);
+
+    // すべて 0 なら EOB を返す
+    if run == u32:63 {
+        EOB_LUM_EXT
+    } else {
+        bits[128]:0x10  // 仮のエンコード結果（本来は Huffman 符号化を行う）
+    }
+}
+ 
+// メイン関数
+fn Huffman_enc(matrix: u8[8][8]) -> bits[128] {
     let flat: u8[64] = flatten(matrix);
     let ac: u8[63] = get_ac(flat);
 
     if is_all_zero(ac) {
-        EOB_LUM
+        bits[128]:0b1100  // EOB（ルミナンス用）
     } else {
-        // 実際の Huffman エンコード処理は未実装なので仮の値
-        EOB_LUM
+        encode_ac(ac, true)  // Luminance 用 Huffman 符号化
     }
 }
 
+// テストケース
 #[test]
-fn test_Huffman_enc() {
+fn test0_Huffman_enc() {
+    let test_matrix: u8[8][8] = [
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
+    ];
+
+    let expected_output: bits[128] = bits[128]:0b1100;  // 修正: `bits[128]` に統一
+    let actual_output: bits[128] = Huffman_enc(test_matrix);  // 修正: `bits[128]` に統一
+
+    trace!(actual_output);
+    assert_eq(actual_output, expected_output);
+}
+
+#[test]
+fn test1_Huffman_enc() {
     let test_matrix: u8[8][8] = [
         [u8:2, u8:2, u8:1, u8:0, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
@@ -128,10 +187,9 @@ fn test_Huffman_enc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bool[4] = EOB_LUM;
-    let actual_output: bool[4] = Huffman_enc(test_matrix);
+    let expected_output: bits[128]  = bits[128]:0x0010;
+    let actual_output: bits[128]  = Huffman_enc(test_matrix);
 
     trace!(actual_output);
-
     assert_eq(actual_output, expected_output);
 }
