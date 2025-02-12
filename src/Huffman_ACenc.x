@@ -1,6 +1,6 @@
 // NISHIHARU
 
-const EOB_LUM_EXT: bits[16] = bits[16]:0b1010;      // 仮の値
+const EOB_LUM_EXT: bits[16] = bits[16]:0b00;    
 
 // JPEG 標準 AC ルミナンス用 Huffman 符号表
 // キーは文字列 "01", "02", …, "FA" に対応し、
@@ -926,7 +926,8 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8]) {
 
     // すべて 0 なら EOB を返す
     if run == u32:63 {
-        (EOB_LUM_EXT, u8:4, bits[8]:0)
+        trace!("EOB");
+        (EOB_LUM_EXT, u8:2, bits[8]:0)
     } else {
         let value: u8 = ac_data[run];  // `run` の次の非ゼロ値
         let size: u32 = bit_length(value);
@@ -973,7 +974,7 @@ fn Huffman_ACenc(matrix: u8[8][8]) -> (bits[16], u8, bits[8]) {
     let ac: u8[63] = get_ac_start(flat, bits[4]:0);
 
     if is_all_zero(ac) {
-        (bits[16]:0b1100, u8:4, bits[8]:0)  // EOB（ルミナンス用）
+        (EOB_LUM_EXT, u8:2, bits[8]:0)  // EOB（ルミナンス用）
     } else {
         encode_ac(ac, true)  // Luminance 用 Huffman 符号化
     }
@@ -995,8 +996,8 @@ fn test0_Huffman_enc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1100;     
-    let expected_length: u8 = u8:4;             
+    let expected_output: bits[16] = bits[16]:0b00;     
+    let expected_length: u8 = u8:2;             
     let expected_code: bits[8] = bits[8]:0b000;             
     let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix);  
 
