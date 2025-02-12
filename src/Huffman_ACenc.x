@@ -769,6 +769,50 @@ fn get_ac(flat: u8[64]) -> u8[63] {
     ac
 }
 
+// スタート位置を指定してAC 成分（63 要素）を取得する関数
+fn get_ac_start(flat: u8[64], start_index: bits[4]) -> u8[63] {
+    // 63個の要素がすべて0の配列を用意（要素数を正確に63個並べる）
+    let zero_array: u8[63] = [
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
+      u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0
+    ];
+  
+    // start_index は bits[4] (最大15) なので、u8 に変換してから使う
+    let si_u8: u8 = u8:1 + start_index as u8;  // 0 <= si_u8 <= 15
+  
+    // parametric for 構文
+    // range(bits[6]:0, bits[6]:63) で 0..62 をループ（i は bits[6] 型）
+    let result = for (i, accum) in range(bits[6]:0, bits[6]:63) {
+      // i を u8 に変換（0..62）
+      let idx_u8 = i as u8;
+  
+      // start_index + i
+      let actual_index: u8 = si_u8 + idx_u8;  // 最大 15 + 62 = 77, 範囲外なら下で 0
+  
+      // update(accum, 書き込み先, 書き込み値)
+      let new_accum = update(
+        accum,
+        idx_u8,
+        if actual_index < u8:64 {
+          flat[actual_index]
+        } else {
+          u8:0
+        }
+      );
+  
+      new_accum
+    }(zero_array);
+  
+    result
+  }
+  
+
 // AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする
 // AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする関数
 // 最大で15個までカウントし、途中で0以外の値が出たらそこで打ち切る
@@ -925,7 +969,8 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8]) {
 // メイン関数
 fn Huffman_ACenc(matrix: u8[8][8]) -> (bits[16], u8, bits[8]) {
     let flat: u8[64] = flatten(matrix);
-    let ac: u8[63] = get_ac(flat);
+    //let ac: u8[63] = get_ac(flat);
+    let ac: u8[63] = get_ac_start(flat, bits[4]:0);
 
     if is_all_zero(ac) {
         (bits[16]:0b1100, u8:4, bits[8]:0)  // EOB（ルミナンス用）
@@ -967,7 +1012,7 @@ fn test0_Huffman_enc() {
 #[test]
 fn test1_Huffman_enc() {
     let test_matrix: u8[8][8] = [
-        [u8:2, u8:0, u8:0, u8:8, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:1, u8:1, u8:2, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
@@ -979,7 +1024,7 @@ fn test1_Huffman_enc() {
 
     let expected_output: bits[16] = bits[16]:0b0001;  
     let expected_length: u8 = u8:2;         
-    let expected_code: bits[8] = bits[8]:0b000_1000;    
+    let expected_code: bits[8] = bits[8]:0b000_0001;    
     let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix);  
 
     trace!(actual_output);
@@ -1075,4 +1120,48 @@ fn test_count_run() {
     assert_eq(result3, u32:15); // すべて 0 でも最大 15 まで
     assert_eq(result4, u32:0);  // すべて 0 でない
     assert_eq(result5, u32:2);  
+}
+
+#[test]
+fn test_get_ac2() {
+  // テスト用の flat 配列を用意 (64 要素)
+  let flat: u8[64] = [
+    u8:10, u8:11, u8:12, u8:13, u8:14, u8:15, u8:16, u8:17,
+    u8:18, u8:19, u8:20, u8:21, u8:22, u8:23, u8:24, u8:25,
+    u8:26, u8:27, u8:28, u8:29, u8:30, u8:31, u8:32, u8:33,
+    u8:34, u8:35, u8:36, u8:37, u8:38, u8:39, u8:40, u8:41,
+    u8:42, u8:43, u8:44, u8:45, u8:46, u8:47, u8:48, u8:49,
+    u8:50, u8:51, u8:52, u8:53, u8:54, u8:55, u8:56, u8:57,
+    u8:58, u8:59, u8:60, u8:61, u8:62, u8:63, u8:64, u8:65,
+    u8:66, u8:67, u8:68, u8:69, u8:70, u8:71, u8:72, u8:73
+  ];
+
+  // start_index を bits[4] にキャストし、たとえば 3 を渡す（0～15 の範囲）
+  let si: bits[4] = bits[4]:2;
+
+  // テスト対象の関数を呼び出し
+  let actual_result: u8[63] = get_ac_start(flat, si);
+
+  // 期待値を作る
+  // start_index=3 なので、flat[3..(3+63-1)]→flat[3..65], ただし65は範囲外なので
+  // 実際には flat[3..63] で残りは0が埋まる
+  let expected: u8[63] = [
+    // flat[3..64]: (要素数61個)
+    u8:13, u8:14, u8:15, u8:16, u8:17, u8:18, u8:19, u8:20,
+    u8:21, u8:22, u8:23, u8:24, u8:25, u8:26, u8:27, u8:28,
+    u8:29, u8:30, u8:31, u8:32, u8:33, u8:34, u8:35, u8:36,
+    u8:37, u8:38, u8:39, u8:40, u8:41, u8:42, u8:43, u8:44,
+    u8:45, u8:46, u8:47, u8:48, u8:49, u8:50, u8:51, u8:52,
+    u8:53, u8:54, u8:55, u8:56, u8:57, u8:58, u8:59, u8:60,
+    u8:61, u8:62, u8:63, u8:64, u8:65, u8:66, u8:67, u8:68,
+    u8:69, u8:70, u8:71, u8:72, u8:73,
+    // 残り (63-61=2個) は 0
+    u8:0,  u8:0
+  ];
+
+  // テスト結果をトレース出力
+  trace!(actual_result);
+
+  // アサーションで検証
+  assert_eq(actual_result, expected);
 }
