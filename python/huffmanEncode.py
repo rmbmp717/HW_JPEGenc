@@ -59,22 +59,6 @@ DCChrominanceSizeToCode = [
 
 ACLuminanceSizeToCode = {
 
-'''
-'10': [1, 1, 1],       # 仮の値
-'20': [1, 1, 1, 0],    # 仮の値
-'30': [1, 1, 1, 1],    # 仮の値
-'40': [1, 0, 0, 0],    # 仮の値
-'50': [1, 0, 0, 1],    # 仮の値
-'60': [1, 0, 1, 0],    # 仮の値
-'70': [1, 0, 1, 1],    # 仮の値
-'80': [1, 1, 0, 0],    # 仮の値
-'90': [1, 1, 0, 1],    # 仮の値
-'A0': [1, 1, 1, 0, 0], # 仮の値
-'B0': [1, 1, 1, 0, 1], # 仮の値
-'C0': [1, 1, 1, 1, 0], # 仮の値
-'D0': [1, 1, 1, 1, 1], # 仮の値
-'E0': [1, 1, 1, 1, 1, 0], # 仮の値
-'''
 
 '01':[0,0],
 
@@ -1054,14 +1038,21 @@ ACChrominanceToCode = {
 
 #DC components are differentially coded as (SIZE,Value)
 def encodeDCToBoolList(value,isLuminance,debugMode = 0):
+    print("==============================")
+    print("enDC start")
+    print("DC value=", value)
     boolList = []
     size = int(value).bit_length() # int(0).bit_length()=0
+    print("DC size=", size)
+    # sizeを出力
     if(isLuminance==1):
         boolList = boolList + DCLuminanceSizeToCode[size]
     else:
         boolList = boolList + DCChrominanceSizeToCode[size]
+    # valueを出力
     if(value<=0): # if value==0, codeList = [], (SIZE,VALUE)=(SIZE)=EOB
         codeList = list(bin(value)[3:])
+        print("codeList=", codeList)
         for i in range(len(codeList)):
             if (codeList[i] == '0'):
                 codeList[i] = 1
@@ -1069,6 +1060,7 @@ def encodeDCToBoolList(value,isLuminance,debugMode = 0):
                 codeList[i] = 0
     else:
         codeList = list(bin(value)[2:])
+        print("codeList=", codeList)
         for i in range(len(codeList)):
             if (codeList[i] == '0'):
                 codeList[i] = 0
@@ -1080,10 +1072,13 @@ def encodeDCToBoolList(value,isLuminance,debugMode = 0):
             print('isLuminance=',isLuminance,'(size,value)=',size,value,'code=',DCLuminanceSizeToCode[size],codeList)
         else:
             print('isLuminance=', isLuminance, '(size,value)=', size, value, 'code=', DCChrominanceSizeToCode[size],codeList)
+    
+    print("booList=", boolList)
     return boolList
 
 def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
+    print("==============================")
     print("enAC start")
     print("isLuminance=", isLuminance)
     print("ACArray=", ACArray)
@@ -1124,6 +1119,7 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
         while 1:
             if(ACArray[i]!=0 or i==maxI - 1 or run==15):
+                print("ACArray[i]=", ACArray[i])
                 print("run15")
                 break
             else:
@@ -1145,16 +1141,17 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
         runSizeStr = str.upper(str(hex(run))[2:]) + str.upper(str(hex(size))[2:])
 
-        print("test runSizeStr:", runSizeStr)
+        print("test runSizeStr int:", int(runSizeStr))
 
         if (isLuminance == 1):
             bitStream.append(ACLuminanceSizeToCode[runSizeStr])
         else:
             bitStream.append(ACChrominanceToCode[runSizeStr])
 
-
+        print("value=", value)
         if(value<=0):# if value==0, codeList = [], (SIZE,VALUE)=(SIZE,[])=EOB
             codeList = list(bin(value)[3:])
+            print("codeList=", codeList)
             for k in range(len(codeList)):
                 if (codeList[k] == '0'):
                     codeList[k] = 1
@@ -1162,6 +1159,7 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
                     codeList[k] = 0
         else:
             codeList = list(bin(value)[2:])
+            print("codeList=", codeList)
             for k in range(len(codeList)):
                 if (codeList[k] == '0'):
                     codeList[k] = 0

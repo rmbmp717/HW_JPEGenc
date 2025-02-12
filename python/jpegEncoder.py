@@ -88,7 +88,7 @@ def main():
     imageHeight = 8
     addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
 
-    #addedImageMatrix = numpy.full((imageHeight, imageWidth, 3), 255, dtype=numpy.uint8)     // All pixel White
+    #addedImageMatrix = numpy.full((imageHeight, imageWidth, 3), 255, dtype=numpy.uint8)     # All pixel White
     addedImageMatrix[:4, :4] = 255
 
 
@@ -126,7 +126,7 @@ def main():
     chrominanceQuantTbl[chrominanceQuantTbl == 0] = 1
     chrominanceQuantTbl[chrominanceQuantTbl > 255] = 255
     chrominanceQuantTbl = chrominanceQuantTbl.reshape([8, 8]).astype(int)
-    #print('chrominanceQuantTbl:\n', chrominanceQuantTbl)
+    print('chrominanceQuantTbl:\n', chrominanceQuantTbl)
     blockSum = imageWidth // 8 * imageHeight // 8
 
     yDC = numpy.zeros([blockSum], dtype=int)
