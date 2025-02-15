@@ -1,7 +1,7 @@
 // NISHIHARU
 
 // Converts an RGB pixel value into YCbCr format.
-fn rgb_to_ycbcr(r: u8, g: u8, b: u8) -> (u8, u8, u8) {
+fn RGB_to_YCbCr(r: u8, g: u8, b: u8) -> (u8, u8, u8) {
     // Convert r, g, b to 16-bit signed integers for calculation.
     let r_16bit = (u8:0 ++ r) as s16;
     let g_16bit = (u8:0 ++ g) as s16;
@@ -42,7 +42,7 @@ fn test1_rgb_to_ycbcr() {
     let r = u8:255;
     let g = u8:0;
     let b = u8:0;
-    let (y, cb, cr) = rgb_to_ycbcr(r, g, b);
+    let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // Expect a specific YCbCr result for pure red.
     assert_eq(y, u8:76);
     assert_eq(cb, u8:85);
@@ -55,7 +55,7 @@ fn test2_rgb_to_ycbcr() {
     let r = u8:0;
     let g = u8:0;
     let b = u8:0;
-    let (y, cb, cr) = rgb_to_ycbcr(r, g, b);
+    let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // Black should yield (Y=0, Cb=128, Cr=128).
     assert_eq(y, u8:0);
     assert_eq(cb, u8:128);
@@ -68,7 +68,7 @@ fn test3_rgb_to_ycbcr() {
     let r = u8:255;
     let g = u8:255;
     let b = u8:255;
-    let (y, cb, cr) = rgb_to_ycbcr(r, g, b);
+    let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // White should yield (Y=255, Cb=128, Cr=128).
     assert_eq(y, u8:255);
     assert_eq(cb, u8:128);
@@ -81,7 +81,7 @@ fn test4_rgb_to_ycbcr() {
     let r = u8:0;
     let g = u8:255;
     let b = u8:0;
-    let (y, cb, cr) = rgb_to_ycbcr(r, g, b);
+    let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // Expect specific YCbCr values for pure green.
     assert_eq(y, u8:149);
     assert_eq(cb, u8:43);
@@ -94,7 +94,7 @@ fn test5_rgb_to_ycbcr() {
     let r = u8:255;
     let g = u8:255;
     let b = u8:255;
-    let (y, cb, cr) = rgb_to_ycbcr(r, g, b);
+    let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // Confirm that white yields (Y=255, Cb=128, Cr=128).
     assert_eq(y, u8:255);
     assert_eq(cb, u8:128);
