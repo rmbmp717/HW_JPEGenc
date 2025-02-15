@@ -59,12 +59,12 @@ pub fn convert_row(row: u8[N]) -> s16[N] {
   }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0 ])
 }
 
-pub fn Quantize(dct_coeffs: u8[N][N], matrix_row: u8, is_luminance: bool) -> s16[N] {
+pub fn Quantize(dct_coeffs: u8[N][N], matrix_row: u8, is_luminance: bool) -> u8[N] {
   let row_idx: u32 = matrix_row as u32;
   // 対象行の u8 値を s16 に変換して初期行を生成
   let initial_row: s16[N] = convert_row(dct_coeffs[row_idx]);
   // 各要素について量子化処理を実施
-  for (j, processed): (u32, s16[N]) in range(u32:0, N) {
+  for (j, processed): (u32, u8[N]) in range(u32:0, N) {
     let q_value: s16 = if is_luminance {
       LUMINANCE_QUANT_TBL[row_idx][j]
     } else {
@@ -73,15 +73,15 @@ pub fn Quantize(dct_coeffs: u8[N][N], matrix_row: u8, is_luminance: bool) -> s16
     // 四捨五入: (initial_row[j] + (q_value/2)) / q_value
     let divided: s32 = (initial_row[j] as s32 + (q_value as s32 / s32:2))
                        / (q_value as s32);
-    let clipped: s16 = if divided > s32:32767 {
-      s16:32767
+    let clipped: u8 = if divided > s32:32767 {
+      u8:255
     } else if divided < s32:-32768 {
-      s16:-32768
+      u8:0
     } else {
-      divided as s16
+      divided as u8
     };
     update(processed, j, clipped)
-  }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0 ])
+  }(u8[N]:[ u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0 ])
 }
 
 // =======================
@@ -103,8 +103,8 @@ fn test0_quantize_block() -> () {
 
   // ※ 本テストでは、輝度の場合 (is_luminance == true)
   // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
-  let expected_result: s16[8] = [
-    s16:13, s16:15, s16:10, s16:3, s16:1, s16:1, s16:0, s16:0
+  let expected_result: u8[8] = [
+    u8:13, u8:15, u8:10, u8:3, u8:1, u8:1, u8:0, u8:0
   ];
 
   let result = Quantize(test_block, u8:0, true);
@@ -128,8 +128,8 @@ fn test1_quantize_block() -> () {
 
   // 色差の場合、標準色差量子化テーブル（scaled）が全要素 94 になると仮定した場合、
   // (value + (94/2))/94 で計算すると、どの要素も 0 になると期待
-  let expected_result: s16[8] = [
-    s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0
+  let expected_result: u8[8] = [
+    u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0
   ];
 
   let result = Quantize(test_block, u8:5, false);
