@@ -1,18 +1,32 @@
 # Variables
-TOP = zigzag_reorder
-#INPUT_FILE = ./src/rgb_ycbcr.x
-#INPUT_FILE = ./src/JPEG_quantize.x
+TOP = Quantize
+#INPUT_FILE = ./src/RGB_YCbCr.x
+INPUT_FILE = ./src/Quantize.x
 #INPUT_FILE = ./src/DCT_1D.x
 #INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
-INPUT_FILE = ./src/Huffman_enc.x
+#INPUT_FILE = ./src/Huffman_DCenc.x
+#INPUT_FILE = ./src/Huffman_ACenc.x
 IR_FILE = ./ir_dir/$(TOP).ir
 OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
 TOOL_DIR = /home/haruhiko/xls/bazel-bin
-OUTPUT_FILE = ./verilog/zigzag_reorder.v
+OUTPUT_FILE = ./verilog/$(TOP).v
 
 SIM = icarus
 COCOTB_DIR = /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
+
+VERILOG_DIR = ./verilog
+VERILOG_FILE = $(VERILOG_DIR)/HW_JPEGenc_top.v
+VERILOG_FILE += $(VERILOG_DIR)/rgb_to_ycbcr.v
+VERILOG_FILE += $(VERILOG_DIR)/HW_JPEGenc.v
+VERILOG_FILE += $(VERILOG_DIR)/databuffer_64x8bit.v
+VERILOG_FILE += $(VERILOG_DIR)/dct_1d_u8.v
+VERILOG_FILE += $(VERILOG_DIR)/databuffer_zigzag64x8bit.v
+VERILOG_FILE += $(VERILOG_DIR)/Zigzag_reorder.v
+
+PIPE_LINE_STAGE = 1
+
+COCOTB_FILE = cocotb_sim.test1_JPEGenc_top
 
 # Tools
 INTERPRETER = $(TOOL_DIR)/xls/dslx/interpreter_main
@@ -38,7 +52,14 @@ codegen: optimize
 	$(CODEGEN_MAIN) \
 	--module_name=$(TOP) \
 	--multi_proc \
-	--pipeline_stages=1 \
+	--pipeline_stages=$(PIPE_LINE_STAGE) \
 	--delay_model=unit \
 	--use_system_verilog=false \
 	$(OPT_IR_FILE) > $(OUTPUT_FILE)
+
+# Cocotb simulation
+simulate: 
+	iverilog -o sim.vvp -D COCOTB_SIM=1 -g2012 $(VERILOG_FILE)
+	MODULE=$(COCOTB_FILE) TOPLEVEL=HW_JPEGenc_top TOPLEVEL_LANG=verilog \
+	SIM=$(SIM) PYTHONPATH=$$(python -c "import site; print(site.getsitepackages()[0])") vvp -M $$(cocotb-config --lib-dir) \
+		-m libcocotbvpi_icarus sim.vvp
