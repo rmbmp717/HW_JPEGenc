@@ -968,13 +968,13 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8]) {
 }
 
 // メイン関数
-fn Huffman_ACenc(matrix: u8[8][8], is_luminance: bool) -> (bits[16], u8, bits[8]) {
+fn Huffman_ACenc(matrix: u8[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8]) {
     let flat: u8[64] = flatten(matrix);
     //let ac: u8[63] = get_ac(flat);
     let ac: u8[63] = get_ac_start(flat, bits[4]:0);
 
     if is_all_zero(ac) {
-        (EOB_LUM_EXT, u8:2, bits[8]:0)  // EOB（ルミナンス用）
+        (EOB_LUM_EXT, start_pix, bits[8]:0)  // EOB（ルミナンス用）
     } else {
         encode_ac(ac, is_luminance)  // Luminance 用 Huffman 符号化
     }
@@ -999,7 +999,7 @@ fn test0_Huffman_enc() {
     let expected_output: bits[16] = bits[16]:0b00;     
     let expected_length: u8 = u8:2;             
     let expected_code: bits[8] = bits[8]:0b000;             
-    let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix, true);  
+    let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
     trace!(actual_length);
@@ -1026,7 +1026,7 @@ fn test1_Huffman_enc() {
     let expected_output: bits[16] = bits[16]:0b0001;  
     let expected_length: u8 = u8:2;         
     let expected_code: bits[8] = bits[8]:0b000_0001;    
-    let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix, true);  
+    let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
     trace!(actual_length);
