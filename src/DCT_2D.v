@@ -1,0 +1,93 @@
+module DCT_2D(
+  input  wire             clock,
+  input  wire             reset_n,
+  input  wire [7:0]       pix_data [0:63],  // 8x8 の 8ビットピクセル（行優先）
+  output reg  [7:0]       out      [0:63]   // 最終 2D DCT 結果（行優先）
+);
+
+  // FSM 用の状態カウンタ：0～7: 行処理, 8～15: 列処理, 16: 出力再構成
+  reg [4:0] state;
+  reg [2:0] row_idx;
+  reg [2:0] col_idx;
+
+  // row_buffer: 各行の DCT 出力を保持（各行は 64 ビット）
+  reg [63:0] row_buffer [0:7];
+  // col_buffer: 各列の DCT 出力を保持（各列は 64 ビット）
+  reg [63:0] col_buffer [0:7];
+
+  // dct_1d_u8 用の入力・出力（1回分の 64 ビットベクトル）
+  reg [63:0] dct_in;
+  wire [63:0] dct_out;
+
+  // dct_1d_u8 のインスタンス（1クロックレイテンシで結果が得られると仮定）
+  dct_1d_u8 dct_inst(
+    .clk(clock),
+    .x(dct_in),
+    .out(dct_out)
+  );
+
+  // 入力 pix_data を行単位でまとめる（行 i は row_in[i] とする）
+  wire [63:0] row_in [0:7];
+  genvar i, j;
+  generate
+    for(i = 0; i < 8; i = i + 1) begin: build_rows
+      // 各行は、pix_data[ i*8 + 0 ] ～ pix_data[ i*8 + 7 ]
+      assign row_in[i] = { pix_data[i*8+7],
+                           pix_data[i*8+6],
+                           pix_data[i*8+5],
+                           pix_data[i*8+4],
+                           pix_data[i*8+3],
+                           pix_data[i*8+2],
+                           pix_data[i*8+1],
+                           pix_data[i*8+0] };
+    end
+  endgenerate
+
+  // FSM：16 クロックで処理完了
+  // 0～7: 各行の 1D DCT 実施 → 結果を row_buffer に保存
+  // 8～15: 各列の 1D DCT 実施 → 結果を col_buffer に保存
+  // 16: col_buffer から最終出力 out を再構成
+  integer r, j_local;  // always ブロック用のループ変数
+  always @(posedge clock or negedge reset_n) begin
+    if(!reset_n) begin
+      state   <= 0;
+      row_idx <= 0;
+      col_idx <= 0;
+    end else begin
+      if(state < 8) begin
+        // [0～7] 行処理段階：行 row_idx の DCT を実施
+        dct_in <= row_in[row_idx];    // 入力をセット
+        row_buffer[row_idx] <= dct_out; // 前回の dct_out（1クロック遅れ）の結果を保存
+        row_idx <= row_idx + 1;
+        state   <= state + 1;
+      end else if(state < 16) begin
+        // [8～15] 列処理段階：col_idx = state - 8
+        reg [63:0] col_vector;
+        integer r_local;
+        col_vector = 64'b0;
+        for(r_local = 0; r_local < 8; r_local = r_local + 1) begin
+          // row_buffer[r_local] は 64 ビット。
+          // 抽出するビットは ((col_idx+1)*8-1) downto (col_idx*8)
+          col_vector[r_local*8 +: 8] = row_buffer[r_local][((col_idx+1)*8-1) -: 8];
+        end
+        dct_in <= col_vector;
+        col_buffer[col_idx] <= dct_out; // 1クロック遅れの結果を保存
+        col_idx <= col_idx + 1;
+        state   <= state + 1;
+      end else begin
+        // state == 16: 最終出力の再構成
+        for(r = 0; r < 8; r = r + 1) begin
+          for(j_local = 0; j_local < 8; j_local = j_local + 1) begin
+            // col_buffer[j_local] のうち、行 r に対応する 8ビットを抽出
+            out[r*8+j_local] <= col_buffer[j_local][((r+1)*8-1) -: 8];
+          end
+        end
+        // 次の処理に備えて FSM リセット
+        state   <= 0;
+        row_idx <= 0;
+        col_idx <= 0;
+      end
+    end
+  end
+
+endmodule
