@@ -3,9 +3,15 @@
 module HW_JPEGenc(
     input  wire             clock,
     input  wire             reset_n,
-    input  wire             input_enable,    // 入力イネーブル信号
-    input  wire             output_enable,   // 出力イネーブル信号
+    input  wire             input_enable,  
+    input  wire             input_1pix_enable,  
+    input  wire [7:0]       pix_1pix_data, 
+    input  wire             dct_enable,
+    input  wire             dct_input_enable,
+    input  wire             zigzag_input_enable,
+    input  wire [7:0]       matrix_row, 
     input  wire [7:0]       pix_data [0:63], // 64個の8ビットピクセル（行優先）
+    input  wire             is_luminance,
     output wire [7:0]       jpeg_out,        // 最終 JPEG 出力（8ビット）
     output wire [3:0]       jpeg_data_bits   // 最終 JPEG 出力のビット幅
 );
@@ -22,7 +28,8 @@ module HW_JPEGenc(
     wire [7:0] dct2d_out [0:63];
 
     // Quantize 用のバッファ（DCT2D 出力を Quantize 用にバッファリング）
-    wire [DATA_WIDTH-1:0] quantim_buffer [0:DEPTH-1];
+    wire [512-1:0]          quantim_buffer;
+    wire [128-1:0]          quantim_out;
 
     // Zigzag バッファ出力（最終出力）
     wire [512-1:0] pix_data_out;
@@ -33,7 +40,7 @@ module HW_JPEGenc(
 
     // Huffmann enc out
     wire [23:0] dc_out;
-    wire [23:0] ac_out;
+    wire [31:0] ac_out;
 
     // ---------------------------------------------------------------------
     // databuffer_64x8bit インスタンス (入力データのバッファ)
@@ -45,9 +52,11 @@ module HW_JPEGenc(
         .clock              (clock),
         .reset_n            (reset_n),
         .input_enable       (input_enable),
-        .output_enable      (output_enable),
+        .input_1pix_enable  (input_1pix_enable),
+        .pix_1pix_data      (pix_1pix_data),     
         .pix_data           (pix_data),   // 64個のピクセル
-        .buffer             (buffer)
+        .buffer             (buffer),
+        .buffer_512bits     ()
     );
     
     // ---------------------------------------------------------------------
@@ -56,6 +65,7 @@ module HW_JPEGenc(
     DCT_2D mDCT_2D (
         .clock          (clock),
         .reset_n        (reset_n),
+        .dct_enable     (dct_enable),   
         .pix_data       (pix_data),   // 入力ピクセル（[0:63]）
         .out            (dct2d_out)   // 2D DCT 結果
     );
@@ -69,10 +79,12 @@ module HW_JPEGenc(
     ) m1_databuffer_64x8bit (
         .clock              (clock),
         .reset_n            (reset_n),
-        .input_enable       (input_enable),
-        .output_enable      (output_enable),
+        .input_enable       (dct_input_enable),
+        .input_1pix_enable  (1'b0),
+        .pix_1pix_data      (8'd0),     
         .pix_data           (dct2d_out),       // DCT_2D の出力を接続
-        .buffer             (quantim_buffer)
+        .buffer             (),
+        .buffer_512bits     (quantim_buffer)
     );
 
     // ---------------------------------------------------------------------
@@ -81,10 +93,10 @@ module HW_JPEGenc(
     // ---------------------------------------------------------------------
     Quantize mQuantize (
         .clk                (clock),
-        .dct_coeffs         (),  // 未接続（後で Quantize 用 DCT係数を接続）
-        .matrix_row         (),  // 未接続
-        .is_luminance       (),  // 未接続
-        .out                ()   // 未接続
+        .dct_coeffs         (quantim_buffer),  
+        .matrix_row         (matrix_row),  
+        .is_luminance       (is_luminance),  
+        .out                (quantim_out)  
     );
 
     // ---------------------------------------------------------------------
@@ -96,9 +108,9 @@ module HW_JPEGenc(
     ) m_databuffer_zigzag64x8bit (
         .clock              (clock),
         .reset_n            (reset_n),
-        .input_enable       (input_enable),
-        .output_enable      (output_enable),
-        .pix_data           (quantim_buffer),  // Quantize 後のバッファ（仮接続）
+        .input_enable       (zigzag_input_enable),
+        .matrix_row         (matrix_row),  
+        .row_data           (quantim_out),
         .buffer             (buffer),          // 既存の buffer 信号を再利用
         .zigzag_pix_out     (pix_data_out)     // 最終 Zigzag 結果
     );
@@ -125,7 +137,6 @@ module HW_JPEGenc(
         .clock              (clock),
         .reset_n            (reset_n),
         .zigzag_pix_in      (pix_data_out),
-        .is_luminance       (is_luminance),
         .dc_matrix          (dc_matrix),
         .ac_matrix          (ac_matrix),
         .dc_out             (dc_out),
