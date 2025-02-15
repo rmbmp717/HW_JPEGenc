@@ -816,41 +816,41 @@ fn get_ac_start(flat: u8[64], start_index: bits[4]) -> u8[63] {
 // AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする
 // AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする関数
 // 最大で15個までカウントし、途中で0以外の値が出たらそこで打ち切る
-fn count_run(ac: u8[63], start: u32) -> u32 {
+fn count_run(ac: u8[63], start: u32) -> u4 {
     if start >= u32:63 {
-      u32:0
+      u4:0
     } else if ac[start] != u8:0 {
-      u32:0
+      u4:0
     } else if start + u32:1 >= u32:63 || ac[start + u32:1] != u8:0 {
-      u32:1
+      u4:1
     } else if start + u32:2 >= u32:63 || ac[start + u32:2] != u8:0 {
-      u32:2
+      u4:2
     } else if start + u32:3 >= u32:63 || ac[start + u32:3] != u8:0 {
-      u32:3
+      u4:3
     } else if start + u32:4 >= u32:63 || ac[start + u32:4] != u8:0 {
-      u32:4
+      u4:4
     } else if start + u32:5 >= u32:63 || ac[start + u32:5] != u8:0 {
-      u32:5
+      u4:5
     } else if start + u32:6 >= u32:63 || ac[start + u32:6] != u8:0 {
-      u32:6
+      u4:6
     } else if start + u32:7 >= u32:63 || ac[start + u32:7] != u8:0 {
-      u32:7
+      u4:7
     } else if start + u32:8 >= u32:63 || ac[start + u32:8] != u8:0 {
-      u32:8
+      u4:8
     } else if start + u32:9 >= u32:63 || ac[start + u32:9] != u8:0 {
-      u32:9
+      u4:9
     } else if start + u32:10 >= u32:63 || ac[start + u32:10] != u8:0 {
-      u32:10
+      u4:10
     } else if start + u32:11 >= u32:63 || ac[start + u32:11] != u8:0 {
-      u32:11
+      u4:11
     } else if start + u32:12 >= u32:63 || ac[start + u32:12] != u8:0 {
-      u32:12
+      u4:12
     } else if start + u32:13 >= u32:63 || ac[start + u32:13] != u8:0 {
-      u32:13
+      u4:13
     } else if start + u32:14 >= u32:63 || ac[start + u32:14] != u8:0 {
-      u32:14
+      u4:14
     } else {
-      u32:15
+      u4:15
     }
   }
   
@@ -919,15 +919,15 @@ fn encode_value(value: u8) -> bits[8] {
 }
 
 // AC 成分の Huffman 符号化（ループなし）
-fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8]) {
-    let run: u32 = count_run(ac_data, u32:0);
+fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8], u4) {
+    let run: u4 = count_run(ac_data, u32:0);
     trace!(ac_data);
     trace!(run);
 
     // すべて 0 なら EOB を返す
-    if run == u32:63 {
+    if run == u4:15 {
         trace!("EOB");
-        (EOB_LUM_EXT, u8:2, bits[8]:0)
+        (EOB_LUM_EXT, u8:2, bits[8]:0, u4:0)
     } else {
         let value: u8 = ac_data[run];  // `run` の次の非ゼロ値
         let size: u32 = bit_length(value);
@@ -963,18 +963,18 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8]) {
     
         trace!(code_list);
 
-        (huffman_code_full, huffman_length, code_list)
+        (huffman_code_full, huffman_length, code_list, run)
     }
 }
 
 // メイン関数
-fn Huffman_ACenc(matrix: u8[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8]) {
+fn Huffman_ACenc(matrix: u8[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u4) {
     let flat: u8[64] = flatten(matrix);
     //let ac: u8[63] = get_ac(flat);
     let ac: u8[63] = get_ac_start(flat, bits[4]:0);
 
     if is_all_zero(ac) {
-        (EOB_LUM_EXT, start_pix, bits[8]:0)  // EOB（ルミナンス用）
+        (EOB_LUM_EXT, start_pix, bits[8]:0, u4:0)  // EOB（ルミナンス用）
     } else {
         encode_ac(ac, is_luminance)  // Luminance 用 Huffman 符号化
     }
@@ -998,16 +998,19 @@ fn test0_Huffman_enc() {
 
     let expected_output: bits[16] = bits[16]:0b00;     
     let expected_length: u8 = u8:2;             
-    let expected_code: bits[8] = bits[8]:0b000;             
-    let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix, u8:2, true);  
+    let expected_code: bits[8] = bits[8]:0b000;  
+    let expected_run: u4 = u4:0;                        
+    let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
+    trace!(actual_run);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
+    assert_eq(actual_run, expected_run);
 }
 
 #[test]
@@ -1026,15 +1029,18 @@ fn test1_Huffman_enc() {
     let expected_output: bits[16] = bits[16]:0b0001;  
     let expected_length: u8 = u8:2;         
     let expected_code: bits[8] = bits[8]:0b000_0001;    
-    let (actual_output, actual_length, actual_code): (bits[16], u8, bits[8]) = Huffman_ACenc(test_matrix, u8:2, true);  
+    let expected_run: u4 = u4:1;                        
+    let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
+    trace!(actual_run);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
+    assert_eq(actual_run, expected_run);
 }
 
 // =======================
@@ -1103,11 +1109,11 @@ fn test_count_run() {
     ];
 
     // 各テストケース
-    let result1: u32 = count_run(ac1, u32:0);
-    let result2: u32 = count_run(ac2, u32:0);
-    let result3: u32 = count_run(ac3, u32:0);
-    let result4: u32 = count_run(ac4, u32:0);
-    let result5: u32 = count_run(ac5, u32:0);
+    let result1: u4 = count_run(ac1, u32:0);
+    let result2: u4 = count_run(ac2, u32:0);
+    let result3: u4 = count_run(ac3, u32:0);
+    let result4: u4 = count_run(ac4, u32:0);
+    let result5: u4 = count_run(ac5, u32:0);
 
     trace!(result1);
     trace!(result2);
@@ -1116,11 +1122,11 @@ fn test_count_run() {
     trace!(result5);
 
     // 期待値と比較
-    assert_eq(result1, u32:10); // 最初の 10 個が 0
-    assert_eq(result2, u32:15); // 最初の 15 個が 0
-    assert_eq(result3, u32:15); // すべて 0 でも最大 15 まで
-    assert_eq(result4, u32:0);  // すべて 0 でない
-    assert_eq(result5, u32:2);  
+    assert_eq(result1, u4:10); // 最初の 10 個が 0
+    assert_eq(result2, u4:15); // 最初の 15 個が 0
+    assert_eq(result3, u4:15); // すべて 0 でも最大 15 まで
+    assert_eq(result4, u4:0);  // すべて 0 でない
+    assert_eq(result5, u4:2);  
 }
 
 #[test]
