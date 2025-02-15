@@ -1,11 +1,11 @@
 # Variables
-TOP = Huffman_ACenc
+TOP = dct_1d_u8
 #INPUT_FILE = ./src/RGB_YCbCr.x
 #INPUT_FILE = ./src/Quantize.x
-#INPUT_FILE = ./src/DCT_1D.x
+INPUT_FILE = ./src/DCT_1D.x
 #INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
-INPUT_FILE = ./src/Huffman_ACenc.x
+#INPUT_FILE = ./src/Huffman_ACenc.x
 #INPUT_FILE = ./src/Huffman_ACenc.x
 IR_FILE = ./ir_dir/$(TOP).ir
 OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
