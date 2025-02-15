@@ -8,6 +8,34 @@ module DCT_2D(
   output reg  [7:0]       out      [0:63]   // 最終 2D DCT 結果（行優先）
 );
 
+  // Debug 
+  wire [511:0] pix_data_flat;
+  genvar idx;
+  generate
+    for (idx = 0; idx < 64; idx = idx + 1) begin : flatten
+      // pix_data_flat の最上位8ビットに pix_data[0]、その次に pix_data[1]、…、最下位に pix_data[63]
+      assign pix_data_flat[511 - idx*8 -: 8] = pix_data[idx];
+    end
+  endgenerate
+
+  wire [63:0] row_buffer0;
+  wire [63:0] row_buffer1;
+  wire [63:0] row_buffer2;
+  wire [63:0] row_buffer3;
+  wire [63:0] row_buffer4;
+  wire [63:0] row_buffer5;
+  wire [63:0] row_buffer6;
+  wire [63:0] row_buffer7;
+
+  assign row_buffer0 = row_buffer[0];
+  assign row_buffer1 = row_buffer[1];
+  assign row_buffer2 = row_buffer[2];
+  assign row_buffer3 = row_buffer[3];
+  assign row_buffer4 = row_buffer[4];
+  assign row_buffer5 = row_buffer[5];
+  assign row_buffer6 = row_buffer[6];
+  assign row_buffer7 = row_buffer[7];
+
   // FSM 用の状態カウンタ：0～7: 行処理, 8～15: 列処理, 16: 出力再構成
   reg [4:0] state;
   reg [2:0] row_idx;

@@ -1,3 +1,7 @@
+/*
+NISHIHARU
+JPEG HW Encorder
+*/
 `timescale 1ns / 1ps
 
 module HW_JPEGenc(
@@ -10,9 +14,10 @@ module HW_JPEGenc(
     input  wire             dct_input_enable,
     input  wire             zigzag_input_enable,
     input  wire [7:0]       matrix_row, 
+    input  wire             Huffman_start,
     input  wire [7:0]       pix_data [0:63], // 64個の8ビットピクセル（行優先）
     input  wire             is_luminance,
-    output wire [7:0]       jpeg_out,        // 最終 JPEG 出力（8ビット）
+    output wire [15:0]      jpeg_out,        // 最終 JPEG 出力（8ビット）
     output wire [3:0]       jpeg_data_bits   // 最終 JPEG 出力のビット幅
 );
 
@@ -66,7 +71,7 @@ module HW_JPEGenc(
         .clock          (clock),
         .reset_n        (reset_n),
         .dct_enable     (dct_enable),   
-        .pix_data       (pix_data),   // 入力ピクセル（[0:63]）
+        .pix_data       (buffer),   // 入力ピクセル（[0:63]）
         .out            (dct2d_out)   // 2D DCT 結果
     );
 
@@ -138,10 +143,11 @@ module HW_JPEGenc(
         .out                ({ac_out, length, code, run})
     );
 
-    // Huffman エンコード コントローラは TBD
+    // Huffman エンコード コントローラ
     Huffman_enc_controller mHuffman_enc_controller (
         .clock              (clock),
         .reset_n            (reset_n),
+        .Huffman_start      (Huffman_start),
         .zigzag_pix_in      (pix_data_out),
         .dc_matrix          (dc_matrix),
         .ac_matrix          (ac_matrix),
