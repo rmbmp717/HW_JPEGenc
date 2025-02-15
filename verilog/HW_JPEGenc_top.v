@@ -20,7 +20,7 @@ module HW_JPEGenc_top(
     wire [7:0]      Y_data, Cb_data, Cr_data;
 
     // RGB -> YCbCr
-    rgb_to_ycbcr mrgb_to_ycbcr(
+    RGB_to_YCbCr mRGB_to_YCbCr(
         .clk           (clock),
         .r             (Red),
         .g             (Green),
