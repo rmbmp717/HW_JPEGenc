@@ -1,6 +1,7 @@
 module Huffman_ACenc(
   input wire clk,
   input wire [511:0] matrix,
+  input wire [7:0] start_pix,
   input wire is_luminance,
   output wire [31:0] out
 );
@@ -74,6 +75,7 @@ module Huffman_ACenc(
 
   // Registers for pipe stage 0:
   reg [7:0] p0_matrix[0:7][0:7];
+  reg [7:0] p0_start_pix;
   always @ (posedge clk) begin
     p0_matrix[0][0] <= matrix_unflattened[0][0];
     p0_matrix[0][1] <= matrix_unflattened[0][1];
@@ -139,89 +141,88 @@ module Huffman_ACenc(
     p0_matrix[7][5] <= matrix_unflattened[7][5];
     p0_matrix[7][6] <= matrix_unflattened[7][6];
     p0_matrix[7][7] <= matrix_unflattened[7][7];
+    p0_start_pix <= start_pix;
   end
 
   // ===== Pipe stage 1:
-  wire [7:0] p1_array_index_4701_comb;
-  wire [7:0] p1_array_index_4705_comb;
-  wire p1_eq_4708_comb;
-  wire [7:0] p1_array_index_4709_comb;
-  wire p1_ne_4711_comb;
-  wire p1_eq_4714_comb;
-  wire [7:0] p1_array_index_4721_comb;
-  wire [7:0] p1_array_index_4727_comb;
-  wire p1_ne_4729_comb;
-  wire [7:0] p1_array_index_4734_comb;
-  wire p1_ne_4736_comb;
-  wire [2:0] p1_sel_4737_comb;
-  wire [7:0] p1_array_index_4739_comb;
-  wire p1_ne_4741_comb;
-  wire p1_eq_4744_comb;
-  wire [7:0] p1_array_index_4751_comb;
-  wire [7:0] p1_array_index_4757_comb;
-  wire p1_ne_4759_comb;
-  wire [7:0] p1_array_index_4764_comb;
-  wire p1_ne_4766_comb;
-  wire [3:0] p1_sel_4767_comb;
-  wire [7:0] p1_array_index_4771_comb;
-  wire p1_ne_4773_comb;
-  wire [7:0] p1_array_index_4778_comb;
-  wire p1_ne_4780_comb;
-  wire [7:0] p1_array_index_4785_comb;
-  wire p1_ne_4787_comb;
-  wire [7:0] p1_array_index_4790_comb;
-  wire p1_ne_4792_comb;
-  wire p1_ne_4797_comb;
-  wire [3:0] p1_sel_4798_comb;
-  wire [7:0] p1_array_index_4800_comb;
-  wire p1_ne_4803_comb;
-  wire [7:0] p1_array_index_4807_comb;
+  wire [7:0] p1_array_index_4700_comb;
+  wire [7:0] p1_array_index_4704_comb;
+  wire p1_eq_4707_comb;
+  wire [7:0] p1_array_index_4708_comb;
+  wire p1_ne_4710_comb;
+  wire p1_eq_4713_comb;
+  wire [7:0] p1_array_index_4720_comb;
+  wire [7:0] p1_array_index_4726_comb;
+  wire p1_ne_4728_comb;
+  wire [7:0] p1_array_index_4733_comb;
+  wire p1_ne_4735_comb;
+  wire [2:0] p1_sel_4736_comb;
+  wire [7:0] p1_array_index_4738_comb;
+  wire p1_ne_4740_comb;
+  wire p1_eq_4743_comb;
+  wire [7:0] p1_array_index_4750_comb;
+  wire [7:0] p1_array_index_4756_comb;
+  wire p1_ne_4758_comb;
+  wire [7:0] p1_array_index_4763_comb;
+  wire p1_ne_4765_comb;
+  wire [3:0] p1_sel_4766_comb;
+  wire [7:0] p1_array_index_4770_comb;
+  wire p1_ne_4772_comb;
+  wire [7:0] p1_array_index_4777_comb;
+  wire p1_ne_4779_comb;
+  wire [7:0] p1_array_index_4784_comb;
+  wire p1_ne_4786_comb;
+  wire [7:0] p1_array_index_4789_comb;
+  wire p1_ne_4791_comb;
+  wire p1_ne_4796_comb;
+  wire [3:0] p1_sel_4797_comb;
+  wire [7:0] p1_array_index_4799_comb;
+  wire p1_ne_4802_comb;
+  wire [7:0] p1_array_index_4806_comb;
   wire [7:0] p1_value_comb;
+  wire p1_and_5060_comb;
   wire [7:0] p1_flipped_comb;
   wire [7:0] p1_code_list_comb;
-  wire [7:0] p1_sign_ext_5067_comb;
-  wire [15:0] p1_concat_5068_comb;
   wire [31:0] p1_tuple_5071_comb;
-  assign p1_array_index_4701_comb = p0_matrix[3'h1][3'h7];
-  assign p1_array_index_4705_comb = p0_matrix[3'h1][3'h6];
-  assign p1_eq_4708_comb = p1_array_index_4701_comb == 8'h00;
-  assign p1_array_index_4709_comb = p0_matrix[3'h1][3'h5];
-  assign p1_ne_4711_comb = p1_array_index_4705_comb != 8'h00;
-  assign p1_eq_4714_comb = p1_array_index_4709_comb == 8'h00;
-  assign p1_array_index_4721_comb = p0_matrix[3'h1][3'h4];
-  assign p1_array_index_4727_comb = p0_matrix[3'h1][3'h3];
-  assign p1_ne_4729_comb = p1_array_index_4721_comb != 8'h00;
-  assign p1_array_index_4734_comb = p0_matrix[3'h1][3'h2];
-  assign p1_ne_4736_comb = p1_array_index_4727_comb != 8'h00;
-  assign p1_sel_4737_comb = p1_ne_4729_comb ? 3'h3 : {1'h1, (p1_ne_4711_comb ? 2'h1 : {1'h1, p1_eq_4708_comb}) & {2{p1_eq_4714_comb}}};
-  assign p1_array_index_4739_comb = p0_matrix[3'h1][3'h1];
-  assign p1_ne_4741_comb = p1_array_index_4734_comb != 8'h00;
-  assign p1_eq_4744_comb = p1_array_index_4739_comb == 8'h00;
-  assign p1_array_index_4751_comb = p0_matrix[3'h1][3'h0];
-  assign p1_array_index_4757_comb = p0_matrix[3'h0][3'h7];
-  assign p1_ne_4759_comb = p1_array_index_4751_comb != 8'h00;
-  assign p1_array_index_4764_comb = p0_matrix[3'h0][3'h6];
-  assign p1_ne_4766_comb = p1_array_index_4757_comb != 8'h00;
-  assign p1_sel_4767_comb = p1_ne_4759_comb ? 4'h7 : {1'h1, (p1_ne_4741_comb ? 3'h1 : (p1_ne_4736_comb ? 3'h2 : p1_sel_4737_comb)) & {3{p1_eq_4744_comb}}};
-  assign p1_array_index_4771_comb = p0_matrix[3'h0][3'h5];
-  assign p1_ne_4773_comb = p1_array_index_4764_comb != 8'h00;
-  assign p1_array_index_4778_comb = p0_matrix[3'h0][3'h4];
-  assign p1_ne_4780_comb = p1_array_index_4771_comb != 8'h00;
-  assign p1_array_index_4785_comb = p0_matrix[3'h0][3'h3];
-  assign p1_ne_4787_comb = p1_array_index_4778_comb != 8'h00;
-  assign p1_array_index_4790_comb = p0_matrix[3'h0][3'h2];
-  assign p1_ne_4792_comb = p1_array_index_4785_comb != 8'h00;
-  assign p1_ne_4797_comb = p1_array_index_4790_comb != 8'h00;
-  assign p1_sel_4798_comb = p1_ne_4792_comb ? 4'h2 : (p1_ne_4787_comb ? 4'h3 : (p1_ne_4780_comb ? 4'h4 : (p1_ne_4773_comb ? 4'h5 : (p1_ne_4766_comb ? 4'h6 : p1_sel_4767_comb))));
-  assign p1_array_index_4800_comb = p0_matrix[3'h0][3'h1];
-  assign p1_ne_4803_comb = p1_array_index_4800_comb != 8'h00;
-  assign p1_array_index_4807_comb = p0_matrix[3'h2][3'h0];
-  assign p1_value_comb = {p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h00 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h01 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h02 ? p1_array_index_4790_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h03 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h04 ? p1_array_index_4785_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h05 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h06 ? p1_array_index_4778_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h07 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h08 ? p1_array_index_4771_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h09 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h0a ? p1_array_index_4764_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h0b ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h0c ? p1_array_index_4757_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h0d ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h0e ? p1_array_index_4751_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h0f ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h10 ? p1_array_index_4739_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h11 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h12 ? p1_array_index_4734_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h13 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h14 ? p1_array_index_4727_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h15 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h16 ? p1_array_index_4721_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h17 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h18 ? p1_array_index_4709_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h19 ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h1a ? p1_array_index_4705_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h1b ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h1c ? p1_array_index_4701_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h1d ? p1_array_index_4800_comb : ({p1_ne_4797_comb ? 4'h1 : p1_sel_4798_comb, p1_ne_4803_comb} == 5'h1e ? p1_array_index_4807_comb : p1_array_index_4800_comb))))))))))))))))))))))))))))));
+  assign p1_array_index_4700_comb = p0_matrix[3'h1][3'h7];
+  assign p1_array_index_4704_comb = p0_matrix[3'h1][3'h6];
+  assign p1_eq_4707_comb = p1_array_index_4700_comb == 8'h00;
+  assign p1_array_index_4708_comb = p0_matrix[3'h1][3'h5];
+  assign p1_ne_4710_comb = p1_array_index_4704_comb != 8'h00;
+  assign p1_eq_4713_comb = p1_array_index_4708_comb == 8'h00;
+  assign p1_array_index_4720_comb = p0_matrix[3'h1][3'h4];
+  assign p1_array_index_4726_comb = p0_matrix[3'h1][3'h3];
+  assign p1_ne_4728_comb = p1_array_index_4720_comb != 8'h00;
+  assign p1_array_index_4733_comb = p0_matrix[3'h1][3'h2];
+  assign p1_ne_4735_comb = p1_array_index_4726_comb != 8'h00;
+  assign p1_sel_4736_comb = p1_ne_4728_comb ? 3'h3 : {1'h1, (p1_ne_4710_comb ? 2'h1 : {1'h1, p1_eq_4707_comb}) & {2{p1_eq_4713_comb}}};
+  assign p1_array_index_4738_comb = p0_matrix[3'h1][3'h1];
+  assign p1_ne_4740_comb = p1_array_index_4733_comb != 8'h00;
+  assign p1_eq_4743_comb = p1_array_index_4738_comb == 8'h00;
+  assign p1_array_index_4750_comb = p0_matrix[3'h1][3'h0];
+  assign p1_array_index_4756_comb = p0_matrix[3'h0][3'h7];
+  assign p1_ne_4758_comb = p1_array_index_4750_comb != 8'h00;
+  assign p1_array_index_4763_comb = p0_matrix[3'h0][3'h6];
+  assign p1_ne_4765_comb = p1_array_index_4756_comb != 8'h00;
+  assign p1_sel_4766_comb = p1_ne_4758_comb ? 4'h7 : {1'h1, (p1_ne_4740_comb ? 3'h1 : (p1_ne_4735_comb ? 3'h2 : p1_sel_4736_comb)) & {3{p1_eq_4743_comb}}};
+  assign p1_array_index_4770_comb = p0_matrix[3'h0][3'h5];
+  assign p1_ne_4772_comb = p1_array_index_4763_comb != 8'h00;
+  assign p1_array_index_4777_comb = p0_matrix[3'h0][3'h4];
+  assign p1_ne_4779_comb = p1_array_index_4770_comb != 8'h00;
+  assign p1_array_index_4784_comb = p0_matrix[3'h0][3'h3];
+  assign p1_ne_4786_comb = p1_array_index_4777_comb != 8'h00;
+  assign p1_array_index_4789_comb = p0_matrix[3'h0][3'h2];
+  assign p1_ne_4791_comb = p1_array_index_4784_comb != 8'h00;
+  assign p1_ne_4796_comb = p1_array_index_4789_comb != 8'h00;
+  assign p1_sel_4797_comb = p1_ne_4791_comb ? 4'h2 : (p1_ne_4786_comb ? 4'h3 : (p1_ne_4779_comb ? 4'h4 : (p1_ne_4772_comb ? 4'h5 : (p1_ne_4765_comb ? 4'h6 : p1_sel_4766_comb))));
+  assign p1_array_index_4799_comb = p0_matrix[3'h0][3'h1];
+  assign p1_ne_4802_comb = p1_array_index_4799_comb != 8'h00;
+  assign p1_array_index_4806_comb = p0_matrix[3'h2][3'h0];
+  assign p1_value_comb = {p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h00 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h01 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h02 ? p1_array_index_4789_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h03 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h04 ? p1_array_index_4784_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h05 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h06 ? p1_array_index_4777_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h07 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h08 ? p1_array_index_4770_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h09 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h0a ? p1_array_index_4763_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h0b ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h0c ? p1_array_index_4756_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h0d ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h0e ? p1_array_index_4750_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h0f ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h10 ? p1_array_index_4738_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h11 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h12 ? p1_array_index_4733_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h13 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h14 ? p1_array_index_4726_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h15 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h16 ? p1_array_index_4720_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h17 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h18 ? p1_array_index_4708_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h19 ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h1a ? p1_array_index_4704_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h1b ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h1c ? p1_array_index_4700_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h1d ? p1_array_index_4799_comb : ({p1_ne_4796_comb ? 4'h1 : p1_sel_4797_comb, p1_ne_4802_comb} == 5'h1e ? p1_array_index_4806_comb : p1_array_index_4799_comb))))))))))))))))))))))))))))));
+  assign p1_and_5060_comb = ~p1_ne_4802_comb & ~p1_ne_4796_comb & ~p1_ne_4791_comb & ~p1_ne_4786_comb & ~p1_ne_4779_comb & ~p1_ne_4772_comb & ~p1_ne_4765_comb & ~p1_ne_4758_comb & p1_eq_4743_comb & ~p1_ne_4740_comb & ~p1_ne_4735_comb & ~p1_ne_4728_comb & p1_eq_4713_comb & ~p1_ne_4710_comb & p1_eq_4707_comb & p1_array_index_4806_comb == 8'h00 & p0_matrix[3'h2][3'h1] == 8'h00 & p0_matrix[3'h2][3'h2] == 8'h00 & p0_matrix[3'h2][3'h3] == 8'h00 & p0_matrix[3'h2][3'h4] == 8'h00 & p0_matrix[3'h2][3'h5] == 8'h00 & p0_matrix[3'h2][3'h6] == 8'h00 & p0_matrix[3'h2][3'h7] == 8'h00 & p0_matrix[3'h3][3'h0] == 8'h00 & p0_matrix[3'h3][3'h1] == 8'h00 & p0_matrix[3'h3][3'h2] == 8'h00 & p0_matrix[3'h3][3'h3] == 8'h00 & p0_matrix[3'h3][3'h4] == 8'h00 & p0_matrix[3'h3][3'h5] == 8'h00 & p0_matrix[3'h3][3'h6] == 8'h00 & p0_matrix[3'h3][3'h7] == 8'h00 & p0_matrix[3'h4][3'h0] == 8'h00 & p0_matrix[3'h4][3'h1] == 8'h00 & p0_matrix[3'h4][3'h2] == 8'h00 & p0_matrix[3'h4][3'h3] == 8'h00 & p0_matrix[3'h4][3'h4] == 8'h00 & p0_matrix[3'h4][3'h5] == 8'h00 & p0_matrix[3'h4][3'h6] == 8'h00 & p0_matrix[3'h4][3'h7] == 8'h00 & p0_matrix[3'h5][3'h0] == 8'h00 & p0_matrix[3'h5][3'h1] == 8'h00 & p0_matrix[3'h5][3'h2] == 8'h00 & p0_matrix[3'h5][3'h3] == 8'h00 & p0_matrix[3'h5][3'h4] == 8'h00 & p0_matrix[3'h5][3'h5] == 8'h00 & p0_matrix[3'h5][3'h6] == 8'h00 & p0_matrix[3'h5][3'h7] == 8'h00 & p0_matrix[3'h6][3'h0] == 8'h00 & p0_matrix[3'h6][3'h1] == 8'h00 & p0_matrix[3'h6][3'h2] == 8'h00 & p0_matrix[3'h6][3'h3] == 8'h00 & p0_matrix[3'h6][3'h4] == 8'h00 & p0_matrix[3'h6][3'h5] == 8'h00 & p0_matrix[3'h6][3'h6] == 8'h00 & p0_matrix[3'h6][3'h7] == 8'h00 & p0_matrix[3'h7][3'h0] == 8'h00 & p0_matrix[3'h7][3'h1] == 8'h00 & p0_matrix[3'h7][3'h2] == 8'h00 & p0_matrix[3'h7][3'h3] == 8'h00 & p0_matrix[3'h7][3'h4] == 8'h00 & p0_matrix[3'h7][3'h5] == 8'h00 & p0_matrix[3'h7][3'h6] == 8'h00 & p0_matrix[3'h7][3'h7] == 8'h00;
   assign p1_flipped_comb = ~p1_value_comb;
   assign p1_code_list_comb = ~((|p1_value_comb[7:1]) | p1_value_comb[0]) ? p1_flipped_comb : p1_value_comb;
-  assign p1_sign_ext_5067_comb = {8{~(~p1_ne_4803_comb & ~p1_ne_4797_comb & ~p1_ne_4792_comb & ~p1_ne_4787_comb & ~p1_ne_4780_comb & ~p1_ne_4773_comb & ~p1_ne_4766_comb & ~p1_ne_4759_comb & p1_eq_4744_comb & ~p1_ne_4741_comb & ~p1_ne_4736_comb & ~p1_ne_4729_comb & p1_eq_4714_comb & ~p1_ne_4711_comb & p1_eq_4708_comb & p1_array_index_4807_comb == 8'h00 & p0_matrix[3'h2][3'h1] == 8'h00 & p0_matrix[3'h2][3'h2] == 8'h00 & p0_matrix[3'h2][3'h3] == 8'h00 & p0_matrix[3'h2][3'h4] == 8'h00 & p0_matrix[3'h2][3'h5] == 8'h00 & p0_matrix[3'h2][3'h6] == 8'h00 & p0_matrix[3'h2][3'h7] == 8'h00 & p0_matrix[3'h3][3'h0] == 8'h00 & p0_matrix[3'h3][3'h1] == 8'h00 & p0_matrix[3'h3][3'h2] == 8'h00 & p0_matrix[3'h3][3'h3] == 8'h00 & p0_matrix[3'h3][3'h4] == 8'h00 & p0_matrix[3'h3][3'h5] == 8'h00 & p0_matrix[3'h3][3'h6] == 8'h00 & p0_matrix[3'h3][3'h7] == 8'h00 & p0_matrix[3'h4][3'h0] == 8'h00 & p0_matrix[3'h4][3'h1] == 8'h00 & p0_matrix[3'h4][3'h2] == 8'h00 & p0_matrix[3'h4][3'h3] == 8'h00 & p0_matrix[3'h4][3'h4] == 8'h00 & p0_matrix[3'h4][3'h5] == 8'h00 & p0_matrix[3'h4][3'h6] == 8'h00 & p0_matrix[3'h4][3'h7] == 8'h00 & p0_matrix[3'h5][3'h0] == 8'h00 & p0_matrix[3'h5][3'h1] == 8'h00 & p0_matrix[3'h5][3'h2] == 8'h00 & p0_matrix[3'h5][3'h3] == 8'h00 & p0_matrix[3'h5][3'h4] == 8'h00 & p0_matrix[3'h5][3'h5] == 8'h00 & p0_matrix[3'h5][3'h6] == 8'h00 & p0_matrix[3'h5][3'h7] == 8'h00 & p0_matrix[3'h6][3'h0] == 8'h00 & p0_matrix[3'h6][3'h1] == 8'h00 & p0_matrix[3'h6][3'h2] == 8'h00 & p0_matrix[3'h6][3'h3] == 8'h00 & p0_matrix[3'h6][3'h4] == 8'h00 & p0_matrix[3'h6][3'h5] == 8'h00 & p0_matrix[3'h6][3'h6] == 8'h00 & p0_matrix[3'h6][3'h7] == 8'h00 & p0_matrix[3'h7][3'h0] == 8'h00 & p0_matrix[3'h7][3'h1] == 8'h00 & p0_matrix[3'h7][3'h2] == 8'h00 & p0_matrix[3'h7][3'h3] == 8'h00 & p0_matrix[3'h7][3'h4] == 8'h00 & p0_matrix[3'h7][3'h5] == 8'h00 & p0_matrix[3'h7][3'h6] == 8'h00 & p0_matrix[3'h7][3'h7] == 8'h00)}};
-  assign p1_concat_5068_comb = {15'h0000, ~(~p1_ne_4803_comb & ~p1_ne_4797_comb & ~p1_ne_4792_comb & ~p1_ne_4787_comb & ~p1_ne_4780_comb & ~p1_ne_4773_comb & ~p1_ne_4766_comb & ~p1_ne_4759_comb & p1_eq_4744_comb & ~p1_ne_4741_comb & ~p1_ne_4736_comb & ~p1_ne_4729_comb & p1_eq_4714_comb & ~p1_ne_4711_comb & p1_eq_4708_comb & p1_array_index_4807_comb == 8'h00 & p0_matrix[3'h2][3'h1] == 8'h00 & p0_matrix[3'h2][3'h2] == 8'h00 & p0_matrix[3'h2][3'h3] == 8'h00 & p0_matrix[3'h2][3'h4] == 8'h00 & p0_matrix[3'h2][3'h5] == 8'h00 & p0_matrix[3'h2][3'h6] == 8'h00 & p0_matrix[3'h2][3'h7] == 8'h00 & p0_matrix[3'h3][3'h0] == 8'h00 & p0_matrix[3'h3][3'h1] == 8'h00 & p0_matrix[3'h3][3'h2] == 8'h00 & p0_matrix[3'h3][3'h3] == 8'h00 & p0_matrix[3'h3][3'h4] == 8'h00 & p0_matrix[3'h3][3'h5] == 8'h00 & p0_matrix[3'h3][3'h6] == 8'h00 & p0_matrix[3'h3][3'h7] == 8'h00 & p0_matrix[3'h4][3'h0] == 8'h00 & p0_matrix[3'h4][3'h1] == 8'h00 & p0_matrix[3'h4][3'h2] == 8'h00 & p0_matrix[3'h4][3'h3] == 8'h00 & p0_matrix[3'h4][3'h4] == 8'h00 & p0_matrix[3'h4][3'h5] == 8'h00 & p0_matrix[3'h4][3'h6] == 8'h00 & p0_matrix[3'h4][3'h7] == 8'h00 & p0_matrix[3'h5][3'h0] == 8'h00 & p0_matrix[3'h5][3'h1] == 8'h00 & p0_matrix[3'h5][3'h2] == 8'h00 & p0_matrix[3'h5][3'h3] == 8'h00 & p0_matrix[3'h5][3'h4] == 8'h00 & p0_matrix[3'h5][3'h5] == 8'h00 & p0_matrix[3'h5][3'h6] == 8'h00 & p0_matrix[3'h5][3'h7] == 8'h00 & p0_matrix[3'h6][3'h0] == 8'h00 & p0_matrix[3'h6][3'h1] == 8'h00 & p0_matrix[3'h6][3'h2] == 8'h00 & p0_matrix[3'h6][3'h3] == 8'h00 & p0_matrix[3'h6][3'h4] == 8'h00 & p0_matrix[3'h6][3'h5] == 8'h00 & p0_matrix[3'h6][3'h6] == 8'h00 & p0_matrix[3'h6][3'h7] == 8'h00 & p0_matrix[3'h7][3'h0] == 8'h00 & p0_matrix[3'h7][3'h1] == 8'h00 & p0_matrix[3'h7][3'h2] == 8'h00 & p0_matrix[3'h7][3'h3] == 8'h00 & p0_matrix[3'h7][3'h4] == 8'h00 & p0_matrix[3'h7][3'h5] == 8'h00 & p0_matrix[3'h7][3'h6] == 8'h00 & p0_matrix[3'h7][3'h7] == 8'h00)};
-  assign p1_tuple_5071_comb = {p1_concat_5068_comb, 8'h02, p1_code_list_comb & p1_sign_ext_5067_comb};
+  assign p1_tuple_5071_comb = {{15'h0000, ~p1_and_5060_comb}, p1_and_5060_comb ? p0_start_pix : 8'h02, p1_code_list_comb & {8{~p1_and_5060_comb}}};
 
   // Registers for pipe stage 1:
   reg [31:0] p1_tuple_5071;

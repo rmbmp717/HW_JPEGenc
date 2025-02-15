@@ -40,7 +40,7 @@ module HW_JPEGenc(
 
     // Huffmann enc out
     wire [23:0] dc_out;
-    wire [31:0] ac_out;
+    wire [15:0] ac_out;
 
     // ---------------------------------------------------------------------
     // databuffer_64x8bit インスタンス (入力データのバッファ)
@@ -118,6 +118,10 @@ module HW_JPEGenc(
     // ---------------------------------------------------------------------
     // Huffman エンコード インスタンス
     // ---------------------------------------------------------------------
+    wire [7:0]  start_pix;
+    wire [7:0]  length;
+    wire [7:0]  code;
+
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
         .matrix             (dc_matrix),
@@ -128,8 +132,9 @@ module HW_JPEGenc(
     Huffman_ACenc mHuffman_ACenc (
         .clk                (clock),
         .matrix             (ac_matrix),
+        .start_pix          (start_pix),
         .is_luminance       (is_luminance),
-        .out                (ac_out)
+        .out                ({ac_out, length, code})
     );
 
     // Huffman エンコード コントローラは TBD
@@ -139,8 +144,11 @@ module HW_JPEGenc(
         .zigzag_pix_in      (pix_data_out),
         .dc_matrix          (dc_matrix),
         .ac_matrix          (ac_matrix),
+        .start_pix          (start_pix),
         .dc_out             (dc_out),
         .ac_out             (ac_out),
+        .length             (length),
+        .code               (code),
         .jpeg_out           (jpeg_out),
         .jpeg_data_bits     (jpeg_data_bits)
     );
