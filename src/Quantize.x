@@ -1,7 +1,7 @@
 // NISHIHARU
 
 pub const N: u32 = u32:8;
-pub const QUALITY: u8 = u8:95;
+pub const QUALITY: u8 = u8:95;      // JPEG Quality
 pub const QUALITY_SCALE: s16 = QUALITY as s16;
 
 // JPEG 標準の輝度量子化テーブル (s16)
@@ -51,48 +51,60 @@ pub const LUMINANCE_QUANT_TBL: s16[N][N] =
 pub const CHROMINANCE_QUANT_TBL: s16[N][N] =
     scale_quant_tbl(STD_CHROMINANCE_QUANT_TBL, QUALITY_SCALE);
 
-// 量子化処理 (DCT 係数を JPEG 標準量子化テーブルでスケール)
-pub fn Quantize(dct_coeffs: s16[N][N], matrix_row: u8, is_luminance: bool) -> s16[N] {
-    let row_idx: u32 = matrix_row as u32;
-    let processed_row: s16[N] =
-        for (j, row): (u32, s16[N]) in range(u32:0, N) {
-            let q_value: s16 = if is_luminance {
-                LUMINANCE_QUANT_TBL[row_idx][j]
-            } else {
-                CHROMINANCE_QUANT_TBL[row_idx][j]
-            };
-            let divided: s32 = (dct_coeffs[row_idx][j] as s32 + (q_value as s32 / s32:2))
-                                / (q_value as s32);
-            let clipped: s16 = if divided > s32:32767 {
-                s16:32767
-            } else if divided < s32:-32768 {
-                s16:-32768
-            } else {
-                divided as s16
-            };
-            update(row, j, clipped)
-        }(dct_coeffs[row_idx]);
-    processed_row
+// ヘルパー関数: u8[N] の行を s16[N] に変換
+pub fn convert_row(row: u8[N]) -> s16[N] {
+  // 初期値として全要素ゼロの s16[N] を指定し、for 内包表記で各要素を更新
+  for (j, result): (u32, s16[N]) in range(u32:0, N) {
+    update(result, j, row[j] as s16)
+  }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0 ])
+}
+
+pub fn Quantize(dct_coeffs: u8[N][N], matrix_row: u8, is_luminance: bool) -> s16[N] {
+  let row_idx: u32 = matrix_row as u32;
+  // 対象行の u8 値を s16 に変換して初期行を生成
+  let initial_row: s16[N] = convert_row(dct_coeffs[row_idx]);
+  // 各要素について量子化処理を実施
+  for (j, processed): (u32, s16[N]) in range(u32:0, N) {
+    let q_value: s16 = if is_luminance {
+      LUMINANCE_QUANT_TBL[row_idx][j]
+    } else {
+      CHROMINANCE_QUANT_TBL[row_idx][j]
+    };
+    // 四捨五入: (initial_row[j] + (q_value/2)) / q_value
+    let divided: s32 = (initial_row[j] as s32 + (q_value as s32 / s32:2))
+                       / (q_value as s32);
+    let clipped: s16 = if divided > s32:32767 {
+      s16:32767
+    } else if divided < s32:-32768 {
+      s16:-32768
+    } else {
+      divided as s16
+    };
+    update(processed, j, clipped)
+  }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0 ])
 }
 
 // =======================
-// 以下はテストケース
+// 以下はテストケース（u8 型入力版）
 // =======================
 #[test]
 fn test0_quantize_block() -> () {
-  let test_block: s16[8][8] = [
-    s16[8]:[s16:400, s16:300, s16:200, s16:100, s16:50, s16:25, s16:10, s16:5],
-    s16[8]:[s16:300, s16:250, s16:150, s16:75, s16:30, s16:20, s16:10, s16:5],
-    s16[8]:[s16:200, s16:150, s16:100, s16:50, s16:25, s16:15, s16:10, s16:5],
-    s16[8]:[s16:100, s16:75, s16:50, s16:30, s16:20, s16:10, s16:5, s16:3],
-    s16[8]:[s16:50, s16:30, s16:25, s16:20, s16:15, s16:10, s16:5, s16:3],
-    s16[8]:[s16:25, s16:20, s16:15, s16:10, s16:8, s16:5, s16:3, s16:2],
-    s16[8]:[s16:10, s16:10, s16:10, s16:8, s16:5, s16:3, s16:2, s16:1],
-    s16[8]:[s16:5, s16:5, s16:5, s16:3, s16:2, s16:2, s16:1, s16:1]
+  // test_block の行0のみ使用。その他は 0 で埋める。
+  let test_block: u8[8][8] = [
+    u8[8]:[u8:200, u8:150, u8:100, u8:50, u8:30, u8:20, u8:10, u8:5],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0]
   ];
 
+  // ※ 本テストでは、輝度の場合 (is_luminance == true)
+  // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
   let expected_result: s16[8] = [
-    s16:27, s16:30, s16:20, s16:7, s16:2, s16:1, s16:0, s16:0
+    s16:13, s16:15, s16:10, s16:3, s16:1, s16:1, s16:0, s16:0
   ];
 
   let result = Quantize(test_block, u8:0, true);
@@ -102,17 +114,20 @@ fn test0_quantize_block() -> () {
 
 #[test]
 fn test1_quantize_block() -> () {
-  let test_block: s16[8][8] = [
-    s16[8]:[s16:400, s16:300, s16:200, s16:100, s16:50, s16:25, s16:10, s16:5],
-    s16[8]:[s16:300, s16:250, s16:150, s16:75, s16:30, s16:20, s16:10, s16:5],
-    s16[8]:[s16:200, s16:150, s16:100, s16:50, s16:25, s16:15, s16:10, s16:5],
-    s16[8]:[s16:100, s16:75, s16:50, s16:30, s16:20, s16:10, s16:5, s16:3],
-    s16[8]:[s16:50, s16:30, s16:25, s16:20, s16:15, s16:10, s16:5, s16:3],
-    s16[8]:[s16:25, s16:20, s16:15, s16:10, s16:8, s16:5, s16:3, s16:2],
-    s16[8]:[s16:10, s16:10, s16:10, s16:8, s16:5, s16:3, s16:2, s16:1],
-    s16[8]:[s16:5, s16:5, s16:5, s16:3, s16:2, s16:2, s16:1, s16:1]
+  // test_block の行5に対してテスト（色差の場合: is_luminance == false）
+  let test_block: u8[8][8] = [
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:25,  u8:20,  u8:15,  u8:10, u8:8,  u8:5,  u8:3,  u8:2],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0],
+    u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0]
   ];
 
+  // 色差の場合、標準色差量子化テーブル（scaled）が全要素 94 になると仮定した場合、
+  // (value + (94/2))/94 で計算すると、どの要素も 0 になると期待
   let expected_result: s16[8] = [
     s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0
   ];
