@@ -1,11 +1,11 @@
 # Variables
-TOP = Quantize
+TOP = Huffman_ACenc
 #INPUT_FILE = ./src/RGB_YCbCr.x
-INPUT_FILE = ./src/Quantize.x
+#INPUT_FILE = ./src/Quantize.x
 #INPUT_FILE = ./src/DCT_1D.x
 #INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
-#INPUT_FILE = ./src/Huffman_DCenc.x
+INPUT_FILE = ./src/Huffman_ACenc.x
 #INPUT_FILE = ./src/Huffman_ACenc.x
 IR_FILE = ./ir_dir/$(TOP).ir
 OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
@@ -17,12 +17,17 @@ COCOTB_DIR = /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
 
 VERILOG_DIR = ./verilog
 VERILOG_FILE = $(VERILOG_DIR)/HW_JPEGenc_top.v
-VERILOG_FILE += $(VERILOG_DIR)/rgb_to_ycbcr.v
+VERILOG_FILE += $(VERILOG_DIR)/RGB_to_YCbCr.v
 VERILOG_FILE += $(VERILOG_DIR)/HW_JPEGenc.v
 VERILOG_FILE += $(VERILOG_DIR)/databuffer_64x8bit.v
+VERILOG_FILE += $(VERILOG_DIR)/DCT_2D.v
 VERILOG_FILE += $(VERILOG_DIR)/dct_1d_u8.v
 VERILOG_FILE += $(VERILOG_DIR)/databuffer_zigzag64x8bit.v
 VERILOG_FILE += $(VERILOG_DIR)/Zigzag_reorder.v
+VERILOG_FILE += $(VERILOG_DIR)/Quantize.v
+VERILOG_FILE += $(VERILOG_DIR)/Huffman_DCenc.v
+VERILOG_FILE += $(VERILOG_DIR)/Huffman_ACenc.v
+VERILOG_FILE += $(VERILOG_DIR)/Huffman_enc_controller.v
 
 PIPE_LINE_STAGE = 1
 
@@ -50,8 +55,8 @@ optimize: ir_convert
 
 codegen: optimize
 	$(CODEGEN_MAIN) \
+  	--generator=pipeline \
 	--module_name=$(TOP) \
-	--multi_proc \
 	--pipeline_stages=$(PIPE_LINE_STAGE) \
 	--delay_model=unit \
 	--use_system_verilog=false \
