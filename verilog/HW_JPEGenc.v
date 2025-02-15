@@ -121,6 +121,7 @@ module HW_JPEGenc(
     wire [7:0]  start_pix;
     wire [7:0]  length;
     wire [7:0]  code;
+    wire [3:0]  run;
 
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
@@ -134,7 +135,7 @@ module HW_JPEGenc(
         .matrix             (ac_matrix),
         .start_pix          (start_pix),
         .is_luminance       (is_luminance),
-        .out                ({ac_out, length, code})
+        .out                ({ac_out, length, code, run})
     );
 
     // Huffman エンコード コントローラは TBD
@@ -149,6 +150,7 @@ module HW_JPEGenc(
         .ac_out             (ac_out),
         .length             (length),
         .code               (code),
+        .run                (run),
         .jpeg_out           (jpeg_out),
         .jpeg_data_bits     (jpeg_data_bits)
     );
