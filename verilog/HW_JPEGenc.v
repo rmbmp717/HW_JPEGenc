@@ -29,7 +29,7 @@ module HW_JPEGenc(
 
     // Quantize 用のバッファ（DCT2D 出力を Quantize 用にバッファリング）
     wire [512-1:0]          quantim_buffer;
-    wire [128-1:0]          quantim_out;
+    wire [64-1:0]           quantim_out;
 
     // Zigzag バッファ出力（最終出力）
     wire [512-1:0] pix_data_out;
@@ -111,7 +111,7 @@ module HW_JPEGenc(
         .input_enable       (zigzag_input_enable),
         .matrix_row         (matrix_row),  
         .row_data           (quantim_out),
-        .buffer             (buffer),          // 既存の buffer 信号を再利用
+        .buffer             (),    
         .zigzag_pix_out     (pix_data_out)     // 最終 Zigzag 結果
     );
 

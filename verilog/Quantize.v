@@ -3,7 +3,7 @@ module Quantize(
   input wire [511:0] dct_coeffs,
   input wire [7:0] matrix_row,
   input wire is_luminance,
-  output wire [127:0] out
+  output wire [63:0] out
 );
   function automatic [31:0] sdiv_32b (input reg [31:0] lhs, input reg [31:0] rhs);
     begin
@@ -290,14 +290,14 @@ module Quantize(
   wire [6:0] p1_q_value__5_squeezed_comb;
   wire [6:0] p1_q_value__6_squeezed_comb;
   wire [6:0] p1_q_value__7_squeezed_comb;
-  wire [8:0] p1_add_1115_comb;
-  wire [8:0] p1_add_1118_comb;
-  wire [8:0] p1_add_1121_comb;
-  wire [8:0] p1_add_1124_comb;
-  wire [8:0] p1_add_1127_comb;
-  wire [8:0] p1_add_1130_comb;
-  wire [8:0] p1_add_1133_comb;
-  wire [8:0] p1_add_1136_comb;
+  wire [8:0] p1_add_1139_comb;
+  wire [8:0] p1_add_1142_comb;
+  wire [8:0] p1_add_1145_comb;
+  wire [8:0] p1_add_1148_comb;
+  wire [8:0] p1_add_1151_comb;
+  wire [8:0] p1_add_1154_comb;
+  wire [8:0] p1_add_1157_comb;
+  wire [8:0] p1_add_1160_comb;
   wire [31:0] p1_divided_comb;
   wire [31:0] p1_divided__1_comb;
   wire [31:0] p1_divided__2_comb;
@@ -306,15 +306,15 @@ module Quantize(
   wire [31:0] p1_divided__5_comb;
   wire [31:0] p1_divided__6_comb;
   wire [31:0] p1_divided__7_comb;
-  wire [15:0] p1_clipped_comb;
-  wire [15:0] p1_clipped__1_comb;
-  wire [15:0] p1_clipped__2_comb;
-  wire [15:0] p1_clipped__3_comb;
-  wire [15:0] p1_clipped__4_comb;
-  wire [15:0] p1_clipped__5_comb;
-  wire [15:0] p1_clipped__6_comb;
-  wire [15:0] p1_clipped__7_comb;
-  wire [15:0] p1_array_1234_comb[0:7];
+  wire [7:0] p1_clipped_comb;
+  wire [7:0] p1_clipped__1_comb;
+  wire [7:0] p1_clipped__2_comb;
+  wire [7:0] p1_clipped__3_comb;
+  wire [7:0] p1_clipped__4_comb;
+  wire [7:0] p1_clipped__5_comb;
+  wire [7:0] p1_clipped__6_comb;
+  wire [7:0] p1_clipped__7_comb;
+  wire [7:0] p1_array_1258_comb[0:7];
   assign p1_q_value_squeezed_comb = p0_is_luminance ? LUMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h0][6:0] : CHROMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h0][6:0];
   assign p1_q_value__1_squeezed_comb = p0_is_luminance ? LUMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h1][6:0] : CHROMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h1][6:0];
   assign p1_q_value__2_squeezed_comb = p0_is_luminance ? LUMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h2][6:0] : CHROMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h2][6:0];
@@ -323,50 +323,50 @@ module Quantize(
   assign p1_q_value__5_squeezed_comb = p0_is_luminance ? LUMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h5][6:0] : 7'h5e;
   assign p1_q_value__6_squeezed_comb = p0_is_luminance ? LUMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h6][6:0] : 7'h5e;
   assign p1_q_value__7_squeezed_comb = p0_is_luminance ? LUMINANCE_QUANT_TBL[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h7][6:0] : 7'h5e;
-  assign p1_add_1115_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h0]} + {3'h0, p1_q_value_squeezed_comb[6:1]};
-  assign p1_add_1118_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h1]} + {3'h0, p1_q_value__1_squeezed_comb[6:1]};
-  assign p1_add_1121_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h2]} + {3'h0, p1_q_value__2_squeezed_comb[6:1]};
-  assign p1_add_1124_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h3]} + {3'h0, p1_q_value__3_squeezed_comb[6:1]};
-  assign p1_add_1127_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h4]} + {3'h0, p1_q_value__4_squeezed_comb[6:1]};
-  assign p1_add_1130_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h5]} + {3'h0, p1_q_value__5_squeezed_comb[6:1]};
-  assign p1_add_1133_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h6]} + {3'h0, p1_q_value__6_squeezed_comb[6:1]};
-  assign p1_add_1136_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h7]} + {3'h0, p1_q_value__7_squeezed_comb[6:1]};
-  assign p1_divided_comb = sdiv_32b({23'h00_0000, p1_add_1115_comb}, {25'h000_0000, p1_q_value_squeezed_comb});
-  assign p1_divided__1_comb = sdiv_32b({23'h00_0000, p1_add_1118_comb}, {25'h000_0000, p1_q_value__1_squeezed_comb});
-  assign p1_divided__2_comb = sdiv_32b({23'h00_0000, p1_add_1121_comb}, {25'h000_0000, p1_q_value__2_squeezed_comb});
-  assign p1_divided__3_comb = sdiv_32b({23'h00_0000, p1_add_1124_comb}, {25'h000_0000, p1_q_value__3_squeezed_comb});
-  assign p1_divided__4_comb = sdiv_32b({23'h00_0000, p1_add_1127_comb}, {25'h000_0000, p1_q_value__4_squeezed_comb});
-  assign p1_divided__5_comb = sdiv_32b({23'h00_0000, p1_add_1130_comb}, {25'h000_0000, p1_q_value__5_squeezed_comb});
-  assign p1_divided__6_comb = sdiv_32b({23'h00_0000, p1_add_1133_comb}, {25'h000_0000, p1_q_value__6_squeezed_comb});
-  assign p1_divided__7_comb = sdiv_32b({23'h00_0000, p1_add_1136_comb}, {25'h000_0000, p1_q_value__7_squeezed_comb});
-  assign p1_clipped_comb = $signed(p1_divided_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided_comb[15:0]);
-  assign p1_clipped__1_comb = $signed(p1_divided__1_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__1_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__1_comb[15:0]);
-  assign p1_clipped__2_comb = $signed(p1_divided__2_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__2_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__2_comb[15:0]);
-  assign p1_clipped__3_comb = $signed(p1_divided__3_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__3_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__3_comb[15:0]);
-  assign p1_clipped__4_comb = $signed(p1_divided__4_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__4_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__4_comb[15:0]);
-  assign p1_clipped__5_comb = $signed(p1_divided__5_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__5_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__5_comb[15:0]);
-  assign p1_clipped__6_comb = $signed(p1_divided__6_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__6_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__6_comb[15:0]);
-  assign p1_clipped__7_comb = $signed(p1_divided__7_comb) > $signed(32'h0000_7fff) ? 16'h7fff : ($signed(p1_divided__7_comb) < $signed(32'hffff_8000) ? 16'h8000 : p1_divided__7_comb[15:0]);
-  assign p1_array_1234_comb[0] = p1_clipped_comb;
-  assign p1_array_1234_comb[1] = p1_clipped__1_comb;
-  assign p1_array_1234_comb[2] = p1_clipped__2_comb;
-  assign p1_array_1234_comb[3] = p1_clipped__3_comb;
-  assign p1_array_1234_comb[4] = p1_clipped__4_comb;
-  assign p1_array_1234_comb[5] = p1_clipped__5_comb;
-  assign p1_array_1234_comb[6] = p1_clipped__6_comb;
-  assign p1_array_1234_comb[7] = p1_clipped__7_comb;
+  assign p1_add_1139_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h0]} + {3'h0, p1_q_value_squeezed_comb[6:1]};
+  assign p1_add_1142_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h1]} + {3'h0, p1_q_value__1_squeezed_comb[6:1]};
+  assign p1_add_1145_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h2]} + {3'h0, p1_q_value__2_squeezed_comb[6:1]};
+  assign p1_add_1148_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h3]} + {3'h0, p1_q_value__3_squeezed_comb[6:1]};
+  assign p1_add_1151_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h4]} + {3'h0, p1_q_value__4_squeezed_comb[6:1]};
+  assign p1_add_1154_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h5]} + {3'h0, p1_q_value__5_squeezed_comb[6:1]};
+  assign p1_add_1157_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h6]} + {3'h0, p1_q_value__6_squeezed_comb[6:1]};
+  assign p1_add_1160_comb = {1'h0, p0_dct_coeffs[p0_matrix_row > 8'h07 ? 3'h7 : p0_matrix_row[2:0]][3'h7]} + {3'h0, p1_q_value__7_squeezed_comb[6:1]};
+  assign p1_divided_comb = sdiv_32b({23'h00_0000, p1_add_1139_comb}, {25'h000_0000, p1_q_value_squeezed_comb});
+  assign p1_divided__1_comb = sdiv_32b({23'h00_0000, p1_add_1142_comb}, {25'h000_0000, p1_q_value__1_squeezed_comb});
+  assign p1_divided__2_comb = sdiv_32b({23'h00_0000, p1_add_1145_comb}, {25'h000_0000, p1_q_value__2_squeezed_comb});
+  assign p1_divided__3_comb = sdiv_32b({23'h00_0000, p1_add_1148_comb}, {25'h000_0000, p1_q_value__3_squeezed_comb});
+  assign p1_divided__4_comb = sdiv_32b({23'h00_0000, p1_add_1151_comb}, {25'h000_0000, p1_q_value__4_squeezed_comb});
+  assign p1_divided__5_comb = sdiv_32b({23'h00_0000, p1_add_1154_comb}, {25'h000_0000, p1_q_value__5_squeezed_comb});
+  assign p1_divided__6_comb = sdiv_32b({23'h00_0000, p1_add_1157_comb}, {25'h000_0000, p1_q_value__6_squeezed_comb});
+  assign p1_divided__7_comb = sdiv_32b({23'h00_0000, p1_add_1160_comb}, {25'h000_0000, p1_q_value__7_squeezed_comb});
+  assign p1_clipped_comb = $signed(p1_divided_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided_comb[7:0] & {8{$signed(p1_divided_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__1_comb = $signed(p1_divided__1_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__1_comb[7:0] & {8{$signed(p1_divided__1_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__2_comb = $signed(p1_divided__2_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__2_comb[7:0] & {8{$signed(p1_divided__2_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__3_comb = $signed(p1_divided__3_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__3_comb[7:0] & {8{$signed(p1_divided__3_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__4_comb = $signed(p1_divided__4_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__4_comb[7:0] & {8{$signed(p1_divided__4_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__5_comb = $signed(p1_divided__5_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__5_comb[7:0] & {8{$signed(p1_divided__5_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__6_comb = $signed(p1_divided__6_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__6_comb[7:0] & {8{$signed(p1_divided__6_comb) >= $signed(32'hffff_8000)}};
+  assign p1_clipped__7_comb = $signed(p1_divided__7_comb) > $signed(32'h0000_7fff) ? 8'hff : p1_divided__7_comb[7:0] & {8{$signed(p1_divided__7_comb) >= $signed(32'hffff_8000)}};
+  assign p1_array_1258_comb[0] = p1_clipped_comb;
+  assign p1_array_1258_comb[1] = p1_clipped__1_comb;
+  assign p1_array_1258_comb[2] = p1_clipped__2_comb;
+  assign p1_array_1258_comb[3] = p1_clipped__3_comb;
+  assign p1_array_1258_comb[4] = p1_clipped__4_comb;
+  assign p1_array_1258_comb[5] = p1_clipped__5_comb;
+  assign p1_array_1258_comb[6] = p1_clipped__6_comb;
+  assign p1_array_1258_comb[7] = p1_clipped__7_comb;
 
   // Registers for pipe stage 1:
-  reg [15:0] p1_array_1234[0:7];
+  reg [7:0] p1_array_1258[0:7];
   always @ (posedge clk) begin
-    p1_array_1234[0] <= p1_array_1234_comb[0];
-    p1_array_1234[1] <= p1_array_1234_comb[1];
-    p1_array_1234[2] <= p1_array_1234_comb[2];
-    p1_array_1234[3] <= p1_array_1234_comb[3];
-    p1_array_1234[4] <= p1_array_1234_comb[4];
-    p1_array_1234[5] <= p1_array_1234_comb[5];
-    p1_array_1234[6] <= p1_array_1234_comb[6];
-    p1_array_1234[7] <= p1_array_1234_comb[7];
+    p1_array_1258[0] <= p1_array_1258_comb[0];
+    p1_array_1258[1] <= p1_array_1258_comb[1];
+    p1_array_1258[2] <= p1_array_1258_comb[2];
+    p1_array_1258[3] <= p1_array_1258_comb[3];
+    p1_array_1258[4] <= p1_array_1258_comb[4];
+    p1_array_1258[5] <= p1_array_1258_comb[5];
+    p1_array_1258[6] <= p1_array_1258_comb[6];
+    p1_array_1258[7] <= p1_array_1258_comb[7];
   end
-  assign out = {p1_array_1234[7], p1_array_1234[6], p1_array_1234[5], p1_array_1234[4], p1_array_1234[3], p1_array_1234[2], p1_array_1234[1], p1_array_1234[0]};
+  assign out = {p1_array_1258[7], p1_array_1258[6], p1_array_1258[5], p1_array_1258[4], p1_array_1258[3], p1_array_1258[2], p1_array_1258[1], p1_array_1258[0]};
 endmodule

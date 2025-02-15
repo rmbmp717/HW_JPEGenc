@@ -10,7 +10,7 @@ module databuffer_zigzag64x8bit #(
     input  wire                          output_enable,
     input  wire                          zigag_enable,
     input  wire [7:0]                    matrix_row,   // 書き込み対象の行 (0～7)
-    input  wire [127:0]                  row_data,     // 128ビット入力。下位64ビットを使用
+    input  wire [64-1:0]                 row_data,     // 128ビット入力。下位64ビットを使用
     input  wire                          input_data_enable,
     output reg  [DATA_WIDTH-1:0]         buffer   [0:DEPTH-1],
     output reg  [511:0]                  zigzag_pix_out 
