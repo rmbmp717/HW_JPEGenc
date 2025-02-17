@@ -22,109 +22,14 @@ module DCT_2D(
   // Debug 
   `ifdef DEBUG
   // 行0 (out[0]～out[7]) を 64ビットにまとめる
-  wire [63:0] out_row0;
-  assign out_row0 = {
-    out[7],  // 上位8ビット
-    out[6],
-    out[5],
-    out[4],
-    out[3],
-    out[2],
-    out[1],
-    out[0]   // 下位8ビット
-  };
-
-  // 行1 (out[8]～out[15])
-  wire [63:0] out_row1;
-  assign out_row1 = {
-    out[15],
-    out[14],
-    out[13],
-    out[12],
-    out[11],
-    out[10],
-    out[9],
-    out[8]
-  };
-
-  // 行2 (out[16]～out[23])
-  wire [63:0] out_row2;
-  assign out_row2 = {
-    out[23],
-    out[22],
-    out[21],
-    out[20],
-    out[19],
-    out[18],
-    out[17],
-    out[16]
-  };
-
-  // 行3 (out[24]～out[31])
-  wire [63:0] out_row3;
-  assign out_row3 = {
-    out[31],
-    out[30],
-    out[29],
-    out[28],
-    out[27],
-    out[26],
-    out[25],
-    out[24]
-  };
-
-  // 行4 (out[32]～out[39])
-  wire [63:0] out_row4;
-  assign out_row4 = {
-    out[39],
-    out[38],
-    out[37],
-    out[36],
-    out[35],
-    out[34],
-    out[33],
-    out[32]
-  };
-
-  // 行5 (out[40]～out[47])
-  wire [63:0] out_row5;
-  assign out_row5 = {
-    out[47],
-    out[46],
-    out[45],
-    out[44],
-    out[43],
-    out[42],
-    out[41],
-    out[40]
-  };
-
-  // 行6 (out[48]～out[55])
-  wire [63:0] out_row6;
-  assign out_row6 = {
-    out[55],
-    out[54],
-    out[53],
-    out[52],
-    out[51],
-    out[50],
-    out[49],
-    out[48]
-  };
-
-  // 行7 (out[56]～out[63])
-  wire [63:0] out_row7;
-  assign out_row7 = {
-    out[63],
-    out[62],
-    out[61],
-    out[60],
-    out[59],
-    out[58],
-    out[57],
-    out[56]
-  };
-
+  wire [63:0] out_row0 = { out[7],  out[6],  out[5],  out[4],  out[3],  out[2],  out[1],  out[0]  },
+              out_row1 = { out[15], out[14], out[13], out[12], out[11], out[10], out[9],  out[8]  },
+              out_row2 = { out[23], out[22], out[21], out[20], out[19], out[18], out[17], out[16] },
+              out_row3 = { out[31], out[30], out[29], out[28], out[27], out[26], out[25], out[24] },
+              out_row4 = { out[39], out[38], out[37], out[36], out[35], out[34], out[33], out[32] },
+              out_row5 = { out[47], out[46], out[45], out[44], out[43], out[42], out[41], out[40] },
+              out_row6 = { out[55], out[54], out[53], out[52], out[51], out[50], out[49], out[48] },
+              out_row7 = { out[63], out[62], out[61], out[60], out[59], out[58], out[57], out[56] };
 
   wire [63:0] row_in0;
   wire [63:0] row_in1;
