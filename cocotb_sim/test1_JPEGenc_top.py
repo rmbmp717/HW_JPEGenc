@@ -29,7 +29,7 @@ async def test1_JPEGenc_top(dut):
     dut.input_enable.value = 0
 
     dut.dct_enable.value = 0
-    dut.dct_input_enable.value = 0
+    dut.dct_end_enable.value = 0
     dut.zigzag_input_enable.value = 0
     dut.zigag_enable.value = 0
     dut.matrix_row.value = 0
@@ -60,6 +60,9 @@ async def test1_JPEGenc_top(dut):
         row_data = pix_data_list[row*8:(row+1)*8]
         print(" ".join(f"{val:3d}" for val in row_data))
 
+    for _ in range(4):
+        await RisingEdge(dut.clock)
+
     print("==========================================================================")
     print("DCT 2D Start")
     # DCT 2D Start
@@ -68,7 +71,7 @@ async def test1_JPEGenc_top(dut):
     await RisingEdge(dut.clock)
     dut.dct_enable.value = 0
 
-    for _ in range(28):
+    for _ in range(20):
         await RisingEdge(dut.clock)
 
     # 例: dct2d_out を 8x8 の行列として表示
@@ -84,13 +87,12 @@ async def test1_JPEGenc_top(dut):
         # 各値を 3 桁（例）で整形して表示
         print(" ".join(f"{val:3d}" for val in row_data))
 
-
     print("==========================================================================")
     print("Quantize Start")
     # Quantize buffer
-    dut.dct_input_enable.value = 1
+    dut.dct_end_enable.value = 1
     await RisingEdge(dut.clock)
-    dut.dct_input_enable.value = 0
+    dut.dct_end_enable.value = 0
 
     await RisingEdge(dut.clock)
     await RisingEdge(dut.clock)
