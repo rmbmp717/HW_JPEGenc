@@ -1,9 +1,9 @@
 # Variables
-TOP = dct_1d_u8
+TOP = dct_2d_u8
 #INPUT_FILE = ./src/RGB_YCbCr.x
 #INPUT_FILE = ./src/Quantize.x
-INPUT_FILE = ./src/DCT_1D.x
-#INPUT_FILE = ./src/DCT_2D.x
+#INPUT_FILE = ./src/DCT_1D.x
+INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
 #INPUT_FILE = ./src/Huffman_ACenc.x
 #INPUT_FILE = ./src/Huffman_ACenc.x
@@ -68,3 +68,8 @@ simulate:
 	MODULE=$(COCOTB_FILE) TOPLEVEL=HW_JPEGenc_top TOPLEVEL_LANG=verilog \
 	SIM=$(SIM) PYTHONPATH=$$(python -c "import site; print(site.getsitepackages()[0])") vvp -M $$(cocotb-config --lib-dir) \
 		-m libcocotbvpi_icarus sim.vvp
+
+# Python activate
+activate:
+	@echo "Run: python3 -m venv myenv"
+	@echo "Run: source ./myenv/bin/activate"
