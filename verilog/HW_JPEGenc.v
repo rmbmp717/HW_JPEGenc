@@ -13,6 +13,7 @@ module HW_JPEGenc(
     input  wire             dct_enable,
     input  wire             dct_input_enable,
     input  wire             zigzag_input_enable,
+    input  wire             zigag_enable,
     input  wire [7:0]       matrix_row, 
     input  wire             Huffman_start,
     input  wire [7:0]       pix_data [0:63], // 64個の8ビットピクセル（行優先）
@@ -113,9 +114,11 @@ module HW_JPEGenc(
     ) m_databuffer_zigzag64x8bit (
         .clock              (clock),
         .reset_n            (reset_n),
-        .input_enable       (zigzag_input_enable),
+        .input_enable       (1'b0),
+        .zigag_enable       (zigag_enable),
         .matrix_row         (matrix_row),  
         .row_data           (quantim_out),
+        .input_data_enable  (zigzag_input_enable),
         .buffer             (),    
         .zigzag_pix_out     (pix_data_out)     // 最終 Zigzag 結果
     );

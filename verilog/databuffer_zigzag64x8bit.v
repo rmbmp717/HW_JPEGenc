@@ -7,7 +7,6 @@ module databuffer_zigzag64x8bit #(
     input  wire                          clock,
     input  wire                          reset_n,
     input  wire                          input_enable,
-    input  wire                          output_enable,
     input  wire                          zigag_enable,
     input  wire [7:0]                    matrix_row,   // 書き込み対象の行 (0～7)
     input  wire [64-1:0]                 row_data,     // 128ビット入力。下位64ビットを使用
@@ -53,13 +52,33 @@ module databuffer_zigzag64x8bit #(
         end
     endgenerate
 
+    wire  [511:0]    zigzag_pix_data; 
+
     // Zigzag 並べ替えモジュールのインスタンス化
     // 入力：512ビットの matrix、出力：512ビットの zigzag_pix_out
     Zigzag_reorder zigzag_inst (
         .clk        (clock),
         .matrix     (matrix),
         .is_enable  (zigag_enable),
-        .out        (zigzag_pix_out)
+        .out        (zigzag_pix_data)
     );
+
+    reg zigag_enable_d1;
+    reg zigag_enable_d2;
+
+    // 1 CLK
+    always @(posedge clock or negedge reset_n) begin
+        if (!reset_n) begin
+            zigag_enable_d1 <= 0;
+            zigag_enable_d2 <= 0;
+            zigzag_pix_out <= 0;
+        end else begin
+            zigag_enable_d1 <= zigag_enable;
+            zigag_enable_d2 <= zigag_enable_d1;
+            if(zigag_enable_d2) begin
+                zigzag_pix_out <= zigzag_pix_data;
+            end
+        end
+    end
 
 endmodule
