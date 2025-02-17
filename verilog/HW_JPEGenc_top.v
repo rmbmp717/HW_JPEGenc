@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`define DEBUG
 
 module HW_JPEGenc_top(
     input  wire             clock,
@@ -11,7 +12,7 @@ module HW_JPEGenc_top(
     input  wire             input_enable,  
     output wire [7:0]       pix_data [0:63], // 64個の16ビット入力：インデックス 0～63
     input  wire             dct_enable,
-    input  wire             dct_input_enable,
+    input  wire             dct_end_enable,
     input  wire             zigzag_input_enable,
     input  wire             zigag_enable,
     input  wire [7:0]       matrix_row, 
@@ -28,6 +29,26 @@ module HW_JPEGenc_top(
         $dumpfile("./vcd/hw_jpeg_top.vcd");
         $dumpvars(0, HW_JPEGenc_top);
     end
+
+    `ifdef DEBUG
+    reg  [3:0]  main_state;
+    reg  [7:0]  counter;
+    always @(posedge clock or negedge reset_n) begin
+        if (!reset_n) begin
+            main_state <= 0;
+            counter   <= 0;
+        end else begin
+            if(input_enable) begin
+                main_state <= 1;
+                counter   <= 0;
+            end else begin
+                if(main_state==1) begin
+                    counter   <= counter + 1;
+                end
+            end
+        end
+    end
+    `endif
 
     wire [7:0]      Y_data, Cb_data, Cr_data;
 
@@ -48,7 +69,7 @@ module HW_JPEGenc_top(
         .input_1pix_enable      (input_1pix_enable),  
         .pix_1pix_data          (Y_data), 
         .dct_enable             (dct_enable),
-        .dct_input_enable       (dct_input_enable),
+        .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
         .zigag_enable           (zigag_enable),
         .matrix_row             (matrix_row),

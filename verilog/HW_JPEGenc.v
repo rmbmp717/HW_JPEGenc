@@ -11,7 +11,7 @@ module HW_JPEGenc(
     input  wire             input_1pix_enable,  
     input  wire [7:0]       pix_1pix_data, 
     input  wire             dct_enable,
-    input  wire             dct_input_enable,
+    input  wire             dct_end_enable,
     input  wire             zigzag_input_enable,
     input  wire             zigag_enable,
     input  wire [7:0]       matrix_row, 
@@ -85,7 +85,7 @@ module HW_JPEGenc(
     ) m1_databuffer_64x8bit (
         .clock              (clock),
         .reset_n            (reset_n),
-        .input_enable       (dct_input_enable),
+        .input_enable       (dct_end_enable),
         .input_1pix_enable  (1'b0),
         .pix_1pix_data      (8'd0),     
         .pix_data           (dct2d_out),       // DCT_2D の出力を接続
