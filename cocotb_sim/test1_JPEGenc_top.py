@@ -21,24 +21,24 @@ async def test1_JPEGenc_top(dut):
     cocotb.start_soon(generate_clock(dut, period=10))
 
     # initialize
-    dut.reset_n = 0  
-    dut.Red = 0
-    dut.Green = 0
-    dut.Blue = 0
-    dut.input_1pix_enable = 0
+    dut.reset_n.value = 0  
+    dut.Red.value = 0
+    dut.Green.value = 0
+    dut.Blue.value = 0
+    dut.input_1pix_enable.value = 0
     dut.input_enable.value = 0
 
-    dut.dct_enable = 0
-    dut.dct_input_enable = 0
-    dut.zigzag_input_enable = 0
-    dut.matrix_row = 0
-    dut.Huffman_start = 0
-    dut.output_enable = 0
+    dut.dct_enable.value = 0
+    dut.dct_input_enable.value = 0
+    dut.zigzag_input_enable.value = 0
+    dut.matrix_row.value = 0
+    dut.Huffman_start.value = 0
+    dut.output_enable.value = 0
 
 
     for _ in range(10):
         await RisingEdge(dut.clock)
-    dut.reset_n = 1      
+    dut.reset_n.value = 1      
     
     for _ in range(10):
         await RisingEdge(dut.clock)    
@@ -50,7 +50,7 @@ async def test1_JPEGenc_top(dut):
     dut.input_enable.value = 0
 
     await RisingEdge(dut.clock)
-    dut.dct_enable = 1
+    dut.dct_enable.value = 1
 
 
 
@@ -58,6 +58,7 @@ async def test1_JPEGenc_top(dut):
     await RisingEdge(dut.clock)
     await RisingEdge(dut.clock)
     await RisingEdge(dut.clock)
+    dut.dct_enable.value = 0
     
     # Disable input_enable
     dut.input_enable.value = 0
