@@ -31,6 +31,7 @@ async def test1_JPEGenc_top(dut):
     dut.dct_enable.value = 0
     dut.dct_input_enable.value = 0
     dut.zigzag_input_enable.value = 0
+    dut.zigag_enable = 0
     dut.matrix_row.value = 0
     dut.Huffman_start.value = 0
     dut.output_enable.value = 0
@@ -49,17 +50,48 @@ async def test1_JPEGenc_top(dut):
     await RisingEdge(dut.clock)
     dut.input_enable.value = 0
 
+    # DCT 2D Start
     await RisingEdge(dut.clock)
     dut.dct_enable.value = 1
-
-
-
-    await RisingEdge(dut.clock)
-    await RisingEdge(dut.clock)
-    await RisingEdge(dut.clock)
     await RisingEdge(dut.clock)
     dut.dct_enable.value = 0
-    
+
+    for _ in range(40):
+        await RisingEdge(dut.clock)
+
+    # Quantize buffer
+    dut.dct_input_enable.value = 1
+    await RisingEdge(dut.clock)
+    dut.dct_input_enable.value = 0
+
+    await RisingEdge(dut.clock)
+    await RisingEdge(dut.clock)
+
+    dut.zigzag_input_enable.value = 1
+    for _ in range(8):
+        dut.matrix_row.value = _
+        await RisingEdge(dut.clock)
+    dut.zigzag_input_enable.value = 0
+
+    for _ in range(4):
+        await RisingEdge(dut.clock)
+
+    # Zigag scan
+    dut.zigag_enable = 1
+    await RisingEdge(dut.clock)
+    dut.zigag_enable = 0
+
+    for _ in range(4):
+        await RisingEdge(dut.clock)
+
+    # Huffman start
+    dut.Huffman_start.value = 1
+    await RisingEdge(dut.clock)
+    dut.Huffman_start = 0
+
+    for _ in range(100):
+        await RisingEdge(dut.clock)
+
     # Disable input_enable
     dut.input_enable.value = 0
     
