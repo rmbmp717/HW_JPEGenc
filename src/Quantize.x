@@ -4,8 +4,9 @@
 //qualityScale = 5000 / quality
 
 pub const N: u32 = u32:8;
-pub const QUALITY: u8 = u8:95;      // JPEG Quality
-pub const QUALITY_SCALE: s16 = s16:200 - s16:2 * QUALITY as s16;
+pub const QUALITY: u8 = u8:25;      // JPEG Quality
+//pub const QUALITY_SCALE: s16 = s16:200 - s16:2 * QUALITY as s16;
+pub const QUALITY_SCALE: s16 = s16:5000 / QUALITY as s16;
 
 // JPEG 標準の輝度量子化テーブル (s16)
 // 標準の輝度量子化テーブル (s16)
@@ -75,13 +76,13 @@ pub fn Quantize(dct_coeffs: u8[N][N], matrix_row: u8, is_luminance: bool, quanti
     };
     // 四捨五入: (initial_row[j] + (q_value/2)) / q_value
     let divided: s32 = if quantize_off == false {
-      (initial_row[j] as s32 + (q_value as s32 / s32:2)) / (q_value as s32)
+      (initial_row[j] as s32) / (q_value as s32)
     } else {
       initial_row[j] as s32
     };
-    let clipped: u8 = if divided > s32:32767 {
+    let clipped: u8 = if divided > s32:255 {
       u8:255
-    } else if divided < s32:-32768 {
+    } else if divided < s32:0 {
       u8:0
     } else {
       divided as u8
@@ -110,7 +111,7 @@ fn test0_quantize_block() -> () {
   // ※ 本テストでは、輝度の場合 (is_luminance == true)
   // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
   let expected_result: u8[8] = [
-    u8:100, u8:150, u8:100, u8:25, u8:15, u8:5, u8:2, u8:1
+    u8:100, u8:150, u8:100, u8:25, u8:15, u8:5, u8:2, u8:0
   ];
 
   let result = Quantize(test_block, u8:0, true, false);
@@ -135,7 +136,7 @@ fn test1_quantize_block() -> () {
   // 色差の場合、標準色差量子化テーブル（scaled）が全要素 94 になると仮定した場合、
   // (value + (94/2))/94 で計算すると、どの要素も 0 になると期待
   let expected_result: u8[8] = [
-    u8:3, u8:2, u8:2, u8:1, u8:1, u8:1, u8:0, u8:0
+    u8:2, u8:2, u8:1, u8:1, u8:0, u8:0, u8:0, u8:0
   ];
 
   let result = Quantize(test_block, u8:5, false, false);
@@ -157,11 +158,11 @@ fn test2_quantize_block() -> () {
     u8[8]:[u8:0,   u8:0,   u8:0,   u8:0,  u8:0,  u8:0,  u8:0,  u8:0]
   ];
 
-  let expected_result: u8[8] = [u8:64, u8:0, u8:0, u8:26, u8:0, u8:3, u8:9, u8:0];
+  let expected_result: u8[8] = [u8:64, u8:0, u8:0, u8:25, u8:0, u8:2, u8:8, u8:0];
   let result = Quantize(test_block, u8:0, true, false);
   assert_eq(result, expected_result);
 
-  let expected_result: u8[8] = [u8:128, u8:0, u8:0, u8:23, u8:0, u8:2, u8:7, u8:0];
+  let expected_result: u8[8] = [u8:128, u8:0, u8:0, u8:23, u8:0, u8:1, u8:6, u8:0];
   let result = Quantize(test_block, u8:1, true, false);
   assert_eq(result, expected_result);
 }

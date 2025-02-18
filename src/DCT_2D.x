@@ -163,6 +163,7 @@ fn zeros_2d() -> u8[N][N] {
 	  u8[N]:[ u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0 ] ]
 }
 
+// メイン関数
 // 2D DCT 計算 (Q8.8) - u8 入出力版
 // まず各行に対して 1D DCT を適用し、その後各列に対して 1D DCT を適用
 pub fn dct_2d_u8(x: u8[N][N]) -> u8[N][N] {
@@ -172,7 +173,7 @@ pub fn dct_2d_u8(x: u8[N][N]) -> u8[N][N] {
             update(acc, i, dct_1d_u8(x[i]))  // ✅ 行ごとに DCT を適用
         }(zeros_2d());
 
-    //trace!(row_transformed);  // ✅ 行方向 DCT の結果を確認
+    trace!(row_transformed);  // ✅ 行方向 DCT の結果を確認
 
     // ✅ 列方向 DCT
     let col_transformed: u8[N][N] =
@@ -185,6 +186,8 @@ pub fn dct_2d_u8(x: u8[N][N]) -> u8[N][N] {
 
             // ✅ 1D DCT を適用
             let col_dct: u8[N] = dct_1d_u8(col);
+
+            trace!(col_dct);
 
             // ✅ `col_dct` の結果を `col_transformed` に更新
             for (i, updated_mat): (u32, u8[N][N]) in range(u32:0, N) {
