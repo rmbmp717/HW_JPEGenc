@@ -1,16 +1,18 @@
 # Variables
-TOP = dct_2d_u8
+TOP = dct_1d_u8
 #INPUT_FILE = ./src/RGB_YCbCr.x
 #INPUT_FILE = ./src/Quantize.x
-#INPUT_FILE = ./src/DCT_1D.x
-INPUT_FILE = ./src/DCT_2D.x
+INPUT_FILE = ./src/DCT_1D.x		# PIPE_LINE_STAGE = 2
+#INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
-#INPUT_FILE = ./src/Huffman_ACenc.x
+#INPUT_FILE = ./src/Huffman_ACenc.x # PIPE_LINE_STAGE = 3
 #INPUT_FILE = ./src/Huffman_ACenc.x
 IR_FILE = ./ir_dir/$(TOP).ir
 OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
 TOOL_DIR = /home/haruhiko/xls/bazel-bin
 OUTPUT_FILE = ./verilog/$(TOP).v
+
+PIPE_LINE_STAGE = 2
 
 SIM = icarus
 COCOTB_DIR = /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
@@ -28,8 +30,6 @@ VERILOG_FILE += $(VERILOG_DIR)/Quantize.v
 VERILOG_FILE += $(VERILOG_DIR)/Huffman_DCenc.v
 VERILOG_FILE += $(VERILOG_DIR)/Huffman_ACenc.v
 VERILOG_FILE += $(VERILOG_DIR)/Huffman_enc_controller.v
-
-PIPE_LINE_STAGE = 1
 
 COCOTB_FILE = cocotb_sim.test1_JPEGenc_top
 
