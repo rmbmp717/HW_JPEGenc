@@ -15,8 +15,8 @@ module Huffman_enc_controller(
   // final output 
   output reg                jpeg_out_enable,
   output reg   [23:0]       jpeg_dc_out,
-  output reg   [15:0]       jpeg_out,
-  output reg   [3:0]        jpeg_data_length,
+  output reg   [15:0]       huffman_code,
+  output reg   [7:0]        huffman_code_length,
   output reg   [7:0]        code_out
 );
 
@@ -30,8 +30,8 @@ module Huffman_enc_controller(
       start_pix <= 0;
       jpeg_out_enable <= 0;
       jpeg_dc_out <= 0;
-      jpeg_out <= 0;
-      jpeg_data_length <= 0;
+      huffman_code <= 0;
+      huffman_code_length <= 0;
       code_out <= 0;
     end else begin
       case(state)
@@ -78,8 +78,8 @@ module Huffman_enc_controller(
         8: begin
           jpeg_out_enable <= 1;
           start_pix <= start_pix + run + 1;
-          jpeg_out <= ac_out;
-          jpeg_data_length <= length;
+          huffman_code <= ac_out;
+          huffman_code_length <= length;
           state <= 3;
           code_out <= code; 
         end

@@ -20,8 +20,8 @@ module HW_JPEGenc_top(
     // End
     output wire             jpeg_out_enable,  
     output wire [23:0]      jpeg_dc_out,
-    output wire [15:0]      jpeg_out,        // 最終 JPEG 出力（8ビット）
-    output wire [3:0]       jpeg_data_bits   // 最終 JPEG 出力のビット幅
+    output wire [15:0]      huffman_code,         // 最終 JPEG 出力（8ビット）
+    output wire [7:0]       huffman_code_length   // 最終 JPEG 出力のビット幅
     // JPEG Data 
 );
 
@@ -33,7 +33,7 @@ module HW_JPEGenc_top(
 
     `ifdef DEBUG
     reg  [3:0]  main_state;
-    reg  [7:0]  counter;
+    reg  [11:0]  counter;
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
             main_state <= 0;
@@ -79,8 +79,8 @@ module HW_JPEGenc_top(
         .is_luminance           (1'b1),
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (jpeg_dc_out),
-        .jpeg_out               (jpeg_out),
-        .jpeg_data_length       (jpeg_data_length)
+        .huffman_code           (huffman_code),
+        .huffman_code_length    (huffman_code_length)
     );
 
     // Cb, Cr module

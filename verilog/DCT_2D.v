@@ -130,14 +130,14 @@ module DCT_2D(
   generate
     for(i = 0; i < 8; i = i + 1) begin: build_rows
       // 各行は、pix_data[ i*8 + 0 ] ～ pix_data[ i*8 + 7 ]
-      assign row_in[i] = { pix_data[i*8+0],
-                           pix_data[i*8+1],
-                           pix_data[i*8+2],
-                           pix_data[i*8+3],
-                           pix_data[i*8+4],
-                           pix_data[i*8+5],
+      assign row_in[i] = { pix_data[i*8+7],
                            pix_data[i*8+6],
-                           pix_data[i*8+7] };
+                           pix_data[i*8+5],
+                           pix_data[i*8+4],
+                           pix_data[i*8+3],
+                           pix_data[i*8+2],
+                           pix_data[i*8+1],
+                           pix_data[i*8+0] };
     end
   endgenerate
 
@@ -269,26 +269,26 @@ module DCT_2D(
             dct_in_0 <= col_vector[col_idx];    // 入力をセット
             dct_in_1 <= col_vector[col_idx+1];   
             // 出力スタート
-            col_buffer[col_idx-6] <= dct_out_0;   
-            col_buffer[col_idx+1-6] <= dct_out_1;   
+            col_buffer[col_idx-6] <= dct_out_0;    
+            col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
             state_v <= 5;
         end
         5: begin
             col_buffer[col_idx-6] <= dct_out_0;   
-            col_buffer[col_idx+1-6] <= dct_out_1;   
+            col_buffer[col_idx-6+1] <= dct_out_1;   
             col_idx <= col_idx + 2;
             state_v <= 6;
         end
         6: begin
-            col_buffer[col_idx-6] <= dct_out_0;   
-            col_buffer[col_idx+1-6] <= dct_out_1;   
+            col_buffer[col_idx-6] <= dct_out_0;    
+            col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
             state_v <= 7;
         end
         7: begin
-            col_buffer[col_idx-6] <= dct_out_0;   
-            col_buffer[col_idx+1-6] <= dct_out_1;   
+            col_buffer[col_idx-6] <= dct_out_0;    
+            col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
             state_v <= 8;
         end

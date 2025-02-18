@@ -21,8 +21,8 @@ module HW_JPEGenc(
     // JPEG Output
     output wire             jpeg_out_enable,
     output wire [23:0]      jpeg_dc_out,
-    output wire [15:0]      jpeg_out,           // 最終 JPEG 出力（8ビット）
-    output wire [3:0]       jpeg_data_length    // 最終 JPEG 出力のビット幅
+    output wire [15:0]      huffman_code,           // 最終 JPEG 出力（8ビット）
+    output wire [7:0]       huffman_code_length     // 最終 JPEG 出力のビット幅
 );
 
     // パラメータ定義
@@ -165,11 +165,11 @@ module HW_JPEGenc(
         .code               (code),
         .run                (run),
         // JPEG Code Output
-        .jpeg_out_enable    (jpeg_out_enable),
-        .jpeg_dc_out        (jpeg_dc_out),
-        .jpeg_out           (jpeg_out),
-        .jpeg_data_length   (jpeg_data_length),
-        .code_out           ()
+        .jpeg_out_enable        (jpeg_out_enable),
+        .jpeg_dc_out            (jpeg_dc_out),
+        .huffman_code           (huffman_code),
+        .huffman_code_length    (huffman_code_length),
+        .code_out               ()
     );
 
 endmodule
