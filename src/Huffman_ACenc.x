@@ -334,8 +334,9 @@ const AC_LUMINANCE_SIZE_TO_CODE: (bits[16], u8)[162] = [
 ];
 
 // lookup 関数：与えられたインデックス (u8) から対応する Huffman コード (code, length) を返す
-fn lookup_ACLuminanceToCode(index: u8) -> (bits[16], u8) {
-  AC_LUMINANCE_SIZE_TO_CODE[index]
+fn lookup_ACLuminanceToCode(index: u8[2]) -> (bits[16], u8) {
+  let index_u8: u8 = (index[0] << u8:4) | index[1];
+  AC_LUMINANCE_SIZE_TO_CODE[index_u8]
 }
 
 const AC_CHROMINANCE_SIZE_TO_CODE: (bits[16], u8)[162] = [
@@ -667,8 +668,9 @@ const AC_CHROMINANCE_SIZE_TO_CODE: (bits[16], u8)[162] = [
 
 
 // 指定したインデックスの Huffman コードを取得する関数
-fn lookup_ACChrominanceToCode(index: u8) -> (bits[16], u8) {
-    AC_CHROMINANCE_SIZE_TO_CODE[index]
+fn lookup_ACChrominanceToCode(index: u8[2]) -> (bits[16], u8) {
+  let index_u8: u8 = (index[0] << u8:4) | index[1];
+  AC_CHROMINANCE_SIZE_TO_CODE[index_u8]
 }
 
 // 8×8 の u8 行列を平坦化して 64 要素の u8 配列にする関数
@@ -770,7 +772,7 @@ fn get_ac(flat: u8[64]) -> u8[63] {
 }
 
 // スタート位置を指定してAC 成分（63 要素）を取得する関数
-fn get_ac_start(flat: u8[64], start_index: bits[4]) -> u8[63] {
+fn get_ac_start(flat: u8[64], start_index: u8) -> u8[63] {
     // 63個の要素がすべて0の配列を用意（要素数を正確に63個並べる）
     let zero_array: u8[63] = [
       u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0,
@@ -888,11 +890,11 @@ fn to_hex_digit(x: u32) -> u8 {
 
 // run_size_str を符号化
 fn encode_run_size(run: u32, size: u32) -> u8[2] {
-    [to_hex_digit(run), to_hex_digit(size)]
+  let run_u8 : u8 = to_hex_digit(run);
+  let size_u8: u8 = to_hex_digit(size);
+  let run_size : u8[2] = [run_u8, size_u8];
+  run_size
 }
-
-
-
 
 // value を符号反転して符号化
 fn encode_value(value: u8) -> bits[8] {
@@ -931,8 +933,7 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8], u4)
     } else {
         let value: u8 = ac_data[run];  // `run` の次の非ゼロ値
         let size: u32 = bit_length(value);
-        //let run_size_str: u8[2] = encode_run_size(run, size);
-        let run_size_str: u8 = u8:1;
+        let run_size_str: u8[2] = encode_run_size(run as u32, size);
 
         trace!(value);
         trace!(size);
@@ -968,10 +969,11 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8], u4)
 }
 
 // メイン関数
+// Output: code[15:0] + length[7:0] + code_list[7:0] + run[3:0]
 fn Huffman_ACenc(matrix: u8[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u4) {
     let flat: u8[64] = flatten(matrix);
     //let ac: u8[63] = get_ac(flat);
-    let ac: u8[63] = get_ac_start(flat, bits[4]:0);
+    let ac: u8[63] = get_ac_start(flat, start_pix);
 
     if is_all_zero(ac) {
         (EOB_LUM_EXT, start_pix, bits[8]:0, u4:0)  // EOB（ルミナンス用）
@@ -984,7 +986,7 @@ fn Huffman_ACenc(matrix: u8[8][8], start_pix: u8, is_luminance: bool) -> (bits[1
 // 以下はテストケース
 // =======================
 #[test]
-fn test0_Huffman_enc() {
+fn test0_Huffman_ACenc_allzero() {
     let test_matrix: u8[8][8] = [
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
@@ -998,7 +1000,7 @@ fn test0_Huffman_enc() {
 
     let expected_output: bits[16] = bits[16]:0b00;     
     let expected_length: u8 = u8:2;             
-    let expected_code: bits[8] = bits[8]:0b000;  
+    let expected_code: bits[8] = bits[8]:0b0000_0000;  
     let expected_run: u4 = u4:0;                        
     let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
 
@@ -1014,7 +1016,7 @@ fn test0_Huffman_enc() {
 }
 
 #[test]
-fn test1_Huffman_enc() {
+fn test1_Huffman_ACenc() {
     let test_matrix: u8[8][8] = [
         [u8:0, u8:0, u8:1, u8:1, u8:2, u8:0, u8:0, u8:0],
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
@@ -1026,10 +1028,70 @@ fn test1_Huffman_enc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b0001;  
-    let expected_length: u8 = u8:2;         
+    let expected_output: bits[16] = bits[16]:0b1111111110001110;  
+    let expected_length: u8 = u8:16;         
     let expected_code: bits[8] = bits[8]:0b000_0001;    
-    let expected_run: u4 = u4:1;                        
+    let expected_run: u4 = u4:0;                        
+    let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
+
+    trace!(actual_output);
+    trace!(actual_length);
+    trace!(actual_code);
+    trace!(actual_run);
+
+    assert_eq(actual_output, expected_output);
+    assert_eq(actual_length, expected_length);
+    assert_eq(actual_code, expected_code);
+    assert_eq(actual_run, expected_run);
+}
+
+#[test]
+fn test2_Huffman_ACenc() {
+    let test_matrix: u8[8][8] = [
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:5, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
+    ];
+
+    let expected_output: bits[16] = bits[16]:0b1111111110010000;
+    let expected_length: u8 = u8:16;         
+    let expected_code: bits[8] = bits[8]:0b000_0101;    
+    let expected_run: u4 = u4:3;                        
+    let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:5, true);  
+
+    trace!(actual_output);
+    trace!(actual_length);
+    trace!(actual_code);
+    trace!(actual_run);
+
+    assert_eq(actual_output, expected_output);
+    assert_eq(actual_length, expected_length);
+    assert_eq(actual_code, expected_code);
+    assert_eq(actual_run, expected_run);
+}
+
+#[test]
+fn test3_Huffman_ACenc() {
+    let test_matrix: u8[8][8] = [
+        [u8:64, u8:0, u8:128, u8:0, u8:0, u8:0,  u8:26, u8:0],
+        [u8:0,  u8:5, u8:0,   u8:0, u8:0, u8:23, u8:0,  u8:3],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
+    ];
+
+    let expected_output: bits[16] = bits[16]:0b1111111110010010;  
+    let expected_length: u8 = u8:16;         
+    let expected_code: bits[8] = bits[8]:26;    
+    let expected_run: u4 = u4:3;                        
     let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
@@ -1144,7 +1206,7 @@ fn test_get_ac2() {
   ];
 
   // start_index を bits[4] にキャストし、たとえば 3 を渡す（0～15 の範囲）
-  let si: bits[4] = bits[4]:2;
+  let si: u8 = u8:2;
 
   // テスト対象の関数を呼び出し
   let actual_result: u8[63] = get_ac_start(flat, si);
