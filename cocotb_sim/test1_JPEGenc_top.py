@@ -34,7 +34,6 @@ async def test1_JPEGenc_top(dut):
     dut.zigag_enable.value = 0
     dut.matrix_row.value = 0
     dut.Huffman_start.value = 0
-    dut.output_enable.value = 0
 
 
     for _ in range(10):
@@ -181,13 +180,16 @@ async def test1_JPEGenc_top(dut):
     num_detected = 0
     done = False  # ここで done を初期化
 
-    # 例えば12回検出するか、state が 0 になったらループ終了
-    while num_detected < 12 and not done:
+    # 例えば24回検出するか、state が 0 になったらループ終了
+    while num_detected < 24 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
-        #print("code count = {} : ".format(num_detected))
-        #print("jpeg_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out.value)
-        #print("jpeg_data_bits =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_data_bits.value))
+        print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
+        print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
+        print("code count = {} ".format(num_detected))
+        print("jpeg_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out.value)
+        print("jpeg_data_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_data_length.value))
+        print("code_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value)
         print("--------")
         num_detected += 1
 
@@ -198,8 +200,11 @@ async def test1_JPEGenc_top(dut):
                 done = True
                 break
             await RisingEdge(dut.clock)
+    print("jpeg_dc_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out.value)
 
-    print("Exited loop after", num_detected, "detections or state==0")
+    print("==========================================================================")
+    print("7: Huffman enc End")
+    print("count =", int(dut.counter.value), "clk")
 
     for _ in range(100):
         await RisingEdge(dut.clock)
