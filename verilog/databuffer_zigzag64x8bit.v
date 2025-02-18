@@ -10,9 +10,10 @@ module databuffer_zigzag64x8bit #(
     input  wire                          input_enable,
     input  wire                          zigag_enable,
     input  wire [7:0]                    matrix_row,   // 書き込み対象の行 (0～7)
-    input  wire [64-1:0]                 row_data,     // 128ビット入力。下位64ビットを使用
+    input  wire [64-1:0]                 row_data,     // 64ビット入力。
     input  wire                          input_data_enable,
     output reg  [DATA_WIDTH-1:0]         buffer   [0:DEPTH-1],
+    output reg  [DEPTH-1:0]              buffer_64bit [0:DATA_WIDTH-1],
     output reg  [511:0]                  zigzag_pix_out 
 );
 
@@ -40,19 +41,22 @@ module databuffer_zigzag64x8bit #(
 `endif
 
     // Address Delay
+    reg   input_data_enable_d1;
+    reg   input_data_enable_d2;
     reg [7:0]   matrix_row_d1;
     reg [7:0]   matrix_row_d2;
-    reg [7:0]   matrix_row_d3;
 
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
+            input_data_enable_d1 <= 0;
+            input_data_enable_d2 <= 0;
             matrix_row_d1 <= 0;
             matrix_row_d2 <= 0;
-            matrix_row_d3 <= 0;
         end else begin
+            input_data_enable_d1 <= input_data_enable;
+            input_data_enable_d2 <= input_data_enable_d1;
             matrix_row_d1 <= matrix_row;
             matrix_row_d2 <= matrix_row_d1;
-            matrix_row_d3 <= matrix_row_d2;
         end
     end
 
@@ -65,41 +69,49 @@ module databuffer_zigzag64x8bit #(
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
             // 非同期リセット：バッファ全体をゼロにクリア
+            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
+                buffer_64bit[i] <= 0;
+            end
             for (i = 0; i < DEPTH; i = i + 1) begin
-                buffer[i] <= {DATA_WIDTH{1'b0}};
+                buffer[i] <= 0;
             end
         end else begin
             if (input_enable) begin
                 // ※ pix_data からの一括ロードの処理が必要な場合はここに記述
-            end else if (input_data_enable) begin
-                // matrix_row で指定された行に、row_data の下位 64 ビットを 8 ビットずつ書き込む
-                // ここでは、row_data の上位 64 ビットは無視し、下位 64ビット (row_data[63:0]) を使用
-                // 書き込み対象は、行番号 matrix_row に対応するバッファ領域: 
-                // インデックス (matrix_row*8) ～ (matrix_row*8+7)
-                for (i = 0; i < 8; i = i + 1) begin
-                    buffer[matrix_row_d3  * 8 + i] <= row_data[63 - i*8 -: 8];
-                end
+            end else if (input_data_enable_d2) begin
+                buffer_64bit[matrix_row_d2] <= row_data;
             end
         end
     end
 
     // ここで、buffer 配列（64×8ビット）を512ビットのベクトル matrix に再結合
-    wire [511:0] matrix;
-    genvar idx;
-    generate
-        for (idx = 0; idx < DEPTH; idx = idx + 1) begin : concat_buffer
-            // matrix[511:504] に buffer[0]、matrix[503:496] に buffer[1]、… とする例
-            assign matrix[511 - idx*8 -: 8] = buffer[idx];
-        end
-    endgenerate
-
+    // buffer から matrix への変換（各行は自然順：buffer[0]～buffer[7] の順）
+    wire [511:0] zigzag_pix_in;
+    //assign matrix = 512'h0F;
+    
+    assign zigzag_pix_in[511:448] = { buffer_64bit[7] };
+    assign zigzag_pix_in[447:384] = { buffer_64bit[6] };
+    assign zigzag_pix_in[383:320] = { buffer_64bit[5] };
+    assign zigzag_pix_in[319:256] = { buffer_64bit[4] };
+    assign zigzag_pix_in[255:192] = { buffer_64bit[3] };
+    assign zigzag_pix_in[191:128] = { buffer_64bit[2] };
+    assign zigzag_pix_in[127:64]  = { buffer_64bit[1] };
+    assign zigzag_pix_in[63:0]    = { buffer_64bit[0] };
+    
+    // Debug
+    `ifdef DEBUG
+    //assign zigzag_pix_in[191:128]   = { {8'd23}, {8'd22}, {8'd21}, {8'd20}, {8'd19}, {8'd118}, {8'd17}, {8'd16} };
+    //assign zigzag_pix_in[127:64]    = { {8'd15}, {8'd14}, {8'd13}, {8'd12}, {8'd11}, {8'd10}, {8'd9}, {8'd8} };
+    //assign zigzag_pix_in[63:0]      = { {8'd7}, {8'd6}, {8'd5}, {8'd4}, {8'd3}, {8'd2}, {8'd1}, {8'd0} };
+    `endif
+    
     wire  [511:0]    zigzag_pix_data; 
 
     // Zigzag 並べ替えモジュールのインスタンス化
     // 入力：512ビットの matrix、出力：512ビットの zigzag_pix_out
     Zigzag_reorder zigzag_inst (
         .clk        (clock),
-        .matrix     (matrix),
+        .matrix     (zigzag_pix_in),
         .is_enable  (zigag_enable),
         .out        (zigzag_pix_data)
     );

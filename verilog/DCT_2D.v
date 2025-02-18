@@ -38,16 +38,16 @@ module DCT_2D(
   wire [63:0] row_in4;
   wire [63:0] row_in5;
   wire [63:0] row_in6;
-  wire [63:0] row_in7s;
+  wire [63:0] row_in7;
 
   assign row_in0 = row_in[0];
   assign row_in1 = row_in[1];
   assign row_in2 = row_in[2];
   assign row_in3 = row_in[3];
-  assign row_in3 = row_in[4];
-  assign row_in3 = row_in[5];
-  assign row_in3 = row_in[6];
-  assign row_in3 = row_in[7];
+  assign row_in4 = row_in[4];
+  assign row_in5 = row_in[5];
+  assign row_in6 = row_in[6];
+  assign row_in7 = row_in[7];
 
   wire [63:0] col_buffer0;
   wire [63:0] col_buffer1;
@@ -84,6 +84,24 @@ module DCT_2D(
   assign row_buffer5 = row_buffer[5];
   assign row_buffer6 = row_buffer[6];
   assign row_buffer7 = row_buffer[7];
+
+  wire [63:0] col_vector0;
+  wire [63:0] col_vector1;
+  wire [63:0] col_vector2;
+  wire [63:0] col_vector3;
+  wire [63:0] col_vector4;
+  wire [63:0] col_vector5;
+  wire [63:0] col_vector6;
+  wire [63:0] col_vector7;
+
+  assign col_vector0 = col_vector[0];
+  assign col_vector1 = col_vector[1];
+  assign col_vector2 = col_vector[2];
+  assign col_vector3 = col_vector[3];
+  assign col_vector4 = col_vector[4];
+  assign col_vector5 = col_vector[5];
+  assign col_vector6 = col_vector[6];
+  assign col_vector7 = col_vector[7];
   `endif
   // Debug End
 
@@ -112,14 +130,14 @@ module DCT_2D(
   generate
     for(i = 0; i < 8; i = i + 1) begin: build_rows
       // 各行は、pix_data[ i*8 + 0 ] ～ pix_data[ i*8 + 7 ]
-      assign row_in[i] = { pix_data[i*8+7],
-                           pix_data[i*8+6],
-                           pix_data[i*8+5],
-                           pix_data[i*8+4],
-                           pix_data[i*8+3],
-                           pix_data[i*8+2],
+      assign row_in[i] = { pix_data[i*8+0],
                            pix_data[i*8+1],
-                           pix_data[i*8+0] };
+                           pix_data[i*8+2],
+                           pix_data[i*8+3],
+                           pix_data[i*8+4],
+                           pix_data[i*8+5],
+                           pix_data[i*8+6],
+                           pix_data[i*8+7] };
     end
   endgenerate
 
@@ -282,6 +300,21 @@ module DCT_2D(
     end
   end
 
+
+  // Debug 
+ `ifdef DEBUG
+  wire [63:0] out_w0, out_w1, out_w2, out_w3, out_w4, out_w5, out_w6, out_w7;
+  assign out_w0 = { out_w[ 0], out_w[ 1], out_w[ 2], out_w[ 3], out_w[ 4], out_w[ 5], out_w[ 6], out_w[ 7] };
+  assign out_w1 = { out_w[ 8], out_w[ 9], out_w[10], out_w[11], out_w[12], out_w[13], out_w[14], out_w[15] };
+  assign out_w2 = { out_w[16], out_w[17], out_w[18], out_w[19], out_w[20], out_w[21], out_w[22], out_w[23] };
+  assign out_w3 = { out_w[24], out_w[25], out_w[26], out_w[27], out_w[28], out_w[29], out_w[30], out_w[31] };
+  assign out_w4 = { out_w[32], out_w[33], out_w[34], out_w[35], out_w[36], out_w[37], out_w[38], out_w[39] };
+  assign out_w5 = { out_w[40], out_w[41], out_w[42], out_w[43], out_w[44], out_w[45], out_w[46], out_w[47] };
+  assign out_w6 = { out_w[48], out_w[49], out_w[50], out_w[51], out_w[52], out_w[53], out_w[54], out_w[55] };
+  assign out_w7 = { out_w[56], out_w[57], out_w[58], out_w[59], out_w[60], out_w[61], out_w[62], out_w[63] };
+  `endif
+  // Debug End
+
   // 最終出力（行優先）を生成するための中間 wire 配列
   wire [7:0] out_w [0:63];
 
@@ -289,9 +322,8 @@ module DCT_2D(
   generate
     for(r = 0; r < 8; r = r + 1) begin: out_row
       for(c = 0; c < 8; c = c + 1) begin: out_col
-        // 各出力ピクセルは、col_buffer[c] の
-        // (r*8) ビット目～(r*8+7) ビット目に対応
-        assign out_w[r*8 + c] = col_buffer[c][r*8 +: 8];
+        // ここで、(7 - r) によって行順序を反転させている
+        assign out_w[r*8 + c] = col_buffer[c][(r*8) +: 8];
       end
     end
   endgenerate

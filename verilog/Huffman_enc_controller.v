@@ -3,9 +3,9 @@ module Huffman_enc_controller(
   input  wire               reset_n,
   input  wire               Huffman_start,
   input  wire  [511:0]      zigzag_pix_in,
-  output wire  [511:0]      dc_matrix,
-  output wire  [511:0]      ac_matrix,
-  output wire  [7:0]        start_pix,
+  output reg   [511:0]      dc_matrix,
+  output reg   [511:0]      ac_matrix,
+  output reg   [7:0]        start_pix,
   // from enc module
   input  wire  [23:0]       dc_out,
   input  wire  [15:0]       ac_out,
@@ -13,29 +13,74 @@ module Huffman_enc_controller(
   input  wire  [7:0]        code,
   input  wire  [3:0]        run,
   // final output 
-  output wire  [15:0]       jpeg_out,
-  output wire  [3:0]        jpeg_data_bits
+  output reg                jpeg_out_enable,
+  output reg   [15:0]       jpeg_out,
+  output reg   [3:0]        jpeg_data_bits
 );
 
   // 状態レジスタ: 初回はDCを出力、その後はACを出力
-  reg state;  // 0: DC, 1: AC
+  reg [3:0] state;  // 0: DC, 1: AC
   always @(posedge clock or negedge reset_n) begin
-    if (!reset_n)
+    if (!reset_n) begin
       state <= 0;
-    else
-      state <= 1;  // 初回1クロック目はDC、以降はAC
+      dc_matrix <= 0;
+      ac_matrix <= 0;
+      start_pix <= 0;
+      jpeg_out_enable <= 0;
+      jpeg_out <= 0;
+      jpeg_data_bits <= 0;
+    end else begin
+      case(state)
+        0: begin
+          dc_matrix <= 0;
+          jpeg_out_enable <= 0;
+          if(Huffman_start) begin
+            state <= 1;
+          end
+        end
+        // DC enc Start
+        1: begin
+          jpeg_out_enable <= 0;
+          dc_matrix <= zigzag_pix_in;
+          state <= 2;
+        end
+        2: begin
+          state <= 3;
+        end
+        // AC enc Start
+        3: begin
+          if(start_pix >= 63) begin
+            state <= 0;
+          end else begin
+            jpeg_out_enable <= 0;
+            ac_matrix <= zigzag_pix_in;
+            state <= 4;
+          end
+        end
+        4: begin
+          state <= 5;
+        end
+        5: begin
+          state <= 6;
+        end
+        6: begin
+          state <= 7;
+        end
+        7: begin
+          state <= 8;
+        end
+        8: begin
+          jpeg_out_enable <= 1;
+          start_pix <= start_pix + run;
+          jpeg_out <= ac_out;
+          jpeg_data_bits <= length;
+          state <= 3;
+        end
+      endcase
+    end
   end
 
-  // DC マトリックス: zigzag_pix_in の最上位 8ビット（DC成分）を残し、残りはゼロにする
-  assign dc_matrix = (state == 0) ? { zigzag_pix_in[511:504], 504'b0 } : 512'b0;
-  // AC マトリックス: zigzag_pix_in の DC 部分をゼロ化して残りを出力
-  assign ac_matrix = (state == 1) ? { 8'b0, zigzag_pix_in[503:0] } : 512'b0;
-  // AC 部分の最初のピクセル（zigzag_pix_in のビット503:496）を start_pix とする
-  assign start_pix = zigzag_pix_in[503:496];
-
-  // 最終 JPEG 出力: 状態に応じて Huffman DC エンコード結果または AC エンコード結果を出力
-  assign jpeg_out = (state == 0) ? dc_out[23:16] : ac_out[15:8];
-  // jpeg_data_bits は例として固定の8ビット出力とする（必要に応じて調整）
-  assign jpeg_data_bits = 4'd8;
+  //assign jpeg_out = 0;
+  //assign jpeg_data_bits = 0;
 
 endmodule

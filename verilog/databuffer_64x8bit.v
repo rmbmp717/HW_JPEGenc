@@ -48,7 +48,7 @@ module databuffer_64x8bit #(
     generate
       for (idx = 0; idx < DEPTH; idx = idx + 1) begin : pack_gen
         // buffer[idx] を 8 ビットずつ、最上位に buffer[0]、最下位に buffer[63] を配置
-        assign buffer_512bits[511 - idx*8 -: 8] = buffer[idx];
+        assign buffer_512bits[511 - idx*8 -: 8] = buffer[(DEPTH-1) - idx];
       end
     endgenerate
 

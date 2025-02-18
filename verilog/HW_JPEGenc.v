@@ -102,6 +102,7 @@ module HW_JPEGenc(
         .dct_coeffs         (quantim_buffer),  
         .matrix_row         (matrix_row),  
         .is_luminance       (is_luminance),  
+        .quantize_off       (1'b0),
         .out                (quantim_out)  
     );
 
@@ -160,6 +161,8 @@ module HW_JPEGenc(
         .length             (length),
         .code               (code),
         .run                (run),
+        // JPEG Code Output
+        .jpeg_out_enable    (),
         .jpeg_out           (jpeg_out),
         .jpeg_data_bits     (jpeg_data_bits)
     );
