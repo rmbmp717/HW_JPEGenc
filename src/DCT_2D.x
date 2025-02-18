@@ -115,11 +115,6 @@ pub fn dct_1d(x: s16[N]) -> s16[N] {
 	}(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0])
   }
 
-// 0~255 の u8 を Q8.8 固定小数点に変換（-128 のレベルシフトを適用）
-fn to_fixed_with_shift(x: u8) -> s16 {
-    (x as s16 - s16:128) * FIXED_ONE
-}
-
 pub fn dct_1d_u8(x: u8[N]) -> u8[N] {
     let x_q88: s16[N] = for (i, acc): (u32, s16[N]) in range(u32:0, N) {
         let shifted: s16 = ((x[i] as s16) - s16:128) << 8;  // ✅ レベルシフト (-128)
@@ -265,7 +260,7 @@ fn test3_dct_2d_u8_top_left_4x4_80() -> () {
     ];
 
     let result = dct_2d_u8(x);
-    //trace!(result);
+    trace!(result);
 
     // 期待されるリファレンスの出力と一致するか確認
     assert_eq(result, expected);
