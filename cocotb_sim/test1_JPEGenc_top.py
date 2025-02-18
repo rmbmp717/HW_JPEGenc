@@ -52,6 +52,8 @@ async def test1_JPEGenc_top(dut):
     #dut.pix_data.value = list(range(1, 65))
     # すべて0
     #dut.pix_data.value = [0] * 64
+    # すべて255
+    #dut.pix_data.value = [255] * 64
     # 左上が80
     dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
     # 80, 0, 80, 0 ...
@@ -81,6 +83,29 @@ async def test1_JPEGenc_top(dut):
 
     for _ in range(20):
         await RisingEdge(dut.clock)
+
+    # Debug
+    '''
+    matrix = []
+    for i in range(8):
+        # dut.row_buffer is an array; 各要素は 64 ビットの値
+        row_val = dut.HW_JPEGenc_Y.mDCT_2D.row_buffer[i].value.integer  # 整数値として取得
+        #row_val = dut.HW_JPEGenc_Y.mDCT_2D.col_vector[i].value.integer  # 整数値として取得
+        row_bytes = []
+        # 上位バイトから下位バイトへ取り出す (例: row_val[63:56] から row_val[7:0])
+        for j in reversed(range(8)):
+            byte = (row_val >> (8 * j)) & 0xFF
+            row_bytes.append(byte)
+        matrix.append(row_bytes)
+
+    dut._log.info("row_buffer (8x8 matrix):")
+    #dut._log.info("col_vector (8x8 matrix):")
+
+    for row in matrix:
+        # 各バイトを 10 進数 3 桁で表示
+        row_str = " ".join(f"{val:3d}" for val in row)
+        dut._log.info(row_str)
+    '''
 
     # 例: dct2d_out を 8x8 の行列として表示
     dct2d_data = []
@@ -180,15 +205,15 @@ async def test1_JPEGenc_top(dut):
     num_detected = 0
     done = False  # ここで done を初期化
 
-    # 例えば24回検出するか、state が 0 になったらループ終了
-    while num_detected < 24 and not done:
+    # 例えば36回検出するか、state が 0 になったらループ終了
+    while num_detected < 36 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
         print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
         print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
         print("code count = {} ".format(num_detected))
-        print("jpeg_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out.value)
-        print("jpeg_data_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_data_length.value))
+        print("huffman_code =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code.value)
+        print("huffman_code_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code_length.value))
         print("code_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value)
         print("--------")
         num_detected += 1
