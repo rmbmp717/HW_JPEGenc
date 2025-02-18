@@ -45,10 +45,19 @@ async def test1_JPEGenc_top(dut):
         await RisingEdge(dut.clock)    
 
     print("==========================================================================")
-    print("Input Data")
+    print("0: Input Data")
     # Set input_enable high and initialize pix_data with 1's
     dut.input_enable.value = 1
-    dut.pix_data.value = list(range(1, 65))
+
+    # 0〜63のならび
+    #dut.pix_data.value = list(range(1, 65))
+    # すべて0
+    #dut.pix_data.value = [0] * 64
+    # 左上が80
+    dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
+    # 80, 0, 80, 0 ...
+    #dut.pix_data.value = [80, 0] * 32
+
     await RisingEdge(dut.clock)
     dut.input_enable.value = 0
     # pix_data の各要素を 10 進数に変換してリストに格納
@@ -64,7 +73,7 @@ async def test1_JPEGenc_top(dut):
         await RisingEdge(dut.clock)
 
     print("==========================================================================")
-    print("DCT 2D Start")
+    print("1: DCT 2D Start")
     # DCT 2D Start
     await RisingEdge(dut.clock)
     dut.dct_enable.value = 1
@@ -88,7 +97,7 @@ async def test1_JPEGenc_top(dut):
         print(" ".join(f"{val:3d}" for val in row_data))
 
     print("==========================================================================")
-    print("Quantize Start")
+    print("2: Quantize Start")
     # Quantize buffer
     dut.dct_end_enable.value = 1
     await RisingEdge(dut.clock)
@@ -107,15 +116,20 @@ async def test1_JPEGenc_top(dut):
         await RisingEdge(dut.clock)
 
     print("==========================================================================")
-    print("Zigzag scan Start")
-    # Zigag scan
+    print("3: Zigzag scan Start")
     print("Quantized Data (8x8 matrix):")
-    # 各要素を 10 進数に変換してリストに格納
-    quantized_list = [int(d.binstr, 2) for d in dut.HW_JPEGenc_Y.m_databuffer_zigzag64x8bit.buffer.value]
     for row in range(8):
-        # 8 個ずつ取り出して表示（各行）
-        row_data = quantized_list[row*8:(row+1)*8]
-        print(" ".join(f"{val:3d}" for val in row_data))
+        # 各行の64ビットデータをビット文字列として取得
+        binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x8bit.buffer_64bit[row].value.binstr
+        # 未定義 'x' を '0' に置換
+        binstr = binstr.replace("x", "0")
+        # ビット幅が64でない場合は、先頭にゼロを埋める
+        if len(binstr) < 64:
+            binstr = binstr.zfill(64)
+        # 64ビットを8ビットずつに分割して整数のリストに変換
+        row_vals = [int(binstr[i:i+8], 2) for i in range(0, 64, 8)]
+        # 8ビットごとのデータの順序を左右逆にして表示（reversed）
+        print(" ".join("{:3d}".format(val) for val in reversed(row_vals)))
 
     dut.zigag_enable.value = 1
     await RisingEdge(dut.clock)
@@ -125,11 +139,67 @@ async def test1_JPEGenc_top(dut):
         await RisingEdge(dut.clock)
 
     print("==========================================================================")
-    print("Huffman enc Start")
+    print("4: Zigzag Input Data (8x8 matrix):")
+    # matrix.value は 512ビットのシグナルオブジェクトと仮定する
+    matrix_val = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x8bit.zigzag_pix_in.value.binstr  # ビット文字列として取得
+    # matrix_val の長さが 512 であることを確認
+    if len(matrix_val) != 512:
+        print("警告: 取得したビット長が512ではありません:", len(matrix_val))
+    
+    # 8ビット毎にスライスしてリストにする（LSB側から8ビットずつ：末尾から逆順に取得）
+    Zigzan_list = [int(matrix_val[i:i+8], 2) for i in range(512-8, -1, -8)]
+
+    # 8x8のマトリックスに整形して出力
+    for i in range(8):
+        row = Zigzan_list[i*8:(i+1)*8]
+        print(" ".join("{:3d}".format(x) for x in row))
+
+    for _ in range(4):
+        await RisingEdge(dut.clock)
+        
+    print("==========================================================================")
+    print("5: Zigzaged Data (8x8 matrix):")
+    # zigzag_pix_out の値を 512 ビットのビット文字列として取得する
+    zigzag_binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x8bit.zigzag_pix_out.value.binstr
+    print("zigzag_binstr length:", len(zigzag_binstr))
+
+    # LSB側から8ビットずつ取り出す：末尾から逆順にスライス
+    Zigzaned_list = [int(zigzag_binstr[i:i+8], 2) for i in range(len(zigzag_binstr)-8, -1, -8)]
+
+    # 8x8 のマトリックスに整形して出力
+    for i in range(8):
+        row = Zigzaned_list[i*8:(i+1)*8]
+        print(" ".join("{:3d}".format(x) for x in row))
+
+    print("==========================================================================")
+    print("6: Huffman enc Start")
     # Huffman start
     dut.Huffman_start.value = 1
     await RisingEdge(dut.clock)
     dut.Huffman_start.value = 0
+
+    num_detected = 0
+    done = False  # ここで done を初期化
+
+    # 例えば12回検出するか、state が 0 になったらループ終了
+    while num_detected < 12 and not done:
+        # jpeg_out_enable の立ち上がりを待機
+        await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
+        #print("code count = {} : ".format(num_detected))
+        #print("jpeg_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out.value)
+        #print("jpeg_data_bits =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_data_bits.value))
+        print("--------")
+        num_detected += 1
+
+        # 同じ High 状態の重複検出を防ぐため、jpeg_out_enable が Low になるまで待機する
+        while dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable.value == 1:
+            # state が 0 になった場合、外側のループも抜ける
+            if int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.state.value) == 0:
+                done = True
+                break
+            await RisingEdge(dut.clock)
+
+    print("Exited loop after", num_detected, "detections or state==0")
 
     for _ in range(100):
         await RisingEdge(dut.clock)
