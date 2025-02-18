@@ -18,7 +18,8 @@ module HW_JPEGenc_top(
     input  wire [7:0]       matrix_row, 
     input  wire             Huffman_start,
     // End
-    input  wire             output_enable,  // 追加: 出力イネーブル信号
+    output wire             jpeg_out_enable,  
+    output wire [23:0]      jpeg_dc_out,
     output wire [15:0]      jpeg_out,        // 最終 JPEG 出力（8ビット）
     output wire [3:0]       jpeg_data_bits   // 最終 JPEG 出力のビット幅
     // JPEG Data 
@@ -76,8 +77,10 @@ module HW_JPEGenc_top(
         .Huffman_start          (Huffman_start),
         .pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
         .is_luminance           (1'b1),
+        .jpeg_out_enable        (jpeg_out_enable),
+        .jpeg_dc_out            (jpeg_dc_out),
         .jpeg_out               (jpeg_out),
-        .jpeg_data_bits         (jpeg_data_bits)
+        .jpeg_data_length       (jpeg_data_length)
     );
 
     // Cb, Cr module

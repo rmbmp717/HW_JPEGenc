@@ -14,8 +14,10 @@ module Huffman_enc_controller(
   input  wire  [3:0]        run,
   // final output 
   output reg                jpeg_out_enable,
+  output reg   [23:0]       jpeg_dc_out,
   output reg   [15:0]       jpeg_out,
-  output reg   [3:0]        jpeg_data_bits
+  output reg   [3:0]        jpeg_data_length,
+  output reg   [7:0]        code_out
 );
 
   // 状態レジスタ: 初回はDCを出力、その後はACを出力
@@ -27,8 +29,10 @@ module Huffman_enc_controller(
       ac_matrix <= 0;
       start_pix <= 0;
       jpeg_out_enable <= 0;
+      jpeg_dc_out <= 0;
       jpeg_out <= 0;
-      jpeg_data_bits <= 0;
+      jpeg_data_length <= 0;
+      code_out <= 0;
     end else begin
       case(state)
         0: begin
@@ -46,6 +50,8 @@ module Huffman_enc_controller(
         end
         2: begin
           state <= 3;
+          start_pix <= 1;
+          jpeg_dc_out <= dc_out;
         end
         // AC enc Start
         3: begin
@@ -71,10 +77,11 @@ module Huffman_enc_controller(
         end
         8: begin
           jpeg_out_enable <= 1;
-          start_pix <= start_pix + run;
+          start_pix <= start_pix + run + 1;
           jpeg_out <= ac_out;
-          jpeg_data_bits <= length;
+          jpeg_data_length <= length;
           state <= 3;
+          code_out <= code; 
         end
       endcase
     end
