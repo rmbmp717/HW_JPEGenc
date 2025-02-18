@@ -120,7 +120,8 @@ module DCT_2D(
   reg [63:0] dct_in_0, dct_in_1;
   wire [63:0] dct_out_0, dct_out_1;
 
-  // dct_1d_u8 のインスタンス（1クロックレイテンシで結果が得られると仮定）
+  // dct_1d_u8 のインスタンス（2クロックレイテンシで結果が得られると仮定）
+  // PIPE_LINE_STAGE = 2
   dct_1d_u8 m0_dct_inst( .clk(clock), .x(dct_in_0), .out(dct_out_0));
   dct_1d_u8 m1_dct_inst( .clk(clock), .x(dct_in_1), .out(dct_out_1));
 
@@ -208,13 +209,10 @@ module DCT_2D(
         4: begin
             dct_in_0 <= row_in[row_idx];      // 入力をセット
             dct_in_1 <= row_in[row_idx+1];    // 入力をセット
-            row_idx <= row_idx + 2;
-            // 出力スタート
-            row_buffer[row_idx-6] <= dct_out_0;   
-            row_buffer[row_idx+1-6] <= dct_out_1;   
             state_h <= 5;
         end
         5: begin
+            // 出力スタート
             row_idx <= row_idx + 2;
             row_buffer[row_idx-6] <= dct_out_0;   
             row_buffer[row_idx+1-6] <= dct_out_1;   
@@ -233,6 +231,12 @@ module DCT_2D(
             state_h <= 8;
         end
         8: begin
+            row_idx <= row_idx + 2;
+            row_buffer[row_idx-6] <= dct_out_0;   
+            row_buffer[row_idx+1-6] <= dct_out_1;   
+            state_h <= 9;
+        end
+        9: begin
             state_h_end <= 1;
             state_h <= 0;
         end
@@ -267,22 +271,19 @@ module DCT_2D(
         end
         4: begin
             dct_in_0 <= col_vector[col_idx];    // 入力をセット
-            dct_in_1 <= col_vector[col_idx+1];   
+            dct_in_1 <= col_vector[col_idx+1];  
+            state_v <= 5;
+        end
+        5: begin 
             // 出力スタート
             col_buffer[col_idx-6] <= dct_out_0;    
             col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
-            state_v <= 5;
-        end
-        5: begin
-            col_buffer[col_idx-6] <= dct_out_0;   
-            col_buffer[col_idx-6+1] <= dct_out_1;   
-            col_idx <= col_idx + 2;
             state_v <= 6;
         end
         6: begin
-            col_buffer[col_idx-6] <= dct_out_0;    
-            col_buffer[col_idx-6+1] <= dct_out_1; 
+            col_buffer[col_idx-6] <= dct_out_0;   
+            col_buffer[col_idx-6+1] <= dct_out_1;   
             col_idx <= col_idx + 2;
             state_v <= 7;
         end
@@ -293,13 +294,18 @@ module DCT_2D(
             state_v <= 8;
         end
         8: begin
+            col_buffer[col_idx-6] <= dct_out_0;    
+            col_buffer[col_idx-6+1] <= dct_out_1; 
+            col_idx <= col_idx + 2;
+            state_v <= 9;
+        end
+        9: begin
             state_v_end <= 1;
             state_v <= 0;
         end
       endcase
     end
   end
-
 
   // Debug 
  `ifdef DEBUG
