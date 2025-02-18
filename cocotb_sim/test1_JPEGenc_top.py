@@ -81,8 +81,11 @@ async def test1_JPEGenc_top(dut):
     await RisingEdge(dut.clock)
     dut.dct_enable.value = 0
 
-    for _ in range(20):
+    for _ in range(50):
+        if dut.HW_JPEGenc_Y.mDCT_2D.state_v_end.value == 1:
+            break
         await RisingEdge(dut.clock)
+    await RisingEdge(dut.clock)
 
     # Debug
     '''
@@ -209,13 +212,13 @@ async def test1_JPEGenc_top(dut):
     while num_detected < 36 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
-        print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
-        print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
-        print("code count = {} ".format(num_detected))
-        print("huffman_code =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code.value)
-        print("huffman_code_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code_length.value))
-        print("code_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value)
-        print("--------")
+        #print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
+        #print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
+        #print("code count = {} ".format(num_detected))
+        #print("huffman_code =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code.value)
+        #print("huffman_code_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code_length.value))
+        #print("code_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value)
+        #print("--------")
         num_detected += 1
 
         # 同じ High 状態の重複検出を防ぐため、jpeg_out_enable が Low になるまで待機する
