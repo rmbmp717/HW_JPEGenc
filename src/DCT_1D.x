@@ -120,7 +120,55 @@ pub fn dct_1d_u8(x: u8[N]) -> u8[N] {
 #[test]
 fn test1_dct_1d_allzero() {
   let x = u8[8]:[0, 0, 0, 0, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = u8[8]:[0, 128, 128, 128, 128, 101, 30, 193];
+  let expected = u8[8]:[0, 0, 0, 0, 0, 0, 0, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(x);
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
+#[test]
+fn test0_dct_1d() {
+  let x = u8[8]:[8, 70, 6, 5, 4, 3, 25, 12]; // テスト用の入力データ
+  let expected = u8[8]:[47, 18, 22, 0, 0, 0, 0, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(x);
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
+#[test]
+fn test11_dct_1d() {
+  let x = u8[8]:[80, 0, 80, 0, 80, 0, 80, 0]; // テスト用の入力データ
+  let expected = u8[8]:[114, 20, 0, 24, 0, 8, 31, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(x);
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
+#[test]
+fn test2_dct_1d() {
+  let x = u8[8]:[8, 70, 63, 55, 42, 3, 2, 1]; // テスト用の入力データ
+  let expected = u8[8]:[87, 50, 0, 0, 0, 1, 26, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(x);
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
+#[test]
+fn test3_dct_1d() {
+  let x = u8[8]:[80, 80, 80, 80, 80, 80, 80, 80]; // テスト用の入力データ
+  let expected = u8[8]:[128, 0, 0, 0, 0, 17, 61, 0];
 
   let result = dct_1d_u8(x); // 実際の計算結果
   trace!(x);
@@ -132,7 +180,7 @@ fn test1_dct_1d_allzero() {
 #[test]
 fn test4_dct_1d() {
   let x = u8[8]:[80, 80, 80, 80, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = u8[8]:[0, 231, 128, 92, 128, 109, 61, 173];
+  let expected = u8[8]:[114, 103, 0, 0, 0, 8, 31, 0];
 
   let result = dct_1d_u8(x); // 実際の計算結果
   trace!(x);
@@ -141,3 +189,14 @@ fn test4_dct_1d() {
   assert_eq(result, expected);
 }
 
+#[test]
+fn test5_dct_1d() {
+  let x = u8[8]:[114, 114, 114, 114, 0, 0, 0, 0]; // テスト用の入力データ
+  let expected = u8[8]:[128, 128, 0, 0, 0, 12, 44, 0];
+
+  let result = dct_1d_u8(x); // 実際の計算結果
+  trace!(x);
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
