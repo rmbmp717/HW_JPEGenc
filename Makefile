@@ -1,18 +1,18 @@
 # Variables
-TOP = dct_1d_u8
+TOP = Huffman_ACenc
 #INPUT_FILE = ./src/RGB_YCbCr.x
 #INPUT_FILE = ./src/Quantize.x
-INPUT_FILE = ./src/DCT_1D.x		# PIPE_LINE_STAGE = 2
+#INPUT_FILE = ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
-#INPUT_FILE = ./src/Huffman_ACenc.x # PIPE_LINE_STAGE = 3
-#INPUT_FILE = ./src/Huffman_ACenc.x
+INPUT_FILE = ./src/Huffman_ACenc.x # PIPE_LINE_STAGE = 3
+#INPUT_FILE = ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
 IR_FILE = ./ir_dir/$(TOP).ir
 OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
 TOOL_DIR = /home/haruhiko/xls/bazel-bin
 OUTPUT_FILE = ./verilog/$(TOP).v
 
-PIPE_LINE_STAGE = 2
+PIPE_LINE_STAGE = 4
 
 SIM = icarus
 COCOTB_DIR = /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
@@ -73,3 +73,7 @@ simulate:
 activate:
 	@echo "Run: python3 -m venv myenv"
 	@echo "Run: source ./myenv/bin/activate"
+
+# Copy to Gowin EDA Folder
+gowin_copy:
+	@cp $(VERILOG_FILE) /home/haruhiko/gowin/IDE/bin/HW_JPEGenc/src/
