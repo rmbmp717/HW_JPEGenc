@@ -41,14 +41,17 @@ module HW_JPEGenc_top(
             main_state <= 0;
             counter   <= 0;
         end else begin
-            if(input_enable) begin
-                main_state <= 1;
-                counter   <= 0;
-            end else begin
-                if(main_state==1) begin
+            case(main_state)
+                0: begin
+                    if(input_enable | input_1pix_enable) begin
+                        main_state <= 1;
+                        counter   <= 0;
+                    end 
+                end
+                1: begin
                     counter   <= counter + 1;
                 end
-            end
+            endcase
         end
     end
     `endif

@@ -144,7 +144,7 @@ module HW_JPEGenc(
         .out                (dc_out)
     );
 
-    // PIPE_LINE_STAGE = 3 と仮定
+    // PIPE_LINE_STAGE = 4 と仮定
     Huffman_ACenc mHuffman_ACenc (
         .clk                (clock),
         .matrix             (ac_matrix),

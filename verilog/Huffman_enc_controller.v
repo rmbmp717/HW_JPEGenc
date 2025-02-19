@@ -51,10 +51,10 @@ module Huffman_enc_controller(
         end
         2: begin
           state <= 3;
-          jpeg_dc_out <= dc_out;
         end
         // AC enc Start
         3: begin
+          jpeg_dc_out <= dc_out;
           if(start_pix >= 63) begin
             state <= 0;
           end else begin
