@@ -168,6 +168,7 @@ async def test1_JPEGenc_top(dut):
 
     for _ in range(4):
         await RisingEdge(dut.clock)
+    print("2: Quantize End")
 
     print("==========================================================================")
     print("3: Zigzag scan Start")
@@ -234,19 +235,27 @@ async def test1_JPEGenc_top(dut):
 
     num_detected = 0
     done = False  # ここで done を初期化
+    final_output = ""  # 最終出力となるビット列を格納
 
     # 例えば36回検出するか、state が 0 になったらループ終了
     while num_detected < 36 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
-        print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
-        print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
-        print("code count = {} ".format(num_detected))
-        print("huffman_code =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value))
-        print("huffman_code(bin) =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value)
-        print("huffman_code_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.length.value))
-        print("code_out =", int(dut.HW_JPEGenc_Y.code.value))
-        print("--------")
+        #print("code count = {} ".format(num_detected))
+        
+        huffman_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value)
+        huffman_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.length.value)
+        trimmed_huffman_code = huffman_code_bin[-huffman_code_length:]
+        
+        print("huffman_code(bin) =", trimmed_huffman_code)
+        
+        # 左の連続するゼロを削除した code_out の出力
+        code_out_bin = str(dut.HW_JPEGenc_Y.code.value).lstrip('0') or '0'
+        print("code_out(bin) =", code_out_bin)
+        
+        # ビット列を最終出力に連結
+        final_output += trimmed_huffman_code + code_out_bin
+        
         num_detected += 1
 
         # 同じ High 状態の重複検出を防ぐため、jpeg_out_enable が Low になるまで待機する
@@ -262,6 +271,14 @@ async def test1_JPEGenc_top(dut):
     print("7: Huffman enc End")
     print("count =", int(dut.counter.value), "clk")
 
+    print("==========================================================================")
+    print("8: Final Output")
+    formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])
+    print(formatted_output)
+    print("Total Bits:", len(final_output))
+    print("Compression Rate:", 100*len(final_output)/512, "%")
+
+    print("==========================================================================")
     for _ in range(100):
         await RisingEdge(dut.clock)
 
