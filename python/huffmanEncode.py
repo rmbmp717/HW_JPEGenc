@@ -1141,17 +1141,21 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
         runSizeStr = str.upper(str(hex(run))[2:]) + str.upper(str(hex(size))[2:])
 
+        print("test runSizeStr :", runSizeStr)
         print("test runSizeStr int:", int(runSizeStr))
 
         if (isLuminance == 1):
+            print("ACLuminanceSizeToCode :", ACLuminanceSizeToCode[runSizeStr])
             bitStream.append(ACLuminanceSizeToCode[runSizeStr])
         else:
+            print("ACChrominanceToCode :", ACChrominanceToCode[runSizeStr])
             bitStream.append(ACChrominanceToCode[runSizeStr])
 
         print("value=", value)
         if(value<=0):# if value==0, codeList = [], (SIZE,VALUE)=(SIZE,[])=EOB
             codeList = list(bin(value)[3:])
             print("codeList=", codeList)
+            print("List codeList=", list(bin(value)[3:]))
             for k in range(len(codeList)):
                 if (codeList[k] == '0'):
                     codeList[k] = 1
@@ -1160,6 +1164,7 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         else:
             codeList = list(bin(value)[2:])
             print("codeList=", codeList)
+            print("List codeList=", list(bin(value)[2:]))
             for k in range(len(codeList)):
                 if (codeList[k] == '0'):
                     codeList[k] = 0
@@ -1194,7 +1199,7 @@ def check_coverage():
 
 def main():
 
-    check_coverage()
+    #check_coverage()
 
     '''
     Code = [0, 0, 0, 0, 0, 0, 0, 0,
@@ -1206,7 +1211,7 @@ def main():
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0]
     '''
-    Code = [2, 0, 0, 1, 1, 2, 17, 17,
+    Code = [0, 11, 2, 1, 1, 2, 17, 17,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,

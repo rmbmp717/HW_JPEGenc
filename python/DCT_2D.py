@@ -91,7 +91,8 @@ if __name__ == "__main__":
         (np.array([[255 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.uint8), "左上 4x4 255"),
         (np.random.randint(0, 256, (8, 8), dtype=np.uint8), "ランダムパターン"),
         (np.array([[80 if (i + j) % 2 == 0 else 80 for j in range(8)] for i in range(8)], dtype=np.uint8), "ベタ"),
-        (np.array([[80 if (i + j) % 2 == 0 else 0 for j in range(8)] for i in range(8)], dtype=np.uint8), "チェッカーパターン")
+        (np.array([[80 if (i + j) % 2 == 0 else 0 for j in range(8)] for i in range(8)], dtype=np.uint8), "チェッカーパターン"),
+        (np.array([[80 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.uint8), "左上 4x4 80"),
     ]
 
     for img, label in test_matrices:
