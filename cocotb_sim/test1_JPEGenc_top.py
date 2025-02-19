@@ -26,6 +26,7 @@ async def test1_JPEGenc_top(dut):
     dut.Green.value = 0
     dut.Blue.value = 0
     dut.input_1pix_enable.value = 0
+    dut.pix_1pix_data.value = 0
     dut.input_enable.value = 0
 
     dut.dct_enable.value = 0
@@ -46,7 +47,7 @@ async def test1_JPEGenc_top(dut):
     print("==========================================================================")
     print("0: Input Data")
     # Set input_enable high and initialize pix_data with 1's
-    dut.input_enable.value = 1
+    #dut.input_enable.value = 1
 
     # 0〜63のならび
     #dut.pix_data.value = list(range(1, 65))
@@ -55,20 +56,46 @@ async def test1_JPEGenc_top(dut):
     # すべて255
     #dut.pix_data.value = [255] * 64
     # 左上が80
-    dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
+    #dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
+    input_matrix = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    flat_data = [input_matrix[i][j] for i in range(8) for j in range(8)]
     # 80, 0, 80, 0 ...
     #dut.pix_data.value = [80, 0] * 32
 
-    await RisingEdge(dut.clock)
-    dut.input_enable.value = 0
+    #await RisingEdge(dut.clock)
+    #dut.input_enable.value = 0
     # pix_data の各要素を 10 進数に変換してリストに格納
-    pix_data_list = [int(p.binstr, 2) for p in dut.pix_data.value]
+    #pix_data_list = [int(p.binstr, 2) for p in dut.pix_data.value]
 
+    dut.input_1pix_enable.value = 1
+    for pix in range(64):
+        dut.pix_1pix_data.value = flat_data[pix]
+        await RisingEdge(dut.clock)
+    dut.pix_1pix_data.value = 0
+    dut.input_1pix_enable.value = 0
+
+    '''
     print("Input Data (8x8 matrix):")
     for row in range(8):
         # 8 個ずつ取り出して表示（各行）
         row_data = pix_data_list[row*8:(row+1)*8]
         print(" ".join(f"{val:3d}" for val in row_data))
+    '''
+
+    # buffer は 64 要素の配列と仮定
+    matrix = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(dut.HW_JPEGenc_Y.m0_databuffer_64x8bit.buffer[index].value.integer)
+        matrix.append(row)
+    
+    print("Buffer (8x8 matrix):")
+    for row in matrix:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:3d}" for val in row)
+        print(line)
 
     for _ in range(4):
         await RisingEdge(dut.clock)
@@ -212,13 +239,14 @@ async def test1_JPEGenc_top(dut):
     while num_detected < 36 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
-        #print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
-        #print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
-        #print("code count = {} ".format(num_detected))
-        #print("huffman_code =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code.value)
-        #print("huffman_code_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.huffman_code_length.value))
-        #print("code_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value)
-        #print("--------")
+        print("start_pix =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value))
+        print("run =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.run.value))
+        print("code count = {} ".format(num_detected))
+        print("huffman_code =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value))
+        print("huffman_code(bin) =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value)
+        print("huffman_code_length =", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.length.value))
+        print("code_out =", int(dut.HW_JPEGenc_Y.code.value))
+        print("--------")
         num_detected += 1
 
         # 同じ High 状態の重複検出を防ぐため、jpeg_out_enable が Low になるまで待機する
