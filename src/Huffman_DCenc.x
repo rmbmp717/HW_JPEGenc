@@ -41,6 +41,13 @@ fn bit_length(x: u8) -> u8 {
     }
 }
 
+#[test]
+fn bit_length_test () {
+    let bit_value :u8 = u8: 33;
+    let bit_length_out = bit_length(bit_value);
+    trace!(bit_length_out);
+}
+
 // 0〜15 の整数を 16 進数の文字 (0-9, A-F) に変換
 fn to_hex_digit(x: u32) -> u8 {
     if x < u32:10 {
@@ -226,6 +233,8 @@ fn test_get_dc() {
 fn encode_dc(dc_value: u8, is_luminance: bool) -> (bits[8], u8, bits[8]) {
 
     let size: u8 = bit_length(dc_value);
+    trace!(dc_value);
+    trace!(size);
 
     let (BoolList, length): (bits[8], u8) =
         if is_luminance {
@@ -284,6 +293,29 @@ fn test0_Huffman_DCenc() {
     let expected_output: bits[8] = bits[8]:0b01000000;     
     let expected_length: u8 = u8:3;  
     let expected_code: bits[8] = bits[8]:7;                
+    let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
+
+    assert_eq(BooList, expected_output);
+    assert_eq(Length, expected_length);
+    assert_eq(CodeList, expected_code);
+}
+
+#[test]
+fn test1_Huffman_DCenc() {
+    let test_matrix: u8[8][8] = [
+        [u8:33, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
+        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
+    ];
+
+    let expected_output: bits[8] = bits[8]:0b10000000;     
+    let expected_length: u8 = u8:3;  
+    let expected_code: bits[8] = bits[8]:33;                
     let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
 
     assert_eq(BooList, expected_output);

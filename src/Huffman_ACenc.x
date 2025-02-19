@@ -658,10 +658,11 @@ fn encode_ac(ac_data: u8[63], is_luminance: bool) -> (bits[16], u8, bits[8], u4)
     } else {
         let value: u8 = ac_data[run];  // `run` の次の非ゼロ値
         let size: u32 = bit_length(value);
-        let run_size_str: u8[2] = encode_run_size(run as u32, size);
+        //let run_size_str: u8[2] = encode_run_size(run as u32, size);
 
         trace!(value);
         trace!(size);
+        let run_size_str: u8[2] = [run as u8, size as u8];
         trace!(run_size_str);
 
         // Huffman テーブルを参照
@@ -739,8 +740,8 @@ fn test_v0_Huffman_ACenc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b11111111011110;     
-    let expected_length: u8 = u8:14;             
+    let expected_output: bits[16] = bits[16]:0b1011;     
+    let expected_length: u8 = u8:4;             
     let expected_code: bits[8] = bits[8]:11;  
     let expected_run: u4 = u4:0;                        
     let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:1, true);  
@@ -769,8 +770,8 @@ fn test_v1_Huffman_ACenc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b11111110111;     
-    let expected_length: u8 = u8:11;             
+    let expected_output: bits[16] = bits[16]:0b100;     
+    let expected_length: u8 = u8:3;             
     let expected_code: bits[8] = bits[8]:5;  
     let expected_run: u4 = u4:0;                        
     let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
@@ -829,8 +830,8 @@ fn test1_Huffman_ACenc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b111010;  
-    let expected_length: u8 = u8:6;         
+    let expected_output: bits[16] = bits[16]:0b00;  
+    let expected_length: u8 = u8:2;         
     let expected_code: bits[8] = bits[8]:0b000_0001;    
     let expected_run: u4 = u4:0;                        
     let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:2, true);  
@@ -859,8 +860,8 @@ fn test2_Huffman_ACenc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1111111110001100;
-    let expected_length: u8 = u8:16;         
+    let expected_output: bits[16] = bits[16]:0b11111111011101;
+    let expected_length: u8 = u8:14;         
     let expected_code: bits[8] = bits[8]:0b000_0101;    
     let expected_run: u4 = u4:4;                        
     let (actual_output, actual_length, actual_code, actual_run): (bits[16], u8, bits[8], u4) = Huffman_ACenc(test_matrix, u8:5, true);  
@@ -889,7 +890,7 @@ fn test3_Huffman_ACenc() {
         [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1111111111010110;  
+    let expected_output: bits[16] = bits[16]:0b1111111110011100;  
     let expected_length: u8 = u8:16;         
     let expected_code: bits[8] = bits[8]:128;    
     let expected_run: u4 = u4:0;                        
