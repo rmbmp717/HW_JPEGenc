@@ -46,11 +46,11 @@ module Huffman_enc_controller(
         1: begin
           jpeg_out_enable <= 0;
           dc_matrix <= zigzag_pix_in;
+          start_pix <= 1;
           state <= 2;
         end
         2: begin
           state <= 3;
-          start_pix <= 1;
           jpeg_dc_out <= dc_out;
         end
         // AC enc Start
@@ -76,6 +76,9 @@ module Huffman_enc_controller(
           state <= 8;
         end
         8: begin
+          state <= 9;
+        end
+        9: begin
           jpeg_out_enable <= 1;
           start_pix <= start_pix + run + 1;
           huffman_code <= ac_out;

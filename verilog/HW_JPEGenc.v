@@ -22,7 +22,8 @@ module HW_JPEGenc(
     output wire             jpeg_out_enable,
     output wire [23:0]      jpeg_dc_out,
     output wire [15:0]      huffman_code,           // 最終 JPEG 出力（8ビット）
-    output wire [7:0]       huffman_code_length     // 最終 JPEG 出力のビット幅
+    output wire [7:0]       huffman_code_length,    // 最終 JPEG 出力のビット幅
+    output wire [7:0]       code_out
 );
 
     // パラメータ定義
@@ -63,7 +64,7 @@ module HW_JPEGenc(
         .input_enable       (input_enable),
         .input_1pix_enable  (input_1pix_enable),
         .pix_1pix_data      (pix_1pix_data),     
-        .pix_data           (pix_data),   // 64個のピクセル
+        .pix_data           (pix_data),   // 64個のピクセル 一括書き込み用
         .buffer             (buffer),
         .buffer_512bits     ()
     );
@@ -135,6 +136,7 @@ module HW_JPEGenc(
     wire [7:0]  code;
     wire [3:0]  run;
 
+    // PIPE_LINE_STAGE = 1 と仮定
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
         .matrix             (dc_matrix),
@@ -142,6 +144,7 @@ module HW_JPEGenc(
         .out                (dc_out)
     );
 
+    // PIPE_LINE_STAGE = 3 と仮定
     Huffman_ACenc mHuffman_ACenc (
         .clk                (clock),
         .matrix             (ac_matrix),
@@ -169,7 +172,7 @@ module HW_JPEGenc(
         .jpeg_dc_out            (jpeg_dc_out),
         .huffman_code           (huffman_code),
         .huffman_code_length    (huffman_code_length),
-        .code_out               ()
+        .code_out               (code_out)
     );
 
 endmodule
