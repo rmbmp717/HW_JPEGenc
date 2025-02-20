@@ -122,55 +122,6 @@ fn lookup_ChrominanceSizeToCode_test() {
     assert_eq(length, u8:4);
 }
 
-// Luminance 用の Huffman 符号を取得（符号 + ビット長を返す）
-fn lookup_huffman_lum(run_size: u8[2]) -> (bits[16], u8) {
-    if run_size == [u8:48, u8:48] {  // "00" → EOB
-        (bits[16]:0b1010, u8:4)
-    } else if run_size == [u8:48, u8:49] {  // "01"
-        (bits[16]:0b00, u8:2)
-    } else if run_size == [u8:48, u8:50] {  // "02"
-        (bits[16]:0b01, u8:2)
-    } else if run_size == [u8:48, u8:51] {  // "03"
-        (bits[16]:0b100, u8:3)
-    } else if run_size == [u8:48, u8:52] {  // "04"
-        (bits[16]:0b1011, u8:4)
-    } else if run_size == [u8:48, u8:53] {  // "05"
-        (bits[16]:0b11010, u8:5)
-    } else if run_size == [u8:48, u8:54] {  // "06"
-        (bits[16]:0b1111000, u8:7)
-    } else if run_size == [u8:48, u8:55] {  // "07"
-        (bits[16]:0b11111000, u8:8)
-    } else if run_size == [u8:48, u8:56] {  // "08"
-        (bits[16]:0b1111110110, u8:10)
-    } else if run_size == [u8:48, u8:57] {  // "09"
-        (bits[16]:0b1111111110000010, u8:16)
-    } else if run_size == [u8:48, u8:65] {  // "0A"
-        (bits[16]:0b1111111110000011, u8:16)
-    } else if run_size == [u8:49, u8:49] {  // "11"
-        (bits[16]:0b1100, u8:4)
-    } else if run_size == [u8:49, u8:50] {  // "12"
-        (bits[16]:0b11011, u8:5)
-    } else if run_size == [u8:49, u8:51] {  // "13"
-        (bits[16]:0b1111001, u8:7)
-    } else if run_size == [u8:49, u8:52] {  // "14"
-        (bits[16]:0b111110110, u8:9)
-    } else if run_size == [u8:49, u8:53] {  // "15"
-        (bits[16]:0b11111110110, u8:11)
-    } else if run_size == [u8:49, u8:54] {  // "16"
-        (bits[16]:0b1111111110000100, u8:16)
-    } else if run_size == [u8:49, u8:55] {  // "17"
-        (bits[16]:0b1111111110000101, u8:16)
-    } else if run_size == [u8:49, u8:56] {  // "18"
-        (bits[16]:0b1111111110000110, u8:16)
-    } else if run_size == [u8:49, u8:57] {  // "19"
-        (bits[16]:0b1111111110000111, u8:16)
-    } else if run_size == [u8:49, u8:65] {  // "1A"
-        (bits[16]:0b1111111110001000, u8:16)
-    } else {
-        (bits[16]:0b0011, u8:4)  // 仮のエンコード結果（未登録）
-    }
-}
-
 // Chrominance 用の Huffman 符号を取得
 fn lookup_huffman_chrom(run_size: u8[2]) -> (bits[16], u8) {
     if run_size[0] == u8:48 && run_size[1] == u8:48 {
