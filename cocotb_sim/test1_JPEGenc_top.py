@@ -3,7 +3,12 @@ NISHIHARU
 JPEG HW Encoder Test
 """
 import cocotb
+import random
 from cocotb.triggers import Timer, RisingEdge
+
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python/')))
+import my_JPEG_dec
 
 async def generate_clock(dut, period=10):
     """Generate a clock on dut.clock with the given period in ns."""
@@ -58,9 +63,13 @@ async def test1_JPEGenc_top(dut):
     # 左上が80
     #dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
     input_matrix = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    flat_data = [input_matrix[i][j] for i in range(8) for j in range(8)]
     # 80, 0, 80, 0 ...
     #dut.pix_data.value = [80, 0] * 32
+    # ランダムパターン
+    #input_matrix = [[random.randint(0, 255) for _ in range(8)] for _ in range(8)]
+
+    # flat化
+    flat_data = [input_matrix[i][j] for i in range(8) for j in range(8)]
 
     #await RisingEdge(dut.clock)
     #dut.input_enable.value = 0
@@ -237,20 +246,42 @@ async def test1_JPEGenc_top(dut):
     done = False  # ここで done を初期化
     final_output = ""  # 最終出力となるビット列を格納
 
+    for _ in range(16):
+        await RisingEdge(dut.clock)
+        
+    print("6.1: Huffman DC Code")
+    huffman_dc_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out.value)
+    huffman_dc_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out_length.value)
+    huffman_dc_code_list = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_code_list.value)
+    print("huffman_dc_code_bin(bin) =", huffman_dc_code_bin)
+    print("huffman_dc_code_list(bin) =", huffman_dc_code_list)
+    trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
+
+    trimmed_huffman_dc_code = huffman_dc_code_bin[:huffman_dc_code_length]
+    print("huffman_dc_code(bin) =", trimmed_huffman_dc_code)
+    print("huffman_dc_code_length =", huffman_dc_code_length)
+        
+    # ビット列を最終出力に連結
+    final_output += trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
+    print("dc final_output=", final_output)
+
+    print("==========================================================================")
     # 例えば36回検出するか、state が 0 になったらループ終了
-    while num_detected < 36 and not done:
+    print("6.2: Huffman AC Code")
+    while num_detected < 64 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
         #print("code count = {} ".format(num_detected))
-        
+
         huffman_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value)
         huffman_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.length.value)
         trimmed_huffman_code = huffman_code_bin[-huffman_code_length:]
         
         print("huffman_code(bin) =", trimmed_huffman_code)
+        print("huffman_code_length =", huffman_code_length)
         
         # 左の連続するゼロを削除した code_out の出力
-        code_out_bin = str(dut.HW_JPEGenc_Y.code.value).lstrip('0') or '0'
+        code_out_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value).lstrip('0') or '0'
         print("code_out(bin) =", code_out_bin)
         
         # ビット列を最終出力に連結
@@ -273,6 +304,11 @@ async def test1_JPEGenc_top(dut):
 
     print("==========================================================================")
     print("8: Final Output")
+    # 最終出力が8ビットの倍数でない場合、末尾に'0'を追加して調整する
+    if len(final_output) % 8 != 0:
+        padding = 8 - (len(final_output) % 8)
+        final_output += '0' * padding
+
     formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])
     print(formatted_output)
     print("Total Bits:", len(final_output))
@@ -282,6 +318,15 @@ async def test1_JPEGenc_top(dut):
     for _ in range(100):
         await RisingEdge(dut.clock)
 
+    print("==========================================================================")
+    print("9: Decode JPEG final_output")
+    # シミュレーションで得られた final_output（ビット列文字列）を一時ファイルに保存
+    temp_filename = "final_output_temp.txt"
+    with open(temp_filename, "w") as f:
+        f.write(final_output)
+    # my_JPEG_dec のメイン処理を --bitstream モードで呼び出す
+    import my_JPEG_dec
+    my_JPEG_dec.main("--bitstream", temp_filename)
     # Disable input_enable
     dut.input_enable.value = 0
     
