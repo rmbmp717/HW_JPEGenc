@@ -4,62 +4,62 @@ module Huffman_DCenc(
   input wire is_luminance,
   output wire [23:0] out
 );
-  wire [3:0] literal_807[0:12];
-  assign literal_807[0] = 4'h2;
-  assign literal_807[1] = 4'h2;
-  assign literal_807[2] = 4'h3;
-  assign literal_807[3] = 4'h3;
-  assign literal_807[4] = 4'h4;
-  assign literal_807[5] = 4'h4;
-  assign literal_807[6] = 4'h4;
-  assign literal_807[7] = 4'h5;
-  assign literal_807[8] = 4'h6;
-  assign literal_807[9] = 4'h7;
-  assign literal_807[10] = 4'h8;
-  assign literal_807[11] = 4'h9;
-  assign literal_807[12] = 4'h0;
-  wire [3:0] literal_809[0:12];
-  assign literal_809[0] = 4'h3;
-  assign literal_809[1] = 4'h3;
-  assign literal_809[2] = 4'h3;
-  assign literal_809[3] = 4'h3;
-  assign literal_809[4] = 4'h3;
-  assign literal_809[5] = 4'h3;
-  assign literal_809[6] = 4'h3;
-  assign literal_809[7] = 4'h4;
-  assign literal_809[8] = 4'h5;
-  assign literal_809[9] = 4'h6;
-  assign literal_809[10] = 4'h7;
-  assign literal_809[11] = 4'h8;
-  assign literal_809[12] = 4'h0;
-  wire [6:0] literal_810[0:12];
-  assign literal_810[0] = 7'h60;
-  assign literal_810[1] = 7'h50;
-  assign literal_810[2] = 7'h30;
-  assign literal_810[3] = 7'h20;
-  assign literal_810[4] = 7'h00;
-  assign literal_810[5] = 7'h10;
-  assign literal_810[6] = 7'h40;
-  assign literal_810[7] = 7'h70;
-  assign literal_810[8] = 7'h78;
-  assign literal_810[9] = 7'h7c;
-  assign literal_810[10] = 7'h7e;
-  assign literal_810[11] = 7'h7f;
-  assign literal_810[12] = 7'h00;
-  wire [7:0] literal_813[0:12];
-  assign literal_813[0] = 8'h02;
-  assign literal_813[1] = 8'h00;
-  assign literal_813[2] = 8'h20;
-  assign literal_813[3] = 8'h28;
-  assign literal_813[4] = 8'h60;
-  assign literal_813[5] = 8'h68;
-  assign literal_813[6] = 8'h70;
-  assign literal_813[7] = 8'h78;
-  assign literal_813[8] = 8'h7c;
-  assign literal_813[9] = 8'h7e;
-  assign literal_813[10] = 8'h7f;
-  assign literal_813[11] = 8'hfe;
-  assign literal_813[12] = 8'h00;
+  wire [3:0] literal_827[0:12];
+  assign literal_827[0] = 4'h2;
+  assign literal_827[1] = 4'h2;
+  assign literal_827[2] = 4'h3;
+  assign literal_827[3] = 4'h3;
+  assign literal_827[4] = 4'h4;
+  assign literal_827[5] = 4'h4;
+  assign literal_827[6] = 4'h4;
+  assign literal_827[7] = 4'h5;
+  assign literal_827[8] = 4'h6;
+  assign literal_827[9] = 4'h7;
+  assign literal_827[10] = 4'h8;
+  assign literal_827[11] = 4'h9;
+  assign literal_827[12] = 4'h0;
+  wire [3:0] literal_829[0:12];
+  assign literal_829[0] = 4'h3;
+  assign literal_829[1] = 4'h3;
+  assign literal_829[2] = 4'h3;
+  assign literal_829[3] = 4'h3;
+  assign literal_829[4] = 4'h3;
+  assign literal_829[5] = 4'h3;
+  assign literal_829[6] = 4'h3;
+  assign literal_829[7] = 4'h4;
+  assign literal_829[8] = 4'h5;
+  assign literal_829[9] = 4'h6;
+  assign literal_829[10] = 4'h7;
+  assign literal_829[11] = 4'h8;
+  assign literal_829[12] = 4'h0;
+  wire [6:0] literal_830[0:12];
+  assign literal_830[0] = 7'h60;
+  assign literal_830[1] = 7'h50;
+  assign literal_830[2] = 7'h30;
+  assign literal_830[3] = 7'h20;
+  assign literal_830[4] = 7'h00;
+  assign literal_830[5] = 7'h10;
+  assign literal_830[6] = 7'h40;
+  assign literal_830[7] = 7'h70;
+  assign literal_830[8] = 7'h78;
+  assign literal_830[9] = 7'h7c;
+  assign literal_830[10] = 7'h7e;
+  assign literal_830[11] = 7'h7f;
+  assign literal_830[12] = 7'h00;
+  wire [7:0] literal_833[0:12];
+  assign literal_833[0] = 8'h02;
+  assign literal_833[1] = 8'h00;
+  assign literal_833[2] = 8'h20;
+  assign literal_833[3] = 8'h28;
+  assign literal_833[4] = 8'h60;
+  assign literal_833[5] = 8'h68;
+  assign literal_833[6] = 8'h70;
+  assign literal_833[7] = 8'h78;
+  assign literal_833[8] = 8'h7c;
+  assign literal_833[9] = 8'h7e;
+  assign literal_833[10] = 8'h7f;
+  assign literal_833[11] = 8'hfe;
+  assign literal_833[12] = 8'h00;
   wire [7:0] matrix_unflattened[0:7][0:7];
   assign matrix_unflattened[0][0] = matrix[7:0];
   assign matrix_unflattened[0][1] = matrix[15:8];
@@ -201,30 +201,68 @@ module Huffman_DCenc(
 
   // ===== Pipe stage 1:
   wire [7:0] p1_dc_comb;
-  wire [2:0] p1_sel_788_comb;
-  wire p1_eq_800_comb;
-  wire [3:0] p1_concat_802_comb;
-  wire [3:0] p1_size__1_comb;
-  wire [2:0] p1_length_squeezed_squeezed_comb;
-  wire [7:0] p1_BoolList_comb;
-  wire [7:0] p1_length_comb;
-  wire [7:0] p1_code_list_comb;
-  wire [23:0] p1_tuple_826_comb;
+  wire p1_or_reduce_783_comb;
+  wire [2:0] p1_concat_784_comb;
+  wire p1_or_reduce_785_comb;
   assign p1_dc_comb = p0_matrix[3'h0][3'h0];
-  assign p1_sel_788_comb = |p1_dc_comb[7:3] ? 3'h4 : {1'h0, |p1_dc_comb[7:2] ? 2'h3 : (|p1_dc_comb[7:1] ? 2'h2 : 2'h1)};
-  assign p1_eq_800_comb = p1_dc_comb == 8'h00;
-  assign p1_concat_802_comb = {1'h0, |p1_dc_comb[7:6] ? 3'h7 : (|p1_dc_comb[7:5] ? 3'h6 : (|p1_dc_comb[7:4] ? 3'h5 : p1_sel_788_comb))};
-  assign p1_size__1_comb = (p1_dc_comb[7] ? 4'h8 : p1_concat_802_comb) & {4{~p1_eq_800_comb}};
-  assign p1_length_squeezed_squeezed_comb = p0_is_luminance ? literal_809[p1_size__1_comb > 4'hc ? 4'hc : p1_size__1_comb][2:0] : literal_807[p1_size__1_comb > 4'hc ? 4'hc : p1_size__1_comb][2:0];
-  assign p1_BoolList_comb = p0_is_luminance ? {literal_810[p1_size__1_comb > 4'hc ? 4'hc : p1_size__1_comb], 1'h0} : literal_813[p1_size__1_comb];
-  assign p1_length_comb = {5'h00, p1_length_squeezed_squeezed_comb};
-  assign p1_code_list_comb = p1_eq_800_comb ? 8'hff : p1_dc_comb;
-  assign p1_tuple_826_comb = {p1_BoolList_comb, p1_length_comb, p1_code_list_comb};
+  assign p1_or_reduce_783_comb = |p1_dc_comb[7:3];
+  assign p1_concat_784_comb = {1'h0, |p1_dc_comb[7:2] ? 2'h3 : (|p1_dc_comb[7:1] ? 2'h2 : 2'h1)};
+  assign p1_or_reduce_785_comb = |p1_dc_comb[7:4];
 
   // Registers for pipe stage 1:
-  reg [23:0] p1_tuple_826;
+  reg p1_is_luminance;
+  reg [7:0] p1_dc;
+  reg p1_or_reduce_783;
+  reg [2:0] p1_concat_784;
+  reg p1_or_reduce_785;
   always @ (posedge clk) begin
-    p1_tuple_826 <= p1_tuple_826_comb;
+    p1_is_luminance <= p0_is_luminance;
+    p1_dc <= p1_dc_comb;
+    p1_or_reduce_783 <= p1_or_reduce_783_comb;
+    p1_concat_784 <= p1_concat_784_comb;
+    p1_or_reduce_785 <= p1_or_reduce_785_comb;
   end
-  assign out = p1_tuple_826;
+
+  // ===== Pipe stage 2:
+  wire p2_eq_810_comb;
+  wire [3:0] p2_concat_812_comb;
+  wire [3:0] p2_sel_815_comb;
+  wire [3:0] p2_sign_ext_816_comb;
+  wire [7:0] p2_code_list_comb;
+  assign p2_eq_810_comb = p1_dc == 8'h00;
+  assign p2_concat_812_comb = {1'h0, |p1_dc[7:6] ? 3'h7 : (|p1_dc[7:5] ? 3'h6 : (p1_or_reduce_785 ? 3'h5 : (p1_or_reduce_783 ? 3'h4 : p1_concat_784)))};
+  assign p2_sel_815_comb = p1_dc[7] ? 4'h8 : p2_concat_812_comb;
+  assign p2_sign_ext_816_comb = {4{~p2_eq_810_comb}};
+  assign p2_code_list_comb = p2_eq_810_comb ? 8'hff : p1_dc;
+
+  // Registers for pipe stage 2:
+  reg p2_is_luminance;
+  reg [3:0] p2_sel_815;
+  reg [3:0] p2_sign_ext_816;
+  reg [7:0] p2_code_list;
+  always @ (posedge clk) begin
+    p2_is_luminance <= p1_is_luminance;
+    p2_sel_815 <= p2_sel_815_comb;
+    p2_sign_ext_816 <= p2_sign_ext_816_comb;
+    p2_code_list <= p2_code_list_comb;
+  end
+
+  // ===== Pipe stage 3:
+  wire [3:0] p3_size__1_comb;
+  wire [2:0] p3_length_squeezed_squeezed_comb;
+  wire [7:0] p3_BoolList_comb;
+  wire [7:0] p3_length_comb;
+  wire [23:0] p3_tuple_844_comb;
+  assign p3_size__1_comb = p2_sel_815 & p2_sign_ext_816;
+  assign p3_length_squeezed_squeezed_comb = p2_is_luminance ? literal_829[p3_size__1_comb > 4'hc ? 4'hc : p3_size__1_comb][2:0] : literal_827[p3_size__1_comb > 4'hc ? 4'hc : p3_size__1_comb][2:0];
+  assign p3_BoolList_comb = p2_is_luminance ? {literal_830[p3_size__1_comb > 4'hc ? 4'hc : p3_size__1_comb], 1'h0} : literal_833[p3_size__1_comb];
+  assign p3_length_comb = {5'h00, p3_length_squeezed_squeezed_comb};
+  assign p3_tuple_844_comb = {p3_BoolList_comb, p3_length_comb, p2_code_list};
+
+  // Registers for pipe stage 3:
+  reg [23:0] p3_tuple_844;
+  always @ (posedge clk) begin
+    p3_tuple_844 <= p3_tuple_844_comb;
+  end
+  assign out = p3_tuple_844;
 endmodule

@@ -7,14 +7,18 @@ module Huffman_enc_controller(
   output reg   [511:0]      ac_matrix,
   output reg   [7:0]        start_pix,
   // from enc module
-  input  wire  [23:0]       dc_out,
+  input  wire  [7:0]        dc_out,
+  input  wire  [7:0]        dc_out_length,
+  input  wire  [7:0]        dc_out_code_list,
   input  wire  [15:0]       ac_out,
   input  wire  [7:0]        length,
   input  wire  [7:0]        code,
   input  wire  [3:0]        run,
   // final output 
   output reg                jpeg_out_enable,
-  output reg   [23:0]       jpeg_dc_out,
+  output reg   [7:0]        jpeg_dc_out,
+  output reg   [7:0]        jpeg_dc_out_length,
+  output reg   [7:0]        jpeg_dc_code_list,
   output reg   [15:0]       huffman_code,
   output reg   [7:0]        huffman_code_length,
   output reg   [7:0]        code_out
@@ -54,7 +58,10 @@ module Huffman_enc_controller(
         end
         // AC enc Start
         3: begin
+          // DC output 
           jpeg_dc_out <= dc_out;
+          jpeg_dc_out_length <= dc_out_length;
+          jpeg_dc_code_list <= dc_out_code_list;
           if(start_pix >= 63) begin
             state <= 0;
           end else begin
@@ -79,12 +86,15 @@ module Huffman_enc_controller(
           state <= 9;
         end
         9: begin
-          jpeg_out_enable <= 1;
           start_pix <= start_pix + run + 1;
           huffman_code <= ac_out;
           huffman_code_length <= length;
-          state <= 3;
+          state <= 10;
           code_out <= code; 
+        end
+        10: begin
+          jpeg_out_enable <= 1;
+          state <= 3;
         end
       endcase
     end

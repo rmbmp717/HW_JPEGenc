@@ -20,8 +20,10 @@ module HW_JPEGenc(
     input  wire             is_luminance,
     // JPEG Output
     output wire             jpeg_out_enable,
-    output wire [23:0]      jpeg_dc_out,
-    output wire [15:0]      huffman_code,           // 最終 JPEG 出力（8ビット）
+    output wire [7:0]       jpeg_dc_out,
+    output wire [7:0]       jpeg_dc_out_length,
+    output wire [7:0]       jpeg_dc_code_list,
+    output wire [15:0]      huffman_code,           // 最終 JPEG 出力（16ビット）
     output wire [7:0]       huffman_code_length,    // 最終 JPEG 出力のビット幅
     output wire [7:0]       code_out
 );
@@ -49,8 +51,13 @@ module HW_JPEGenc(
     wire [512-1:0] ac_matrix;
 
     // Huffmann enc out
-    wire [23:0] dc_out;
+    wire [7:0]  dc_out;
+    wire [7:0]  dc_out_length;
+    wire [7:0]  dc_out_code_list;
     wire [15:0] ac_out;
+    wire [7:0]  length;
+    wire [7:0]  code;
+    wire [3:0]  run;
 
     // ---------------------------------------------------------------------
     // databuffer_64x8bit インスタンス (入力データのバッファ)
@@ -132,16 +139,13 @@ module HW_JPEGenc(
     // Huffman エンコード インスタンス
     // ---------------------------------------------------------------------
     wire [7:0]  start_pix;
-    wire [7:0]  length;
-    wire [7:0]  code;
-    wire [3:0]  run;
 
     // PIPE_LINE_STAGE = 1 と仮定
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
         .matrix             (dc_matrix),
         .is_luminance       (is_luminance),
-        .out                (dc_out)
+        .out                ({dc_out, dc_out_length, dc_out_code_list})
     );
 
     // PIPE_LINE_STAGE = 4 と仮定
@@ -163,6 +167,8 @@ module HW_JPEGenc(
         .ac_matrix          (ac_matrix),
         .start_pix          (start_pix),
         .dc_out             (dc_out),
+        .dc_out_length      (dc_out_length),
+        .dc_out_code_list   (dc_out_code_list),
         .ac_out             (ac_out),
         .length             (length),
         .code               (code),
@@ -170,6 +176,8 @@ module HW_JPEGenc(
         // JPEG Code Output
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (jpeg_dc_out),
+        .jpeg_dc_out_length     (jpeg_dc_out_length),
+        .jpeg_dc_code_list      (jpeg_dc_code_list),
         .huffman_code           (huffman_code),
         .huffman_code_length    (huffman_code_length),
         .code_out               (code_out)
