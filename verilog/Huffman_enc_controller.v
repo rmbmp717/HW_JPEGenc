@@ -2,9 +2,9 @@ module Huffman_enc_controller(
   input  wire               clock,
   input  wire               reset_n,
   input  wire               Huffman_start,
-  input  wire  [511:0]      zigzag_pix_in,
-  output reg   [511:0]      dc_matrix,
-  output reg   [511:0]      ac_matrix,
+  input  wire  [639:0]      zigzag_pix_in,
+  output reg   [639:0]      dc_matrix,
+  output reg   [639:0]      ac_matrix,
   output reg   [7:0]        start_pix,
   // from enc module
   input  wire  [7:0]        dc_out,
