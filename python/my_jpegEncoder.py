@@ -1,6 +1,7 @@
 from PIL import Image
 from scipy import fftpack
 import numpy
+numpy.set_printoptions(formatter={'float_kind': '{:3.0f}'.format})
 from bitstring import BitStream
 #from bitstream import BitStream
 from numpy import *
@@ -86,10 +87,10 @@ def main():
     addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
 
     #addedImageMatrix = numpy.full((imageHeight, imageWidth, 3), 255, dtype=numpy.uint8)     # All pixel White
-    #addedImageMatrix[:4, :4] = 80
-    addedImageMatrix[:4, :4, 0] = 0  # R チャネルに255
-    addedImageMatrix[:4, :4, 1] = 255    # G チャネルに0
-    addedImageMatrix[:4, :4, 2] = 0    # B チャネルに0
+    addedImageMatrix[:4, :4] = 80
+    #addedImageMatrix[:4, :4, 0] = 0  # R チャネルに255
+    #addedImageMatrix[:4, :4, 1] = 255    # G チャネルに0
+    #addedImageMatrix[:4, :4, 2] = 0    # B チャネルに0
 
 
     # split y u v

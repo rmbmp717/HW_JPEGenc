@@ -24,41 +24,45 @@ DCT_LUT = np.array([
 ], dtype=np.int16)
 
 
-def fixed_mul_q88(a: np.int16, b: np.int16) -> np.int16:
+def fixed_mul_q88(a: np.int32, b: np.int32) -> np.int32:
     """
-    Q8.8 同士の乗算 → Q8.8 (int16)
+    Q8.8 同士の乗算。int32 で計算し、256 で割って四捨五入する。
     """
-    prod = np.int32(a) * np.int32(b)
-    prod = (prod + (1 << 7)) >> 8  # +128 で四捨五入
-    return np.int16(np.clip(prod, -32768, 32767))  # オーバーフロー防止
+    prod = a * b
+    return (prod + 128) >> 8
 
 def dct_1d_q88(x_q88: np.ndarray) -> np.ndarray:
     """
-    Q8.8 (int16) 配列(長さ8) → Q8.8 (int16) の 1次元DCT
+    Q8.8 (int32) 配列（長さ8）→ Q8.8 (int32) の 1次元DCT
     """
     N = 8
-    y_q88 = np.zeros(N, dtype=np.int16)
+    y = np.zeros(N, dtype=np.int32)
     for k in range(N):
-        sum_val = np.int32(0)
+        s = np.int32(0)
         for n in range(N):
-            sum_val += np.int32(fixed_mul_q88(x_q88[n], DCT_LUT[k, n]))
+            s += fixed_mul_q88(np.int32(x_q88[n]), np.int32(DCT_LUT[k, n]))
+        # スケーリング係数 (k==0なら FIXED_SQRT_1_OVER_N, それ以外なら FIXED_SQRT_2_OVER_N)
+        alpha = int(FIXED_SQRT_1_OVER_N) if k == 0 else int(FIXED_SQRT_2_OVER_N)
+        y[k] = (s * alpha + 128) >> 8
+    return y  # Q8.8 表現から一段目のスケーリングが終わった値（int32）
 
-        alpha = np.int32(FIXED_SQRT_1_OVER_N if k == 0 else FIXED_SQRT_2_OVER_N)
-        sum_val = (sum_val * alpha + (1 << 7)) >> 8  # ここもオーバーフロー対策
-        y_q88[k] = np.int16(np.clip(sum_val, -32768, 32767))  # int16 に収める
-
-    return y_q88
-
-def dct_1d_u8(x_u8: np.ndarray) -> np.ndarray:
+def dct_1d_s16(x_u8: np.ndarray) -> np.ndarray:
     """
     入出力: u8[8]
+    手計算版と同じく、入力に対してレベルシフト (-128) し、DCT計算後に逆レベルシフト (+128) を行う。
+    出力は np.int16 型で返す（手計算版: np.clip(np.rint(out_f + 128), -511, 512)）。
     """
-    x_q88 = (x_u8.astype(np.int16) << 8)
-    y_q88 = dct_1d_q88(x_q88)
-
-    # (Q8.8) → 整数 (丸め) → clip → u8
-    y_int32 = (y_q88.astype(np.int32) + (1 << 7)) >> 8
-    return np.clip(y_int32, 0, 255).astype(np.uint8)
+    # 1. 入力のレベルシフト: 0～255 -> -128～127
+    x_shifted = x_u8.astype(np.int32) - 128
+    # 2. Q8.8 表現へ変換（左シフト 8 ビット）
+    x_q88 = x_shifted << 8
+    # 3. 固定小数点 DCT 計算
+    y_q88 = dct_1d_q88(x_q88)  # 結果は Q8.8 表現相当の int32 値
+    # 4. Q8.8 から整数へ変換（四捨五入）
+    y_int = (y_q88 + 128) >> 8
+    # 5. 逆レベルシフト (+128) を加えて、手計算版と同じスケールに復帰
+    result = np.clip(np.rint(y_int + 128), -511, 512).astype(np.int16)
+    return result
 
 # =====================================
 # (2) 直接数式で DCT-II (JPEG 仕様)
@@ -78,7 +82,7 @@ def dct_1d_manual(x_u8: np.ndarray) -> np.ndarray:
         s = sum(x_f[n] * math.cos(math.pi * (n + 0.5) * k / N) for n in range(N))
         out_f[k] = alpha * s
 
-    return np.clip(np.rint(out_f), 0, 255).astype(np.uint8)
+    return np.clip(np.rint(out_f), -511, 512).astype(np.int16) + 128
 
 # =====================================
 # (3) fftpack での DCT 計算 (JPEG 仕様)
@@ -90,39 +94,40 @@ def dct_1d_fftpack(x_u8: np.ndarray) -> np.ndarray:
     x_f = x_u8.astype(np.float64)
     dct_raw = dct(x_f, type=2, norm='ortho')
 
-    return np.clip(np.rint(dct_raw), 0, 255).astype(np.uint8)
+    return np.clip(np.rint(dct_raw), -511, 512).astype(np.int16) + 128
 
 # -------------------------------------
 # テストコード: 比較 (Q8.8 vs Manual vs fftpack)
 # -------------------------------------
 if __name__ == "__main__":
     test_vectors = [
-        (np.array([1,2,3,4,5,6,7,8], dtype=np.uint8),"通常入力"), 
-        (np.array([10,20,30,40,50,60,70,80], dtype=np.uint8), "倍率10倍"),
-        (np.array([0,0,0,0,0,0,0,0], dtype=np.uint8), "ゼロ入力"),
-        (np.array([8,7,6,5,4,3,2,1], dtype=np.uint8), "逆順入力"),
-        (np.array([8,70,6,5,4,3,25,12], dtype=np.uint8), "通常入力"), 
-        (np.array([8,70,63,55,42,3,2,1], dtype=np.uint8), "通常入力"), 
-        (np.array([80,0,80,0,80,0,80,0], dtype=np.uint8), "通常入力"), 
-        (np.array([80,80,80,80,80,80,80,80], dtype=np.uint8), "通常入力"), 
-        (np.array([8,70,6,56,43,3,120,1], dtype=np.uint8), "通常入力"), 
-        (np.array([4,3,20,70,12,6,12,8], dtype=np.uint8), "異常入力")
+        (np.array([1,2,3,4,5,6,7,8], dtype=np.int16),"通常入力"), 
+        (np.array([10,20,30,40,50,60,70,80], dtype=np.int16), "倍率10倍"),
+        (np.array([0,0,0,0,0,0,0,0], dtype=np.int16), "ゼロ入力"),
+        (np.array([8,7,6,5,4,3,2,1], dtype=np.int16), "逆順入力"),
+        (np.array([8,70,6,5,4,3,25,12], dtype=np.int16), "通常入力"), 
+        (np.array([8,70,63,55,42,3,2,1], dtype=np.int16), "通常入力"), 
+        (np.array([-80,-123,-80,0,-80,0,80,0], dtype=np.int16), "通常入力"), 
+        (np.array([80,80,80,80,80,80,80,80], dtype=np.int16), "通常入力"), 
+        (np.array([8,70,6,56,43,3,120,1], dtype=np.int16), "通常入力"), 
+        (np.array([4,3,20,70,12,6,12,8], dtype=np.int16), "異常入力"),
+        (np.array([-48,-48,-48,-48,-128,-128,-128,-128], dtype=np.int16), "通常入力"), 
     ]
 
     for x, label in test_vectors:
-        y_q88   = dct_1d_u8(x)       
-        y_manual= dct_1d_manual(x)   
-        y_fftpack = dct_1d_fftpack(x)  
+        y_q88   = dct_1d_s16(x)       
+        y_manual= dct_1d_manual(x - 128)   
+        y_fftpack = dct_1d_fftpack(x - 128)  
         
         diff_q88_manual = y_q88.astype(int) - y_manual.astype(int)
         diff_q88_fftpack = y_q88.astype(int) - y_fftpack.astype(int)
         diff_manual_fftpack = y_manual.astype(int) - y_fftpack.astype(int)
 
         print(f"\n【{label}】")
-        print("Input u8       :", x)
+        print("Input s16      :", x)
         print("Q8.8 DCT       :", y_q88)
         print("Manual DCT     :", y_manual)
         print("fftpack DCT    :", y_fftpack)
-        print("Diff (Q8.8 - Manual)  :", diff_q88_manual)
-        print("Diff (Q8.8 - fftpack) :", diff_q88_fftpack)
-        print("Diff (Manual - fftpack):", diff_manual_fftpack)
+        #print("Diff (Q8.8 - Manual)  :", diff_q88_manual)
+        #print("Diff (Q8.8 - fftpack) :", diff_q88_fftpack)
+        #rint("Diff (Manual - fftpack):", diff_manual_fftpack)
