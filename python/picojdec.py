@@ -528,20 +528,35 @@ def write_ppm(image, outfile):
     else:
         assert False, "unknown color space"
 
-    # write PPM file
+    # ここからPPMファイルに書き出し
     with open(outfile, 'wb') as f:
         f.write(f'P6\n{width} {height}\n255\n'.encode('ascii'))
+        print("----- Dumping RGB data (width x height) -----")
         for y in range(height):
+            row_rgb = []
             for x in range(width):
+                # luma(=Y成分)を取り出し
                 luma = recimg[0][y * width + x]
                 if nc == 3:
+                    # カラーチャネル (Cb,Cr) の取り出し
                     offset = (y // ds_v) * (width // ds_h) + (x // ds_h)
                     cb = recimg[1][offset]
                     cr = recimg[2][offset]
                 else:
+                    # グレースケール時はCb=Cr=128とみなす
                     cb = cr = 128
-                rgb = to_rgb(luma, cb, cr)
-                f.write(struct.pack('3B', *rgb))
+
+                # YCbCr → RGB 変換
+                r_val, g_val, b_val = to_rgb(luma, cb, cr)
+
+                # 標準出力にRGB値を表示
+                row_rgb.append(f"({r_val:3d},{g_val:3d},{b_val:3d})")
+
+                # PPMファイルに書き込む
+                f.write(struct.pack('3B', r_val, g_val, b_val))
+
+            # 1行分をまとめて表示
+            print(f"Row {y:3d}: " + " ".join(row_rgb))
 
 
 def main(infile, outfile = None):
@@ -553,7 +568,7 @@ def main(infile, outfile = None):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    if len(args) < 1:
+    if len(args) < 2:
         print('usage: picojdec.py <input.jpg> [<output.ppm>]')
         exit(1)
     main(*args)
