@@ -73,20 +73,8 @@ pub fn dct_1d(x: s16[N]) -> s16[N] {
 }
 
 //----------------------------------------------------------------------
-// 全要素が 0 の配列を返すヘルパー関数（各型ごと）
-fn zero_array_s16() -> s16[N] {
-  [ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0 ]
-}
-fn zero_array_s32() -> s32[N] {
-  [ s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0 ]
-}
-fn zero_array_u8() -> u8[N] {
-  [ u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0 ]
-}
-
-//----------------------------------------------------------------------
 // u8 型入力の 1D DCT 計算
-pub fn dct_1d_u8(x: u8[N]) -> u8[N] {
+pub fn dct_1d_s10(x: s10[N]) -> s10[N] {
   let x_q88: s16[N] = for (i, acc): (u32, s16[N]) in range(u32:0, N) {
       let shifted: s16 = ((x[i] as s16) - s16:128) << 8;  // ✅ レベルシフト (-128)
       update(acc, i, shifted)
@@ -100,17 +88,17 @@ pub fn dct_1d_u8(x: u8[N]) -> u8[N] {
       update(acc, i, rounded)
   }(s32[N]:[s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0]);
 
-  let result: u8[N] = for (i, acc): (u32, u8[N]) in range(u32:0, N) {
+  let result: s10[N] = for (i, acc): (u32, s10[N]) in range(u32:0, N) {
       let adjusted: s32 = (y_int32[i] + s32:128);  // ✅ レベルシフト
-      let clipped: u8 = if adjusted < s32:0 {
-          u8:0
+      let clipped: s10 = if adjusted < s32:-255 {
+          s10:-255
       } else if adjusted > s32:255 {
-          u8:255
+          s10:255
       } else {
-          adjusted as u8
+          adjusted as s10
       };
       update(acc, i, clipped)
-  }(u8[N]:[ u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0 ]);	
+  }(s10[N]:[ s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0 ]);	
 
   result
 }
@@ -119,10 +107,10 @@ pub fn dct_1d_u8(x: u8[N]) -> u8[N] {
 // テスト関数
 #[test]
 fn test1_dct_1d_allzero() {
-  let x = u8[8]:[0, 0, 0, 0, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = u8[8]:[0, 128, 128, 128, 128, 101, 30, 193];
+  let x = s10[8]:[0, 0, 0, 0, 0, 0, 0, 0]; // テスト用の入力データ
+  let expected = s10[8]:[0, 128, 128, 128, 128, 101, 30, 193];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
@@ -131,10 +119,10 @@ fn test1_dct_1d_allzero() {
 
 #[test]
 fn test0_dct_1d() {
-  let x = u8[8]:[8, 70, 6, 5, 4, 3, 25, 12]; // テスト用の入力データ
-  let expected = u8[8]:[0, 146, 150, 120, 101, 63, 0, 168];
+  let x = s10[8]:[8, 70, 6, 5, 4, 3, 25, 12]; // テスト用の入力データ
+  let expected = s10[8]:[0, 146, 150, 120, 101, 63, 0, 168];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
@@ -142,11 +130,11 @@ fn test0_dct_1d() {
 }
 
 #[test]
-fn test11_dct_1d() {
-  let x = u8[8]:[80, 0, 80, 0, 80, 0, 80, 0]; // テスト用の入力データ
-  let expected = u8[8]:[0, 148, 128, 152, 128, 109, 61, 173];
+fn test1_dct_1d() {
+  let x = s10[8]:[80, 0, 80, 0, 80, 0, 80, 0]; // テスト用の入力データ
+  let expected = s10[8]:[0, 148, 128, 152, 128, 109, 61, 173];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
@@ -155,10 +143,10 @@ fn test11_dct_1d() {
 
 #[test]
 fn test2_dct_1d() {
-  let x = u8[8]:[8, 70, 63, 55, 42, 3, 2, 1]; // テスト用の入力データ
-  let expected = u8[8]:[0, 178, 89, 91, 117, 102, 56, 154];
+  let x = s10[8]:[8, 70, 63, 55, 42, 3, 2, 1]; // テスト用の入力データ
+  let expected = s10[8]:[0, 178, 89, 91, 117, 102, 56, 154];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
@@ -167,10 +155,10 @@ fn test2_dct_1d() {
 
 #[test]
 fn test3_dct_1d() {
-  let x = u8[8]:[80, 80, 80, 80, 80, 80, 80, 80]; // テスト用の入力データ
-  let expected = u8[8]:[0, 128, 128, 128, 128, 118, 91, 152];
+  let x = s10[8]:[80, 80, 80, 80, 80, 80, 80, 80]; // テスト用の入力データ
+  let expected = s10[8]:[0, 128, 128, 128, 128, 118, 91, 152];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
@@ -179,10 +167,10 @@ fn test3_dct_1d() {
 
 #[test]
 fn test4_dct_1d() {
-  let x = u8[8]:[80, 80, 80, 80, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = u8[8]:[0, 231, 128, 92, 128, 109, 61, 173];
+  let x = s10[8]:[80, 80, 80, 80, 0, 0, 0, 0]; // テスト用の入力データ
+  let expected = s10[8]:[0, 231, 128, 92, 128, 109, 61, 173];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
@@ -191,10 +179,10 @@ fn test4_dct_1d() {
 
 #[test]
 fn test5_dct_1d() {
-  let x = u8[8]:[114, 114, 114, 114, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = u8[8]:[0, 255, 128, 77, 128, 113, 74, 164];
+  let x = s10[8]:[114, 114, 114, 114, 0, 0, 0, 0]; // テスト用の入力データ
+  let expected = s10[8]:[0, 255, 128, 77, 128, 113, 74, 164];
 
-  let result = dct_1d_u8(x); // 実際の計算結果
+  let result = dct_1d_s10(x); // 実際の計算結果
   trace!(x);
   trace!(expected);
   trace!(result);
