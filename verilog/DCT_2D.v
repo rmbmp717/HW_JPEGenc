@@ -31,6 +31,24 @@ module DCT_2D(
               out_row6 = { out[55], out[54], out[53], out[52], out[51], out[50], out[49], out[48] },
               out_row7 = { out[63], out[62], out[61], out[60], out[59], out[58], out[57], out[56] };
 
+  wire [9:0] row_in0_0;
+  wire [9:0] row_in0_1;
+  wire [9:0] row_in0_2;
+  wire [9:0] row_in0_3;
+  wire [9:0] row_in0_4;
+  wire [9:0] row_in0_5;
+  wire [9:0] row_in0_6;
+  wire [9:0] row_in0_7;
+
+  assign row_in0_0 = row_in0[9:0];
+  assign row_in0_1 = row_in0[19:10];
+  assign row_in0_2 = row_in0[29:20];
+  assign row_in0_3 = row_in0[39:30];
+  assign row_in0_4 = row_in0[49:40];
+  assign row_in0_5 = row_in0[59:50];
+  assign row_in0_6 = row_in0[69:60];
+  assign row_in0_7 = row_in0[79:70];
+
   wire [79:0] row_in0;
   wire [79:0] row_in1;
   wire [79:0] row_in2;
@@ -48,6 +66,20 @@ module DCT_2D(
   assign row_in5 = row_in[5];
   assign row_in6 = row_in[6];
   assign row_in7 = row_in[7];
+
+  wire [9:0] col_buffer0_0;
+  wire [9:0] col_buffer0_1;
+  wire [9:0] col_buffer0_2;
+  wire [9:0] col_buffer0_3;
+  wire [9:0] col_buffer0_4;
+  wire [9:0] col_buffer0_5;
+  wire [9:0] col_buffer0_6;
+  wire [9:0] col_buffer0_7;
+
+  assign col_buffer0_0 = col_buffer0[9:0];
+  assign col_buffer0_1 = col_buffer0[19:10];
+  assign col_buffer0_2 = col_buffer0[29:20];
+  assign col_buffer0_3 = col_buffer0[39:30];
 
   wire [79:0] col_buffer0;
   wire [79:0] col_buffer1;
@@ -67,6 +99,24 @@ module DCT_2D(
   assign col_buffer6 = col_buffer[6];
   assign col_buffer7 = col_buffer[7];
 
+  wire [9:0] row_buffer0_0;
+  wire [9:0] row_buffer0_1;
+  wire [9:0] row_buffer0_2;
+  wire [9:0] row_buffer0_3;
+  wire [9:0] row_buffer0_4;
+  wire [9:0] row_buffer0_5;
+  wire [9:0] row_buffer0_6;
+  wire [9:0] row_buffer0_7;
+
+  assign row_buffer0_0 = row_buffer0[9:0];
+  assign row_buffer0_1 = row_buffer0[19:10];
+  assign row_buffer0_2 = row_buffer0[29:20];
+  assign row_buffer0_3 = row_buffer0[39:30];
+  assign row_buffer0_4 = row_buffer0[49:40];
+  assign row_buffer0_5 = row_buffer0[59:50];
+  assign row_buffer0_6 = row_buffer0[69:60];
+  assign row_buffer0_7 = row_buffer0[79:70];
+
   wire [79:0] row_buffer0;
   wire [79:0] row_buffer1;
   wire [79:0] row_buffer2;
@@ -85,6 +135,16 @@ module DCT_2D(
   assign row_buffer6 = row_buffer[6];
   assign row_buffer7 = row_buffer[7];
 
+  wire [9:0] col_vector0_0;
+  wire [9:0] col_vector0_1;
+  wire [9:0] col_vector0_2;
+  wire [9:0] col_vector0_3;
+
+  assign col_vector0_0 = col_vector0[9:0];
+  assign col_vector0_1 = col_vector0[19:10];
+  assign col_vector0_2 = col_vector0[29:20];
+  assign col_vector0_3 = col_vector0[39:30];
+
   wire [79:0] col_vector0;
   wire [79:0] col_vector1;
   wire [79:0] col_vector2;
@@ -102,6 +162,42 @@ module DCT_2D(
   assign col_vector5 = col_vector[5];
   assign col_vector6 = col_vector[6];
   assign col_vector7 = col_vector[7];
+
+  wire [9:0] dct_in_0_0;
+  wire [9:0] dct_in_0_1;
+  wire [9:0] dct_in_0_2;
+  wire [9:0] dct_in_0_3;
+  wire [9:0] dct_in_0_4;
+  wire [9:0] dct_in_0_5;
+  wire [9:0] dct_in_0_6;
+  wire [9:0] dct_in_0_7;
+
+  assign dct_in_0_0 = dct_in_0[9:0];
+  assign dct_in_0_1 = dct_in_0[19:10];
+  assign dct_in_0_2 = dct_in_0[29:20];
+  assign dct_in_0_3 = dct_in_0[39:30];
+  assign dct_in_0_4 = dct_in_0[49:40];
+  assign dct_in_0_5 = dct_in_0[59:50];
+  assign dct_in_0_6 = dct_in_0[69:60];
+  assign dct_in_0_7 = dct_in_0[79:70];
+
+  wire [9:0] dct_out_0_0;
+  wire [9:0] dct_out_0_1;
+  wire [9:0] dct_out_0_2;
+  wire [9:0] dct_out_0_3;
+  wire [9:0] dct_out_0_4;
+  wire [9:0] dct_out_0_5;
+  wire [9:0] dct_out_0_6;
+  wire [9:0] dct_out_0_7;
+
+  assign dct_out_0_0 = dct_out_0[9:0];
+  assign dct_out_0_1 = dct_out_0[19:10];
+  assign dct_out_0_2 = dct_out_0[29:20];
+  assign dct_out_0_3 = dct_out_0[39:30];
+  assign dct_out_0_4 = dct_out_0[49:40];
+  assign dct_out_0_5 = dct_out_0[59:50];
+  assign dct_out_0_6 = dct_out_0[69:60];
+  assign dct_out_0_7 = dct_out_0[79:70];
   `endif
   // Debug End
 
