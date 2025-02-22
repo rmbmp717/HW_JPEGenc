@@ -94,8 +94,50 @@ module HW_JPEGenc_top(
     );
 
     // Cb, Cr module
-    //HW_JPEGenc HW_JPEGenc_Cb(
+    HW_JPEGenc HW_JPEGenc_Cb(
+        .clock                  (clock),
+        .reset_n                (reset_n),
+        .input_enable           (input_enable),
+        .input_1pix_enable      (input_1pix_enable),  
+        .pix_1pix_data          (Cb_data), 
+        //.pix_1pix_data          (pix_1pix_data), 
+        .dct_enable             (dct_enable),
+        .dct_end_enable         (dct_end_enable),
+        .zigzag_input_enable    (zigzag_input_enable),
+        .zigag_enable           (zigag_enable),
+        .matrix_row             (matrix_row),
+        .Huffman_start          (Huffman_start),
+        //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
+        .is_luminance           (1'b1),
+        .jpeg_out_enable        (jpeg_out_enable),
+        .jpeg_dc_out            (),
+        .jpeg_dc_out_length     (),
+        .huffman_code           (),
+        .huffman_code_length    (),
+        .code_out               ()
+    );
 
-    //HW_JPEGenc HW_JPEGenc_Cr(
+    HW_JPEGenc HW_JPEGenc_Cr(
+        .clock                  (clock),
+        .reset_n                (reset_n),
+        .input_enable           (input_enable),
+        .input_1pix_enable      (input_1pix_enable),  
+        .pix_1pix_data          (Cr_data), 
+        //.pix_1pix_data          (pix_1pix_data), 
+        .dct_enable             (dct_enable),
+        .dct_end_enable         (dct_end_enable),
+        .zigzag_input_enable    (zigzag_input_enable),
+        .zigag_enable           (zigag_enable),
+        .matrix_row             (matrix_row),
+        .Huffman_start          (Huffman_start),
+        //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
+        .is_luminance           (1'b1),
+        .jpeg_out_enable        (jpeg_out_enable),
+        .jpeg_dc_out            (),
+        .jpeg_dc_out_length     (),
+        .huffman_code           (),
+        .huffman_code_length    (),
+        .code_out               ()
+    );
     
 endmodule

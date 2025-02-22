@@ -140,7 +140,6 @@ module HW_JPEGenc(
     // ---------------------------------------------------------------------
     wire [7:0]  start_pix;
 
-    /*
     // PIPE_LINE_STAGE = 1 と仮定
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
@@ -157,7 +156,6 @@ module HW_JPEGenc(
         .is_luminance       (is_luminance),
         .out                ({ac_out, length, code, run})
     );
-    */
 
     // Huffman エンコード コントローラ
     Huffman_enc_controller mHuffman_enc_controller (
