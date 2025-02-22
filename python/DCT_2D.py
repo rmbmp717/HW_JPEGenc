@@ -51,8 +51,8 @@ def dct_1d_s16(x_u8: np.ndarray) -> np.ndarray:
     手計算版と同じく、入力に対してレベルシフト (-128) し、DCT計算後に逆レベルシフト (+128) を行う。
     出力は np.int16 型で返す（手計算版: np.clip(np.rint(out_f + 128), -511, 512)）。
     """
-    # 1. 入力のレベルシフト: 0～255 -> -128～127
-    x_shifted = x_u8.astype(np.int32) - 128
+    # 1. 入力のレベルシフトを削除
+    x_shifted = x_u8.astype(np.int32) 
     # 2. Q8.8 表現へ変換（左シフト 8 ビット）
     x_q88 = x_shifted << 8
     # 3. 固定小数点 DCT 計算
@@ -60,7 +60,7 @@ def dct_1d_s16(x_u8: np.ndarray) -> np.ndarray:
     # 4. Q8.8 から整数へ変換（四捨五入）
     y_int = (y_q88 + 128) >> 8
     # 5. 逆レベルシフト (+128) を加えて、手計算版と同じスケールに復帰
-    result = np.clip(np.rint(y_int + 128), -511, 512).astype(np.int16)
+    result = np.clip(np.rint(y_int), -511, 512).astype(np.int16)
     return result
 
 # =====================================
@@ -88,11 +88,11 @@ def dct_2d_q88(img_u8: np.ndarray) -> np.ndarray:
 
 def dct_2d_manual(img_u8: np.ndarray) -> np.ndarray:
     tmp = np.array([dct_1d_manual(row) for row in img_u8])
-    return np.array([dct_1d_manual(tmp[:, i]) for i in range(8)]).T
+    return np.array([dct_1d_manual(tmp[:, i]) for i in range(8)]).T -128
 
 def dct_2d_fftpack(img_u8: np.ndarray) -> np.ndarray:
     img_f = img_u8.astype(np.float64) - 128  # レベルシフト
-    return dct(dct(img_f, axis=0, norm='ortho'), axis=1, norm='ortho') + 128
+    return dct(dct(img_f, axis=0, norm='ortho'), axis=1, norm='ortho')
 
 # rowのみ
 def dct_2d_q88_row(img_u8: np.ndarray) -> np.ndarray:
@@ -105,11 +105,11 @@ if __name__ == "__main__":
     test_matrices = [
         #(np.array([[i * j for j in range(8)] for i in range(8)], dtype=np.int16), "パターン1"),
         #(np.array([[255 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 255"),
-        (np.array([[-48 if i < 4 and j < 4 else -128 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 -48, 他 -128"),
+        (np.array([[-48 if i < 4 and j < 4 else -128 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 -48, 他 -128")
         #(np.random.randint(0, 256, (8, 8), dtype=np.int16), "ランダムパターン"),
         #(np.array([[80 if (i + j) % 2 == 0 else 80 for j in range(8)] for i in range(8)], dtype=np.int16), "ベタ"),
         #(np.array([[80 if (i + j) % 2 == 0 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "チェッカーパターン"),
-        (np.array([[80 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 80"),
+        #(np.array([[80 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 80"),
     ]
 
     for img, label in test_matrices:
@@ -124,10 +124,31 @@ if __name__ == "__main__":
 
         print(f"\n【{label}】")
         print("Input Image (uint8):\n", img)
-        print("Q8.8 DCT row:\n", y_q88_pre)
+        #print("Q8.8 DCT row:\n", y_q88_pre)
         print("Q8.8 DCT:\n", y_q88)
         print("Manual DCT:\n", y_manual)
         print("fftpack DCT:\n", np.rint(y_fftpack).astype(int))
         #print("Diff (Q8.8 - Manual):\n", diff_q88_manual)
         #print("Diff (Q8.8 - fftpack):\n", diff_q88_fftpack)
         #print("Diff (Manual - fftpack):\n", diff_manual_fftpack)
+
+    print("============================================")
+    print("1D DCT Test")
+    test_vectors = [
+        (np.array([1,2,3,4,5,6,7,8], dtype=np.int16),"通常入力"), 
+        (np.array([8,70,6,56,43,3,120,1], dtype=np.int16), "通常入力"), 
+        (np.array([4,3,20,70,12,6,12,8], dtype=np.int16), "異常入力"),
+        (np.array([-48,-48,-48,-48,-128,-128,-128,-128], dtype=np.int16), "通常入力"), 
+    ]
+
+    for x, label in test_vectors:
+        y_q88   = dct_1d_s16(x)       
+        y_manual= dct_1d_manual(x - 128)   
+        
+        diff_q88_manual = y_q88.astype(int) - y_manual.astype(int)
+        diff_q88_fftpack = y_q88.astype(int) - y_fftpack.astype(int)
+
+        print(f"\n【{label}】")
+        print("Input s16      :", x)
+        print("Q8.8 DCT       :", y_q88)
+        print("Manual DCT     :", y_manual)

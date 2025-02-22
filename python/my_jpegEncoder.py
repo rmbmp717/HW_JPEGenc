@@ -92,6 +92,14 @@ def main():
     #addedImageMatrix[:4, :4, 1] = 255    # G チャネルに0
     #addedImageMatrix[:4, :4, 2] = 0    # B チャネルに0
 
+    # 各チャネルのマトリックスを表示
+    print("R matrix:")
+    print(addedImageMatrix[:, :, 0])
+    print("G matrix:")
+    print(addedImageMatrix[:, :, 1])
+    print("B matrix:")
+    print(addedImageMatrix[:, :, 2])
+
 
     # split y u v
     yImage,uImage,vImage = Image.fromarray(addedImageMatrix).convert('YCbCr').split()
