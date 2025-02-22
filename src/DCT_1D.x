@@ -75,15 +75,12 @@ pub fn dct_1d(x: s32[N]) -> s32[N] {
 pub fn dct_1d_s10(x: s10[N]) -> s10[N] {
   // 1. 入力のレベルシフト: Q8.8 表現にする
   let x_q88: s32[N] = for (i, acc): (u32, s32[N]) in range(u32:0, N) {
-      // 入力から 128 を引いてゼロ中心化し、明示的に 256 を掛けて Q8.8 表現にする
-      let shifted: s32 = ((x[i] as s32) - s32:128) * s32:256;
-      trace!(shifted);
+      let shifted: s32 = (x[i] as s32) * s32:256;
       update(acc, i, shifted)
   }(s32[N]:[s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0]);
 
   // 2. Q8.8 固定小数点 DCT を計算
   let y_q88: s32[N] = dct_1d(x_q88);
-  trace!(y_q88);
 
   // 3. Q8.8 表現から整数に変換（四捨五入: +128 して右シフト 8 ビット）
   let y_int32: s32[N] = for (i, acc): (u32, s32[N]) in range(u32:0, N) {
@@ -91,11 +88,10 @@ pub fn dct_1d_s10(x: s10[N]) -> s10[N] {
       let rounded: s32 = (val + s32:128) >> 8;
       update(acc, i, rounded)
   }(s32[N]:[s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0]);
-  trace!(y_int32);
 
   // 4. 逆レベルシフト: 各値に +128 して、手計算版と同じスケールに復帰
   let result: s10[N] = for (i, acc): (u32, s10[N]) in range(u32:0, N) {
-      let adjusted: s32 = (y_int32[i] + s32:128);
+      let adjusted: s32 = y_int32[i];
       let clipped: s10 = if adjusted < s32:-511 {
           s10:-511
       } else if adjusted > s32:511 {
@@ -126,7 +122,7 @@ fn test0_dct_1d() {
 #[test]
 fn test1_dct_1d_allzero() {
   let x = s10[8]:[0, 0, 0, 0, 0, 0, 0, 0]; // テスト用の入力データ
-  let expected = s10[8]:[-236, 128, 128, 128, 128, 101, 30, 193];
+  let expected = s10[8]:[0, 0, 0, 0, 0, 0, 0, 0];
   trace!(x);
 
   let result = dct_1d_s10(x); // 実際の計算結果
@@ -210,7 +206,7 @@ fn test6_dct_1d() {
 #[test]
 fn test7_dct_1d() {
   let x = s10[8]:[4, 3, 20, 70, 12, 6, 12, 8]; // テスト用の入力データ
-  let expected = s10[8]:[-188, 132, 94, 104, 147, 129, 68, 161];
+  let expected = s10[8]:[48, 4, -34, -24, 19, 28, 38, -32];
   trace!(x);
 
   let result = dct_1d_s10(x); // 実際の計算結果
@@ -222,7 +218,7 @@ fn test7_dct_1d() {
 #[test]
 fn test8_dct_1d() {
   let x = s10[8]:[-48, -48, -48, -48, -128, -128, -128, -128]; // テスト用の入力データ
-  let expected = s10[8]:[-486, 231, 128, 92, 128, 82, -37, 238];
+  let expected = s10[8]:[-250, 103, 0, -36, 0, -19, -67, 45];
   trace!(x);
 
   let result = dct_1d_s10(x); // 実際の計算結果
@@ -234,7 +230,7 @@ fn test8_dct_1d() {
 #[test]
 fn test9_dct_1d() {
   let x = s10[8]:[s10:-48, s10:-48, s10:-48, s10:-48, s10:-128, s10:-128, s10:-128, s10:-128]; // テスト用の入力データ
-  let expected = s10[8]:[-486, 231, 128, 92, 128, 82, -37, 238];
+  let expected = s10[8]:[-250, 103, 0, -36, 0, -19, -67, 45];
   trace!(x);
 
   let result = dct_1d_s10(x); // 実際の計算結果
