@@ -4,37 +4,44 @@ const EOB_LUM_EXT: bits[16] = bits[16]:0b1010;      // 仮の値
 const EOB_CHR_EXT: bits[16] = bits[16]:0b00;        // 仮の値
 
 // 8×8 の u8 行列を平坦化して 64 要素の u8 配列にする関数
-fn flatten(matrix: u8[8][8]) -> u8[64] {
-    let row0: u8[8] = matrix[0];
-    let row1: u8[8] = matrix[1];
-    let row2: u8[8] = matrix[2];
-    let row3: u8[8] = matrix[3];
-    let row4: u8[8] = matrix[4];
-    let row5: u8[8] = matrix[5];
-    let row6: u8[8] = matrix[6];
-    let row7: u8[8] = matrix[7];
+fn flatten(matrix: s10[8][8]) -> s10[64] {
+    let row0: s10[8] = matrix[0];
+    let row1: s10[8] = matrix[1];
+    let row2: s10[8] = matrix[2];
+    let row3: s10[8] = matrix[3];
+    let row4: s10[8] = matrix[4];
+    let row5: s10[8] = matrix[5];
+    let row6: s10[8] = matrix[6];
+    let row7: s10[8] = matrix[7];
 
-    let flat: u8[64] = row0 ++ row1 ++ row2 ++ row3 ++ row4 ++ row5 ++ row6 ++ row7;
+    let flat: s10[64] = row0 ++ row1 ++ row2 ++ row3 ++ row4 ++ row5 ++ row6 ++ row7;
     flat
 }
   
 // ビット数を求める関数
-fn bit_length(x: u8) -> u8 {
-    if x == u8:0 {
+fn bit_length(x: s10) -> u8 {
+    // 絶対値を計算
+    let x_abs: u8 = if x < s10:0 {
+        -x as u8
+    } else {
+         x as u8
+    };
+    // Bit長を返す
+    if x_abs == u8:0 {
         u8:0
-    } else if x >= u8:128 {
+    } else if x_abs >= u8:128 {
         u8:8
-    } else if x >= u8:64 {
+    } else if x_abs >= u8:64 {
         u8:7
-    } else if x >= u8:32 {
+    } else if x_abs >= u8:32 {
         u8:6
-    } else if x >= u8:16 {
+    } else if x_abs >= u8:16 {
         u8:5
-    } else if x >= u8:8 {
+    } else if x_abs >= u8:8 {
         u8:4
-    } else if x >= u8:4 {
+    } else if x_abs >= u8:4 {
         u8:3
-    } else if x >= u8:2 {
+    } else if x_abs >= u8:2 {
         u8:2
     } else {
         u8:1
@@ -43,7 +50,7 @@ fn bit_length(x: u8) -> u8 {
 
 #[test]
 fn bit_length_test () {
-    let bit_value :u8 = u8: 33;
+    let bit_value :s10 = s10: 33;
     let bit_length_out = bit_length(bit_value);
     trace!(bit_length_out);
 }
@@ -156,32 +163,32 @@ fn encode_value(value: u8) -> bits[8] {
 }
 
 // AC成分（64 要素）からDC成分を取得する関数
-fn get_dc(flat: u8[64]) -> u8 {
-    let dc: u8 = flat[0];
+fn get_dc(flat: s10[64]) -> s10 {
+    let dc: s10 = flat[0];
     dc
 }
 
 #[test]
 fn test_get_dc() {
-    let test_matrix: u8[8][8] = [
-        [u8:7, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
-    ];
-    let flat: u8[64] = flatten(test_matrix);
-    let dc: u8 = get_dc(flat);
+    let test_matrix: s10[8][8] = [
+        [s10:7, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
+    ];    
+    let flat: s10[64] = flatten(test_matrix);
+    let dc: s10 = get_dc(flat);
     trace!(dc);
-    assert_eq(dc, u8:7);
+    assert_eq(dc, s10:7);
 
 }
 
 // DC 成分の Huffman 符号化（ループなし）
-fn encode_dc(dc_value: u8, is_luminance: bool) -> (bits[8], u8, bits[8]) {
+fn encode_dc(dc_value: s10, is_luminance: bool) -> (bits[8], u8, bits[8]) {
 
     let size: u8 = bit_length(dc_value);
     trace!(dc_value);
@@ -214,10 +221,11 @@ fn encode_dc(dc_value: u8, is_luminance: bool) -> (bits[8], u8, bits[8]) {
     (BoolList, length, code_list)
 }
  
+// --------------------------------
 // メイン関数
-fn Huffman_DCenc(matrix: u8[8][8], is_luminance: bool) -> (bits[8], bits[8], u8) {
-    let flat: u8[64] = flatten(matrix);
-    let dc: u8 = get_dc(flat);
+fn Huffman_DCenc(matrix: s10[8][8], is_luminance: bool) -> (bits[8], bits[8], u8) {
+    let flat: s10[64] = flatten(matrix);
+    let dc: s10 = get_dc(flat);
 
     trace!(dc);
 
@@ -230,17 +238,17 @@ fn Huffman_DCenc(matrix: u8[8][8], is_luminance: bool) -> (bits[8], bits[8], u8)
 // テストケース
 #[test]
 fn test0_Huffman_DCenc() {
-    let test_matrix: u8[8][8] = [
-        [u8:7, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
+    let test_matrix: s10[8][8] = [
+        [s10:7, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
     ];
-
+    
     let expected_output: bits[8] = bits[8]:0b01000000;     
     let expected_length: u8 = u8:3;  
     let expected_code: bits[8] = bits[8]:7;                
@@ -253,20 +261,45 @@ fn test0_Huffman_DCenc() {
 
 #[test]
 fn test1_Huffman_DCenc() {
-    let test_matrix: u8[8][8] = [
-        [u8:33, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0],
-        [u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0, u8:0]
+    let test_matrix: s10[8][8] = [
+        [s10:33, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
     ];
+    
 
     let expected_output: bits[8] = bits[8]:0b10000000;     
     let expected_length: u8 = u8:3;  
     let expected_code: bits[8] = bits[8]:33;                
+    let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
+
+    assert_eq(BooList, expected_output);
+    assert_eq(Length, expected_length);
+    assert_eq(CodeList, expected_code);
+}
+
+#[test]
+fn test2_Huffman_DCenc() {
+    let test_matrix: s10[8][8] = [
+        [s10:-33, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
+    ];
+    
+
+    let expected_output: bits[8] = bits[8]:0b10000000;     
+    let expected_length: u8 = u8:3;  
+    let expected_code: bits[8] = bits[8]:32;                
     let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
 
     assert_eq(BooList, expected_output);

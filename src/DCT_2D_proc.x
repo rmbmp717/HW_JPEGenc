@@ -198,7 +198,7 @@ pub fn dct_2d_u8(x: u8[N][N]) -> u8[N][N] {
             }(acc)
         }(row_transformed);
 
-    //trace!(col_transformed);  // ✅ 列方向 DCT の結果を確認
+    trace!(col_transformed);  // ✅ 列方向 DCT の結果を確認
 
     col_transformed
 }
