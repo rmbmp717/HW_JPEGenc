@@ -7,8 +7,6 @@ import random
 from cocotb.triggers import Timer, RisingEdge
 
 import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python/')))
-import my_JPEG_dec
 
 def convert_s10(raw: int) -> int:
     """
@@ -21,20 +19,215 @@ def convert_s10(raw: int) -> int:
     else:
         return raw
 
-async def generate_clock(dut, period=10):
-    """Generate a clock on dut.clock with the given period in ns."""
-    while True:
-        dut.clock.value = 0
-        await Timer(period // 2, units="ns")
-        dut.clock.value = 1
-        await Timer(period // 2, units="ns")
+async def dump_Input_Y(dut):
+    print("==========================================================================")
+    # buffer は 64 要素の配列と仮定
+    matrix = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(convert_s10(dut.HW_JPEGenc_Y.m0_databuffer_64x10bit.buffer[index].value.integer))
+        matrix.append(row)
+    
+    print("Y Buffer (8x8 matrix):")
+    for row in matrix:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:4d}" for val in row)
+        print(line)
 
-@cocotb.test()
-async def test1_JPEGenc_top(dut):
+async def dump_Input_Cb(dut):
+    print("==========================================================================")
+    # buffer は 64 要素の配列と仮定
+    matrix = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(convert_s10(dut.HW_JPEGenc_Cb.m0_databuffer_64x10bit.buffer[index].value.integer))
+        matrix.append(row)
+    
+    print("Cb Buffer (8x8 matrix):")
+    for row in matrix:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:4d}" for val in row)
+        print(line)
+
+async def dump_Input_Cr(dut):
+    print("==========================================================================")
+    # buffer は 64 要素の配列と仮定
+    matrix = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(convert_s10(dut.HW_JPEGenc_Cr.m0_databuffer_64x10bit.buffer[index].value.integer))
+        matrix.append(row)
+    
+    print("Cb Buffer (8x8 matrix):")
+    for row in matrix:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:4d}" for val in row)
+        print(line)
+
+        
+async def dump_Dct_Y_input(dut):
+    print("==========================================================================")
+    print("1.1: DCT 2D Input Data")
+    # buffer は 64 要素の配列と仮定
+    matrix_dctin = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(convert_s10(dut.HW_JPEGenc_Y.mDCT_2D.pix_data[index].value.integer))
+        matrix_dctin.append(row)
+    
+    print("DCT Y Input Buffer (8x8 matrix):")
+    for row in matrix_dctin:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:4d}" for val in row)
+        print(line)
+
+async def dump_Dct_Cb_input(dut):
+    print("==========================================================================")
+    print("1.1: DCT 2D Input Data")
+    # buffer は 64 要素の配列と仮定
+    matrix_dctin = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(convert_s10(dut.HW_JPEGenc_Cb.mDCT_2D.pix_data[index].value.integer))
+        matrix_dctin.append(row)
+    
+    print("DCT Cb Input Buffer (8x8 matrix):")
+    for row in matrix_dctin:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:4d}" for val in row)
+        print(line)
+
+async def dump_Dct_Cr_input(dut):
+    print("==========================================================================")
+    print("1.1: DCT 2D Input Data")
+    # buffer は 64 要素の配列と仮定
+    matrix_dctin = []
+    for i in range(8):
+        row = []
+        for j in range(8):
+            index = i * 8 + j
+            row.append(convert_s10(dut.HW_JPEGenc_Cr.mDCT_2D.pix_data[index].value.integer))
+        matrix_dctin.append(row)
+    
+    print("DCT Cr Input Buffer (8x8 matrix):")
+    for row in matrix_dctin:
+        # 各値を幅4で右寄せして整形して出力
+        line = " ".join(f"{val:4d}" for val in row)
+        print(line)
+
+
+async def dump_Dct_Y_output(dut):
     print("==========================================================================")
 
-    # Start clock generation (if not already spawned by testbench)
-    cocotb.start_soon(generate_clock(dut, period=10))
+    # 例: dct2d_out を 8x8 の行列として表示
+    dct2d_data = []
+    for d in dut.HW_JPEGenc_Y.dct2d_out.value:
+        # 各要素を 10 進数に変換してリストに追加
+        dct2d_data.append(convert_s10(int(d.binstr, 2)))
+
+    print("DCT2D Y Output (8x8 matrix):")
+    for row in range(8):
+        # 8個ずつ取り出して表示
+        row_data = dct2d_data[row*8:(row+1)*8]
+        # 各値を 4 桁（例）で整形して表示
+        print(" ".join(f"{val:4d}" for val in row_data))
+
+async def dump_Dct_Cb_output(dut):
+    print("==========================================================================")
+
+    # 例: dct2d_out を 8x8 の行列として表示
+    dct2d_data = []
+    for d in dut.HW_JPEGenc_Cb.dct2d_out.value:
+        # 各要素を 10 進数に変換してリストに追加
+        dct2d_data.append(convert_s10(int(d.binstr, 2)))
+
+    print("DCT2D Cb Output (8x8 matrix):")
+    for row in range(8):
+        # 8個ずつ取り出して表示
+        row_data = dct2d_data[row*8:(row+1)*8]
+        # 各値を 4 桁（例）で整形して表示
+        print(" ".join(f"{val:4d}" for val in row_data))
+
+async def dump_Dct_Cr_output(dut):
+    print("==========================================================================")
+
+    # 例: dct2d_out を 8x8 の行列として表示
+    dct2d_data = []
+    for d in dut.HW_JPEGenc_Cr.dct2d_out.value:
+        # 各要素を 10 進数に変換してリストに追加
+        dct2d_data.append(convert_s10(int(d.binstr, 2)))
+
+    print("DCT2D Cr Output (8x8 matrix):")
+    for row in range(8):
+        # 8個ずつ取り出して表示
+        row_data = dct2d_data[row*8:(row+1)*8]
+        # 各値を 4 桁（例）で整形して表示
+        print(" ".join(f"{val:4d}" for val in row_data))
+
+
+async def dump_Quantized_Y_output(dut):
+    print("==========================================================================")
+    print("Quantized Y Data (8x8 matrix):")
+    for row in range(8):
+        # 各行の80ビットデータをビット文字列として取得
+        binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x10bit.buffer_80bit[row].value.binstr
+        # 未定義 'x' を '0' に置換
+        binstr = binstr.replace("x", "0")
+        # ビット幅が80でない場合は、先頭にゼロを埋める
+        if len(binstr) < 80:
+            binstr = binstr.zfill(80)
+        # 80ビットを10ビットずつに分割して整数のリストに変換し、convert_s10で符号付き整数に変換
+        row_vals = [convert_s10(int(binstr[i:i+10], 2)) for i in range(0, 80, 10)]
+        # 10ビットごとのデータの順序を左右逆にして表示（reversed）
+        print(" ".join("{:4d}".format(val) for val in reversed(row_vals)))
+
+async def dump_Quantized_Cb_output(dut):
+    print("==========================================================================")
+    print("Quantized Cb Data (8x8 matrix):")
+    for row in range(8):
+        # 各行の80ビットデータをビット文字列として取得
+        binstr = dut.HW_JPEGenc_Cb.m_databuffer_zigzag64x10bit.buffer_80bit[row].value.binstr
+        # 未定義 'x' を '0' に置換
+        binstr = binstr.replace("x", "0")
+        # ビット幅が80でない場合は、先頭にゼロを埋める
+        if len(binstr) < 80:
+            binstr = binstr.zfill(80)
+        # 80ビットを10ビットずつに分割して整数のリストに変換し、convert_s10で符号付き整数に変換
+        row_vals = [convert_s10(int(binstr[i:i+10], 2)) for i in range(0, 80, 10)]
+        # 10ビットごとのデータの順序を左右逆にして表示（reversed）
+        print(" ".join("{:4d}".format(val) for val in reversed(row_vals)))
+
+async def dump_Quantized_Cr_output(dut):
+    print("==========================================================================")
+    print("Quantized Cr Data (8x8 matrix):")
+    for row in range(8):
+        # 各行の80ビットデータをビット文字列として取得
+        binstr = dut.HW_JPEGenc_Cr.m_databuffer_zigzag64x10bit.buffer_80bit[row].value.binstr
+        # 未定義 'x' を '0' に置換
+        binstr = binstr.replace("x", "0")
+        # ビット幅が80でない場合は、先頭にゼロを埋める
+        if len(binstr) < 80:
+            binstr = binstr.zfill(80)
+        # 80ビットを10ビットずつに分割して整数のリストに変換し、convert_s10で符号付き整数に変換
+        row_vals = [convert_s10(int(binstr[i:i+10], 2)) for i in range(0, 80, 10)]
+        # 10ビットごとのデータの順序を左右逆にして表示（reversed）
+        print(" ".join("{:4d}".format(val) for val in reversed(row_vals)))
+
+
+# ---------------------------------------------------
+# sub メイン関数
+async def sub_test_JPEGenc(dut):
+    print("==========================================================================")
 
     # initialize
     dut.reset_n.value = 0  
@@ -74,8 +267,8 @@ async def test1_JPEGenc_top(dut):
     # 左上が80
     #dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
     input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_g = [[0 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_b = [[0 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
     #input_matrix_r = [[j + 1 for j in range(8)] for i in range(8)]
     #input_matrix_g = [[j + 1 for j in range(8)] for i in range(8)]
     #input_matrix_b = [[j + 1 for j in range(8)] for i in range(8)]
@@ -98,9 +291,9 @@ async def test1_JPEGenc_top(dut):
     for pix in range(64):
         if pix > 1 :
             dut.input_1pix_enable.value = 1
-        dut.Red.value = flat_data_r[pix]
-        dut.Green.value = flat_data_r[pix]
-        dut.Blue.value = flat_data_r[pix]
+        dut.Red.value   = flat_data_r[pix]
+        dut.Green.value = flat_data_g[pix]
+        dut.Blue.value  = flat_data_b[pix]
         await RisingEdge(dut.clock)
     
     dut.Red.value = 0
@@ -113,20 +306,9 @@ async def test1_JPEGenc_top(dut):
     for _ in range(4):
         await RisingEdge(dut.clock)
 
-    # buffer は 64 要素の配列と仮定
-    matrix = []
-    for i in range(8):
-        row = []
-        for j in range(8):
-            index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Y.m0_databuffer_64x10bit.buffer[index].value.integer))
-        matrix.append(row)
-    
-    print("Buffer (8x8 matrix):")
-    for row in matrix:
-        # 各値を幅4で右寄せして整形して出力
-        line = " ".join(f"{val:4d}" for val in row)
-        print(line)
+    await dump_Input_Y(dut)
+    await dump_Input_Cb(dut)
+    await dump_Input_Cr(dut)
 
     for _ in range(4):
         await RisingEdge(dut.clock)
@@ -134,22 +316,9 @@ async def test1_JPEGenc_top(dut):
     print("==========================================================================")
     print("1: DCT 2D Start")
 
-    print("1.1: DCT 2D Input Data")
-    # buffer は 64 要素の配列と仮定
-    matrix_dctin = []
-    for i in range(8):
-        row = []
-        for j in range(8):
-            index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Y.mDCT_2D.pix_data[index].value.integer))
-        matrix_dctin.append(row)
-    
-    print("1.2: DCT 2D Output Data")
-    print("Buffer (8x8 matrix):")
-    for row in matrix_dctin:
-        # 各値を幅4で右寄せして整形して出力
-        line = " ".join(f"{val:4d}" for val in row)
-        print(line)
+    await dump_Dct_Y_input(dut)
+    await dump_Dct_Cb_input(dut)
+    await dump_Dct_Cr_input(dut)
 
     # DCT 2D Start
     await RisingEdge(dut.clock)
@@ -157,24 +326,17 @@ async def test1_JPEGenc_top(dut):
     await RisingEdge(dut.clock)
     dut.dct_enable.value = 0
 
+    # DCT 2D Endまで待つ
     for _ in range(50):
         if dut.HW_JPEGenc_Y.mDCT_2D.state_v_end.value == 1:
             break
         await RisingEdge(dut.clock)
     await RisingEdge(dut.clock)
 
-    # 例: dct2d_out を 8x8 の行列として表示
-    dct2d_data = []
-    for d in dut.HW_JPEGenc_Y.dct2d_out.value:
-        # 各要素を 10 進数に変換してリストに追加
-        dct2d_data.append(convert_s10(int(d.binstr, 2)))
-
-    print("DCT2D Output (8x8 matrix):")
-    for row in range(8):
-        # 8個ずつ取り出して表示
-        row_data = dct2d_data[row*8:(row+1)*8]
-        # 各値を 4 桁（例）で整形して表示
-        print(" ".join(f"{val:4d}" for val in row_data))
+    print("1.2: DCT 2D Output Data")
+    await dump_Dct_Y_output(dut)
+    await dump_Dct_Cb_output(dut)
+    await dump_Dct_Cr_output(dut)
 
     print("==========================================================================")
     print("2: Quantize Start")
@@ -196,21 +358,13 @@ async def test1_JPEGenc_top(dut):
         await RisingEdge(dut.clock)
     print("2: Quantize End")
 
+    await dump_Quantized_Y_output(dut)
+    await dump_Quantized_Cb_output(dut)
+    await dump_Quantized_Cr_output(dut)
+
     print("==========================================================================")
     print("3: Zigzag scan Start")
-    print("Quantized Data (8x8 matrix):")
-    for row in range(8):
-        # 各行の80ビットデータをビット文字列として取得
-        binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x10bit.buffer_80bit[row].value.binstr
-        # 未定義 'x' を '0' に置換
-        binstr = binstr.replace("x", "0")
-        # ビット幅が80でない場合は、先頭にゼロを埋める
-        if len(binstr) < 80:
-            binstr = binstr.zfill(80)
-        # 80ビットを10ビットずつに分割して整数のリストに変換し、convert_s10で符号付き整数に変換
-        row_vals = [convert_s10(int(binstr[i:i+10], 2)) for i in range(0, 80, 10)]
-        # 10ビットごとのデータの順序を左右逆にして表示（reversed）
-        print(" ".join("{:4d}".format(val) for val in reversed(row_vals)))
+
 
     dut.zigag_enable.value = 1
     await RisingEdge(dut.clock)
@@ -337,19 +491,6 @@ async def test1_JPEGenc_top(dut):
     for _ in range(100):
         await RisingEdge(dut.clock)
 
-    '''
-    print("==========================================================================")
-    print("9: Decode JPEG final_output")
-    # シミュレーションで得られた final_output（ビット列文字列）を一時ファイルに保存
-    temp_filename = "final_output_temp.txt"
-    with open(temp_filename, "w") as f:
-        f.write(final_output)
-    # my_JPEG_dec のメイン処理を --bitstream モードで呼び出す
-    import my_JPEG_dec
-    my_JPEG_dec.main("--bitstream", temp_filename)
-    # Disable input_enable
-    dut.input_enable.value = 0
-    '''
     
     # Wait additional time for processing
     for _ in range(100):
