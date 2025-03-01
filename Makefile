@@ -5,7 +5,7 @@ TOP = Huffman_ACenc
 #INPUT_FILE = ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE = ./src/DCT_2D.x
 #INPUT_FILE = ./src/Zigzag_scan.x
-INPUT_FILE = ./src/Huffman_ACenc.x # PIPE_LINE_STAGE = 3
+INPUT_FILE = ./src/Huffman_ACenc.x # PIPE_LINE_STAGE = 4
 #INPUT_FILE = ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
 IR_FILE = ./ir_dir/$(TOP).ir
 OPT_IR_FILE = ./ir_dir/$(TOP)_opt.ir
@@ -21,17 +21,17 @@ VERILOG_DIR = ./verilog
 VERILOG_FILE = $(VERILOG_DIR)/HW_JPEGenc_top.v
 VERILOG_FILE += $(VERILOG_DIR)/RGB_to_YCbCr.v
 VERILOG_FILE += $(VERILOG_DIR)/HW_JPEGenc.v
-VERILOG_FILE += $(VERILOG_DIR)/databuffer_64x8bit.v
+VERILOG_FILE += $(VERILOG_DIR)/databuffer_64x10bit.v
 VERILOG_FILE += $(VERILOG_DIR)/DCT_2D.v
-VERILOG_FILE += $(VERILOG_DIR)/dct_1d_u8.v
-VERILOG_FILE += $(VERILOG_DIR)/databuffer_zigzag64x8bit.v
+VERILOG_FILE += $(VERILOG_DIR)/dct_1d_s10.v
+VERILOG_FILE += $(VERILOG_DIR)/databuffer_zigzag64x10bit.v
 VERILOG_FILE += $(VERILOG_DIR)/Zigzag_reorder.v
 VERILOG_FILE += $(VERILOG_DIR)/Quantize.v
 VERILOG_FILE += $(VERILOG_DIR)/Huffman_DCenc.v
 VERILOG_FILE += $(VERILOG_DIR)/Huffman_ACenc.v
 VERILOG_FILE += $(VERILOG_DIR)/Huffman_enc_controller.v
 
-COCOTB_FILE = cocotb_sim.test1_JPEGenc_top
+COCOTB_FILE = cocotb_sim.main_JPEGenc_top
 
 # Tools
 INTERPRETER = $(TOOL_DIR)/xls/dslx/interpreter_main
