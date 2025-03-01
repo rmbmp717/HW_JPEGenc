@@ -23,6 +23,7 @@ module HW_JPEGenc_top(
     output wire [7:0]       jpeg_dc_out,          // 最終 JPEG 出力 DC
     output reg  [7:0]       jpeg_dc_out_length,   // 最終 JPEG 出力 DC
     output reg  [7:0]       jpeg_dc_code_list,    // 最終 JPEG 出力 DC
+    output reg  [7:0]       jpeg_dc_code_size,
     output wire [15:0]      huffman_code,         // 最終 JPEG 出力（16ビット）
     output wire [7:0]       huffman_code_length,  // 最終 JPEG 出力のビット幅
     output wire [7:0]       code_out              // 最終 JPEG 出力 CODE
@@ -88,6 +89,7 @@ module HW_JPEGenc_top(
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (jpeg_dc_out),
         .jpeg_dc_out_length     (jpeg_dc_out_length),
+        .jpeg_dc_code_size      (jpeg_dc_code_size),
         .huffman_code           (huffman_code),
         .huffman_code_length    (huffman_code_length),
         .code_out               (code_out)

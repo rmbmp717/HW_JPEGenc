@@ -23,6 +23,7 @@ module HW_JPEGenc(
     output wire [7:0]       jpeg_dc_out,
     output wire [7:0]       jpeg_dc_out_length,
     output wire [7:0]       jpeg_dc_code_list,
+    output wire [7:0]       jpeg_dc_code_size,
     output wire [15:0]      huffman_code,           // 最終 JPEG 出力（16ビット）
     output wire [7:0]       huffman_code_length,    // 最終 JPEG 出力のビット幅
     output wire [7:0]       code_out
@@ -54,6 +55,7 @@ module HW_JPEGenc(
     wire [7:0]  dc_out;
     wire [7:0]  dc_out_length;
     wire [7:0]  dc_out_code_list;
+    wire [7:0]  dc_out_code_size;
     wire [15:0] ac_out;
     wire [7:0]  length;
     wire [7:0]  code;
@@ -145,7 +147,7 @@ module HW_JPEGenc(
         .clk                (clock),
         .matrix             (dc_matrix),
         .is_luminance       (is_luminance),
-        .out                ({dc_out, dc_out_length, dc_out_code_list})
+        .out                ({dc_out, dc_out_length, dc_out_code_list, dc_out_code_size})
     );
 
     // PIPE_LINE_STAGE = 4 と仮定
@@ -169,6 +171,7 @@ module HW_JPEGenc(
         .dc_out             (dc_out),
         .dc_out_length      (dc_out_length),
         .dc_out_code_list   (dc_out_code_list),
+        .dc_out_code_size   (dc_out_code_size),
         .ac_out             (ac_out),
         .length             (length),
         .code               (code),
@@ -178,6 +181,7 @@ module HW_JPEGenc(
         .jpeg_dc_out            (jpeg_dc_out),
         .jpeg_dc_out_length     (jpeg_dc_out_length),
         .jpeg_dc_code_list      (jpeg_dc_code_list),
+        .jpeg_dc_code_size      (jpeg_dc_code_size),
         .huffman_code           (huffman_code),
         .huffman_code_length    (huffman_code_length),
         .code_out               (code_out)

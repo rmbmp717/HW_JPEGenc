@@ -10,6 +10,7 @@ module Huffman_enc_controller(
   input  wire  [7:0]        dc_out,
   input  wire  [7:0]        dc_out_length,
   input  wire  [7:0]        dc_out_code_list,
+  input  wire  [7:0]        dc_out_code_size,
   input  wire  [15:0]       ac_out,
   input  wire  [7:0]        length,
   input  wire  [7:0]        code,
@@ -19,6 +20,7 @@ module Huffman_enc_controller(
   output reg   [7:0]        jpeg_dc_out,
   output reg   [7:0]        jpeg_dc_out_length,
   output reg   [7:0]        jpeg_dc_code_list,
+  output reg   [7:0]        jpeg_dc_code_size,
   output reg   [15:0]       huffman_code,
   output reg   [7:0]        huffman_code_length,
   output reg   [7:0]        code_out
@@ -62,6 +64,7 @@ module Huffman_enc_controller(
           jpeg_dc_out <= dc_out;
           jpeg_dc_out_length <= dc_out_length;
           jpeg_dc_code_list <= dc_out_code_list;
+          jpeg_dc_code_size <= dc_out_code_size;
           if(start_pix >= 63) begin
             state <= 0;
           end else begin
