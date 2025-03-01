@@ -279,6 +279,52 @@ def main():
     jpegFile.write(bytes([255,217])) # FF D9
     jpegFile.close()
 
+def debug_main():
+    
+    srcImageWidth  = 8
+    srcImageHeight = 8
+    imageWidth  = 8
+    imageHeight = 8
+    addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
+
+    # Image Input
+    addedImageMatrix[:4, :4] = 0    # 0 format
+    
+    yImage,uImage,vImage = Image.fromarray(addedImageMatrix).split()
+
+    yImage =  [-15,   6,   6,   0,   5,   0,  -1,   0,
+                 0,  -1,   0,  -1,   0,  -1,   0,   0,
+                 0,   0,   0,   0,  -1,  -2,   0,   0,
+                 0,   0,   0,  14,   0,   0,   0,   0,
+                 0,   0,   0,   1,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0]
+
+    yArray = numpy.asarray(yImage)
+    yZCode = yArray.reshape([64])
+
+    # BitStream
+    sosBitStream = BitStream()
+
+    # 各チャネルのマトリックスを表示
+    print("Input yZCode:")
+    print(yZCode)
+    
+    sosBitStream.append(huffmanEncode.encodeDCToBoolList(yZCode[0],1, 1))
+    print("sosBitStream DC:")
+    print(sosBitStream.bin)
+
+    print("encode yAC:", yZCode[1:])
+    huffmanEncode.encodeACBlock(sosBitStream, yZCode[1:], 1, 1)
+
+    print("================================")
+    print("sosBitStream:")
+    binary_str = sosBitStream.bin
+    formatted = '_'.join([binary_str[i:i+8] for i in range(0, len(binary_str), 8)])
+    print(formatted)
+
 
 if __name__ == '__main__':
-    main()
+    #main()
+    debug_main()

@@ -1073,8 +1073,10 @@ def encodeDCToBoolList(value,isLuminance,debugMode = 0):
     # sizeを出力
     if(isLuminance==1):
         boolList = boolList + DCLuminanceSizeToCode[size]
+        print("boolList=", boolList)
     else:
         boolList = boolList + DCChrominanceSizeToCode[size]
+        print("boolList=", boolList)
     # valueを出力
     if(value<=0): # if value==0, codeList = [], (SIZE,VALUE)=(SIZE)=EOB
         codeList = list(bin(value)[3:])
@@ -1116,7 +1118,7 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
     maxI = numpy.size(ACArray)
     #print("maxI", maxI)
     while 1:
-        #print("==============================")
+        print("==============================")
         #print("i=", i)
         if(i==maxI):
             print("maxI")
@@ -1164,28 +1166,28 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
 
         size = int(value).bit_length()
 
-        #print("run=", run)
-        #print("hex(run)=", hex(run))
-        #print("size=", run)
-        #print("hex(size)=", hex(size))
+        print("run=", run)
+        print("hex(run)=", hex(run))
+        print("size=", run)
+        print("hex(size)=", hex(size))
 
         runSizeStr = str.upper(str(hex(run))[2:]) + str.upper(str(hex(size))[2:])
 
-        #print("test runSizeStr :", runSizeStr)
-        #print("test runSizeStr int:", int(runSizeStr))
+        print("test runSizeStr :", runSizeStr)
+        print("test runSizeStr int:", int(runSizeStr))
 
         if (isLuminance == 1):
-            #print("ACLuminanceSizeToCode :", ACLuminanceSizeToCode[runSizeStr])
+            print("ACLuminanceSizeToCode :", ACLuminanceSizeToCode[runSizeStr])
             bitStream.append(ACLuminanceSizeToCode[runSizeStr])
         else:
-            #print("ACChrominanceToCode :", ACChrominanceToCode[runSizeStr])
+            print("ACChrominanceToCode :", ACChrominanceToCode[runSizeStr])
             bitStream.append(ACChrominanceToCode[runSizeStr])
 
         #print("value=", value)
         if(value<=0):# if value==0, codeList = [], (SIZE,VALUE)=(SIZE,[])=EOB
             codeList = list(bin(value)[3:])
-            #print("codeList=", codeList)
-            #print("List codeList=", list(bin(value)[3:]))
+            print("codeList=", codeList)
+            print("List codeList=", list(bin(value)[3:]))
             for k in range(len(codeList)):
                 if (codeList[k] == '0'):
                     codeList[k] = 1
@@ -1193,8 +1195,8 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
                     codeList[k] = 0
         else:
             codeList = list(bin(value)[2:])
-            #print("codeList=", codeList)
-            #print("List codeList=", list(bin(value)[2:]))
+            print("codeList=", codeList)
+            print("List codeList=", list(bin(value)[2:]))
             for k in range(len(codeList)):
                 if (codeList[k] == '0'):
                     codeList[k] = 0
@@ -1208,7 +1210,7 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
             else:
                 print('isLuminance=',isLuminance,'(run,size,value)=',run,size,value,'code=',ACChrominanceToCode[runSizeStr],codeList)
 
-        #print("bitStream=", bitStream.bin)
+        print("bitStream=", bitStream.bin)
         i = i + 1
 
 
