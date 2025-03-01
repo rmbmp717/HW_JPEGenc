@@ -188,13 +188,14 @@ fn test_get_dc() {
 }
 
 // DC 成分の Huffman 符号化（ループなし）
-fn encode_dc(dc_value: s10, is_luminance: bool) -> (bits[8], u8, bits[8]) {
+fn encode_dc(dc_value: s10, is_luminance: bool) -> (bits[8], u8, bits[8], u8) {
 
     let size: u8 = bit_length(dc_value);
+    let Code_size = size;
     trace!(dc_value);
     trace!(size);
 
-    let (BoolList, length): (bits[8], u8) =
+    let (BoolList, Length): (bits[8], u8) =
         if is_luminance {
             lookup_DCLuminanceSizeToCode(size)
         } else {
@@ -202,28 +203,30 @@ fn encode_dc(dc_value: s10, is_luminance: bool) -> (bits[8], u8, bits[8]) {
         };
 
     trace!(BoolList);
-    trace!(length);
+    trace!(Length);
 
     let dc_value_s16 = dc_value as s16;
 
-    let code_list: bits[8] =
+    let Code_list: bits[8] =
     if dc_value_s16 <= s16:0 {
-        let bin_value: bits[8] = dc_value as bits[8];
-        let flipped: bits[8] = !bin_value; // 反転
+        let bin_value:bits[8] = (-dc_value) as bits[8];
+        trace!(bin_value);
+        let flipped:bits[8] = !bin_value;
+        trace!(flipped);
         flipped
     } else {
         let bin_value: bits[8] = dc_value as bits[8];
         bin_value
     };
 
-    trace!(code_list);
+    trace!(Code_list);
 
-    (BoolList, length, code_list)
+    (BoolList, Length, Code_list, Code_size)
 }
  
 // --------------------------------
 // メイン関数
-fn Huffman_DCenc(matrix: s10[8][8], is_luminance: bool) -> (bits[8], bits[8], u8) {
+fn Huffman_DCenc(matrix: s10[8][8], is_luminance: bool) -> (bits[8], bits[8], u8, u8) {
     let flat: s10[64] = flatten(matrix);
     let dc: s10 = get_dc(flat);
 
@@ -251,12 +254,14 @@ fn test0_Huffman_DCenc() {
     
     let expected_output: bits[8] = bits[8]:0b01000000;     
     let expected_length: u8 = u8:3;  
-    let expected_code: bits[8] = bits[8]:7;                
-    let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
+    let expected_code: bits[8] = bits[8]:7;      
+    let expected_code_size: u8 = u8:3;          
+    let (BooList, Length, CodeList, Code_size): (bits[8], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
 
     assert_eq(BooList, expected_output);
     assert_eq(Length, expected_length);
     assert_eq(CodeList, expected_code);
+    assert_eq(Code_size, expected_code_size);
 }
 
 #[test]
@@ -275,18 +280,20 @@ fn test1_Huffman_DCenc() {
 
     let expected_output: bits[8] = bits[8]:0b10000000;     
     let expected_length: u8 = u8:3;  
-    let expected_code: bits[8] = bits[8]:33;                
-    let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
+    let expected_code: bits[8] = bits[8]:33;   
+    let expected_code_size: u8 = u8:6;                       
+    let (BooList, Length, CodeList, Code_size): (bits[8], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
 
     assert_eq(BooList, expected_output);
     assert_eq(Length, expected_length);
     assert_eq(CodeList, expected_code);
+    assert_eq(Code_size, expected_code_size);
 }
 
 #[test]
 fn test2_Huffman_DCenc() {
     let test_matrix: s10[8][8] = [
-        [s10:-33, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:-15, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
@@ -297,12 +304,18 @@ fn test2_Huffman_DCenc() {
     ];
     
 
-    let expected_output: bits[8] = bits[8]:0b10000000;     
+    let expected_output: bits[8] = bits[8]:0b00000000;     
     let expected_length: u8 = u8:3;  
-    let expected_code: bits[8] = bits[8]:32;                
-    let (BooList, Length, CodeList): (bits[8], u8, bits[8]) = Huffman_DCenc(test_matrix, true);  
+    let expected_code: bits[8] = bits[8]:0b1111_0000;   
+    let expected_code_size: u8 = u8:4;                       
+    let (BooList, Length, CodeList, Code_size): (bits[8], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
+
+    trace!(BooList);
+    trace!(Length);
+    trace!(CodeList);
 
     assert_eq(BooList, expected_output);
     assert_eq(Length, expected_length);
     assert_eq(CodeList, expected_code);
+    assert_eq(Code_size, expected_code_size);
 }
