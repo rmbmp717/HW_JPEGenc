@@ -186,8 +186,6 @@ async def sub_test_JPEGenc(dut):
         #await sub_Debug_func.dump_Zigzag_Cb_output(dut)
         #await sub_Debug_func.dump_Zigzag_Cr_output(dut)
 
-    await sub_Debug_func.dump_Zigzag_Y_output(dut)
-
     print("==========================================================================")
     print("6: Huffman enc Start")
     # Huffman start
@@ -209,15 +207,20 @@ async def sub_test_JPEGenc(dut):
     huffman_dc_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out.value)
     huffman_dc_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out_length.value)
     huffman_dc_code_list = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_code_list.value)
+    huffman_dc_code_lst_size = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.dc_out_code_size.value)
+    
     if Huffman_debug == 1:
         print("huffman_dc_code_bin(bin) =", huffman_dc_code_bin)
         print("huffman_dc_code_list(bin) =", huffman_dc_code_list)
     trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
+    trimmed_huffman_dc_code_list = trimmed_huffman_dc_code_list[-huffman_dc_code_lst_size:]
 
     trimmed_huffman_dc_code = huffman_dc_code_bin[:huffman_dc_code_length]
     if Huffman_debug == 1:
         print("huffman_dc_code(bin) =", trimmed_huffman_dc_code)
         print("huffman_dc_code_length =", huffman_dc_code_length)
+        print("trimmed_huffman_dc_code_list =", trimmed_huffman_dc_code_list)
+        print("huffman_dc_code_lst_size =", huffman_dc_code_lst_size)
         
     # ビット列を最終出力に連結
     final_output += trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
