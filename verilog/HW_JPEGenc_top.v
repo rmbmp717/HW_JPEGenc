@@ -92,7 +92,8 @@ module HW_JPEGenc_top(
         .jpeg_dc_code_size      (jpeg_dc_code_size),
         .huffman_code           (huffman_code),
         .huffman_code_length    (huffman_code_length),
-        .code_out               (code_out)
+        .code_out               (code_out),
+        .code_size_out          (code_size_out)
     );
 
     // Cb, Cr module
@@ -116,7 +117,8 @@ module HW_JPEGenc_top(
         .jpeg_dc_out_length     (),
         .huffman_code           (),
         .huffman_code_length    (),
-        .code_out               ()
+        .code_out               (),
+        .code_size_out          ()
     );
 
     HW_JPEGenc HW_JPEGenc_Cr(
@@ -139,7 +141,8 @@ module HW_JPEGenc_top(
         .jpeg_dc_out_length     (),
         .huffman_code           (),
         .huffman_code_length    (),
-        .code_out               ()
+        .code_out               (),
+        .code_size_out          ()
     );
     
 endmodule

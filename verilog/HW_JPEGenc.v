@@ -26,7 +26,8 @@ module HW_JPEGenc(
     output wire [7:0]       jpeg_dc_code_size,
     output wire [15:0]      huffman_code,           // 最終 JPEG 出力（16ビット）
     output wire [7:0]       huffman_code_length,    // 最終 JPEG 出力のビット幅
-    output wire [7:0]       code_out
+    output wire [7:0]       code_out,
+    output wire [7:0]       code_size_out
 );
 
     // パラメータ定義
@@ -59,6 +60,7 @@ module HW_JPEGenc(
     wire [15:0] ac_out;
     wire [7:0]  length;
     wire [7:0]  code;
+    wire [7:0]  code_size;
     wire [3:0]  run;
 
     // ---------------------------------------------------------------------
@@ -156,7 +158,7 @@ module HW_JPEGenc(
         .matrix             (ac_matrix),
         .start_pix          (start_pix),
         .is_luminance       (is_luminance),
-        .out                ({ac_out, length, code, run})
+        .out                ({ac_out, length, code, code_size, run})
     );
 
     // Huffman エンコード コントローラ
@@ -175,8 +177,10 @@ module HW_JPEGenc(
         .ac_out             (ac_out),
         .length             (length),
         .code               (code),
+        .code_size          (code_size),
         .run                (run),
         // JPEG Code Output
+        .Huffmanenc_active      (),
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (jpeg_dc_out),
         .jpeg_dc_out_length     (jpeg_dc_out_length),
@@ -184,7 +188,8 @@ module HW_JPEGenc(
         .jpeg_dc_code_size      (jpeg_dc_code_size),
         .huffman_code           (huffman_code),
         .huffman_code_length    (huffman_code_length),
-        .code_out               (code_out)
+        .code_out               (code_out),
+        .code_size_out          (code_size_out)
     );
 
 endmodule
