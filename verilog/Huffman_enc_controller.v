@@ -43,6 +43,8 @@ module Huffman_enc_controller(
       jpeg_out_end <= 0;
       jpeg_dc_out <= 0;
       jpeg_dc_out_length <= 0;
+      jpeg_dc_code_list <= 0;
+      jpeg_dc_code_size <= 0;
       huffman_code <= 0;
       huffman_code_length <= 0;
       code_out <= 0;
