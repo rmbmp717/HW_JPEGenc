@@ -213,7 +213,6 @@ async def sub_test_JPEGenc(dut):
     huffman_dc_code_list_size = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.dc_out_code_size.value)
     
     if Huffman_debug == 1:
-        print(f"{get_sim_time('ns')} ns:")
         print("huffman_dc_code_bin(bin) =", huffman_dc_code_bin)
         print("huffman_dc_code_list(bin) =", huffman_dc_code_list)
     trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
@@ -233,12 +232,13 @@ async def sub_test_JPEGenc(dut):
     print("==========================================================================")
     # 例えば36回検出するか、state が 0 になったらループ終了
     print("6.2: Huffman AC Code")
-    while num_detected < 36 and not done:
+    while num_detected < 48 and not done:
             
         # jpeg_out_enable の立ち上がりを待機
-        print(f"{get_sim_time('ns')} ns:")
         await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
+        print(f"{get_sim_time('ns')} ns:")
         #print("code count = {} ".format(num_detected))
+        await FallingEdge(dut.clock)
 
         huffman_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value)
         huffman_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.length.value)
@@ -248,7 +248,6 @@ async def sub_test_JPEGenc(dut):
         code_out_bin = code_out[-code_size_out:]
         
         if Huffman_debug == 1:
-            print(f"{get_sim_time('ns')} ns:")
             print("huffman_code(bin) =", trimmed_huffman_code)
             print("huffman_code_length =", huffman_code_length)
             print("code_out(bin) =", code_out_bin)
@@ -256,7 +255,12 @@ async def sub_test_JPEGenc(dut):
         
         # ビット列を最終出力に連結
         if(dut.HW_JPEGenc_Y.mHuffman_enc_controller.Huffmanenc_active.value==1):
-           final_output += trimmed_huffman_code + code_out_bin 
+            if(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_end.value==1):
+                print("final bit")
+                final_output += trimmed_huffman_code 
+            else:
+                final_output += trimmed_huffman_code + code_out_bin 
+
         num_detected += 1
 
         print("now_JPEG_output=", final_output)
@@ -272,10 +276,9 @@ async def sub_test_JPEGenc(dut):
 
         print("Huffmanenc_active=", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.Huffmanenc_active.value))
 
-        print(f"{get_sim_time('ns')} ns:")
-
         # 状態が 0 になったら終了
-        if int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.start_pix.value) >= 36:
+        if int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.Huffmanenc_active.value) == 0:
+            print(f"{get_sim_time('ns')} ns:")
             print("Loop End")
             done = True
 
@@ -289,19 +292,22 @@ async def sub_test_JPEGenc(dut):
     print("8: Final Output")
     # とりあえずの出力ビット処理 #
     # 追加処理：final_output の最後の4ビットを削除する
-    final_output = final_output + "1100"
+    #final_output = final_output + "1100"
 
     # 最終出力が8ビットの倍数でない場合、末尾に'0'を追加して調整する
     if len(final_output) % 8 != 0:
         padding = 8 - (len(final_output) % 8)
         final_output += '0' * padding
 
-
+    '''
     formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])
     print(formatted_output)
     if Huffman_debug == 1:
         print("Total Bits:", len(final_output))
         print("Compression Rate:", 100*len(final_output)/512, "%")
+    '''
+
+    return final_output
 
     print("==========================================================================")
     for _ in range(100):

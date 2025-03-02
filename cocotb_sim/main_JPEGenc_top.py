@@ -28,23 +28,16 @@ async def main_JPEGenc_top(dut):
     cocotb.start_soon(generate_clock(dut, period=10))
 
     # start
-    await sub_test_JPEGenc.sub_test_JPEGenc(dut)
+    final_output = await sub_test_JPEGenc.sub_test_JPEGenc(dut)
 
     for _ in range(20):
         await RisingEdge(dut.clock)
 
-    '''
-    print("==========================================================================")
-    print("9: Decode JPEG final_output")
-    # シミュレーションで得られた final_output（ビット列文字列）を一時ファイルに保存
-    temp_filename = "final_output_temp.txt"
-    with open(temp_filename, "w") as f:
-        f.write(final_output)
-    # my_JPEG_dec のメイン処理を --bitstream モードで呼び出す
-    import my_JPEG_dec
-    my_JPEG_dec.main("--bitstream", temp_filename)
-    # Disable input_enable
-    dut.input_enable.value = 0
-    '''
+    formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])
+    print(formatted_output)
 
+    print("Total Bits:", len(final_output))
+    print("Compression Rate:", 100*len(final_output)/512, "%")
+
+    print("==========================================================================")
     print("Main test End")
