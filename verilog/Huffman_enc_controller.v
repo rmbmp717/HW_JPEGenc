@@ -19,6 +19,7 @@ module Huffman_enc_controller(
   // final output 
   output reg                Huffmanenc_active,
   output reg                jpeg_out_enable,
+  output reg                jpeg_out_end,
   output reg   [7:0]        jpeg_dc_out,
   output reg   [7:0]        jpeg_dc_out_length,
   output reg   [7:0]        jpeg_dc_code_list,
@@ -39,6 +40,7 @@ module Huffman_enc_controller(
       ac_matrix <= 0;
       start_pix <= 0;
       jpeg_out_enable <= 0;
+      jpeg_out_end <= 0;
       jpeg_dc_out <= 0;
       jpeg_dc_out_length <= 0;
       huffman_code <= 0;
@@ -50,6 +52,7 @@ module Huffman_enc_controller(
         0: begin
           dc_matrix <= 0;
           jpeg_out_enable <= 0;
+          jpeg_out_end <= 0;
           if(Huffman_start) begin
             state <= 1;
             Huffmanenc_active <= 1;
@@ -96,22 +99,27 @@ module Huffman_enc_controller(
           state <= 9;
         end
         9: begin
+          start_pix <= start_pix + run + 1;
+          huffman_code <= ac_out;
+          huffman_code_length <= length;
+          state <= 10;
+          code_out <= code; 
+          code_size_out <= code_size;
+          jpeg_out_enable <= 1;
           if(ac_out[3:0]==4'b1100 && length==8'd4) begin
-            state <= 0;
-            Huffmanenc_active <= 0;
-          end else begin
-            start_pix <= start_pix + run + 1;
-            huffman_code <= ac_out;
-            huffman_code_length <= length;
-            state <= 10;
-            code_out <= code; 
-            code_size_out <= code_size;
-            jpeg_out_enable <= 1;
+            jpeg_out_end <= 1;
           end
         end
         10: begin
-          jpeg_out_enable <= 0;
-          state <= 3;
+          if(ac_out[3:0]==4'b1100 && length==8'd4) begin
+            jpeg_out_enable <= 0;
+            jpeg_out_end <= 0;
+            state <= 0;
+            Huffmanenc_active <= 0;
+          end else begin
+            jpeg_out_enable <= 0;
+            state <= 3;
+          end
         end
       endcase
     end

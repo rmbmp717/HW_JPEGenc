@@ -182,6 +182,7 @@ module HW_JPEGenc(
         // JPEG Code Output
         .Huffmanenc_active      (),
         .jpeg_out_enable        (jpeg_out_enable),
+        .jpeg_out_end           (),
         .jpeg_dc_out            (jpeg_dc_out),
         .jpeg_dc_out_length     (jpeg_dc_out_length),
         .jpeg_dc_code_list      (jpeg_dc_code_list),
