@@ -28,16 +28,23 @@ async def main_JPEGenc_top(dut):
     cocotb.start_soon(generate_clock(dut, period=10))
 
     # start
-    final_output = await sub_test_JPEGenc.sub_test_JPEGenc(dut)
+    final_Y_output, final_Cb_output, final_Cr_output = await sub_test_JPEGenc.sub_test_JPEGenc(dut)
 
     for _ in range(20):
         await RisingEdge(dut.clock)
 
-    formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])
-    print(formatted_output)
+    #formatted_output = '_'.join([final_Y_output[i:i+8] for i in range(0, len(final_Y_output), 8)])
+    formatted_output = final_Y_output
+    print("final Y output : ", formatted_output)
+    #formatted_output = '_'.join([final_Cb_output[i:i+8] for i in range(0, len(final_Cb_output), 8)])
+    formatted_output = final_Cb_output
+    print("final Cb output : ", formatted_output)
+    #formatted_output = '_'.join([final_Cr_output[i:i+8] for i in range(0, len(final_Cr_output), 8)])
+    formatted_output = final_Cr_output
+    print("final Cr output : ", formatted_output)
 
-    print("Total Bits:", len(final_output))
-    print("Compression Rate:", 100*len(final_output)/512, "%")
+    print("Total Bits:", len(final_Y_output + final_Cb_output + final_Cr_output))
+    print("Compression Rate:", 100*len((final_Y_output + final_Cb_output + final_Cr_output))/(512*3), "%")
 
     print("==========================================================================")
     print("Main test End")

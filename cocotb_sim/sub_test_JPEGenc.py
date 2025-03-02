@@ -4,7 +4,7 @@ JPEG HW Encoder Test
 """
 import cocotb
 import random
-from cocotb.triggers import Timer, RisingEdge, FallingEdge
+from cocotb.triggers import First, Timer, RisingEdge, FallingEdge
 from cocotb.utils import get_sim_time
 
 import sys, os
@@ -12,11 +12,105 @@ import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../cocotb_sim/')))
 import sub_Debug_func
 
-# Debug 8x8 matrix out
-matrix_debug_out = 1
+# ---------------------------------------------------
+# sub DC 関数
+async def run_huffman_dc(module, name, debug_flag, final_dc_container, clock):
+    # 各モジュールの DC 部分の処理を行う関数
+    # モジュールの state が 6 になるまで待機
+    while True:
+        await RisingEdge(clock)
+        if int(module.state.value) == 6:
+            break
+
+    # DC コード関連の信号を取得
+    huffman_dc_code_bin = str(module.jpeg_dc_out.value)
+    huffman_dc_code_length = int(module.jpeg_dc_out_length.value)
+    huffman_dc_code_list = str(module.jpeg_dc_code_list.value)
+    huffman_dc_code_list_size = int(module.dc_out_code_size.value)
+
+    if debug_flag:
+        print(f"{name} huffman_dc_code_bin(bin) =", huffman_dc_code_bin)
+        print(f"{name} huffman_dc_code_list(bin) =", huffman_dc_code_list)
+
+    # 余分な 0 を除去し、リストサイズ分を取り出す
+    trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
+    trimmed_huffman_dc_code_list = trimmed_huffman_dc_code_list[-huffman_dc_code_list_size:]
+    # DC コード本体は先頭部分から取り出す
+    trimmed_huffman_dc_code = huffman_dc_code_bin[:huffman_dc_code_length]
+
+    if debug_flag:
+        print(f"{name} huffman_dc_code(bin) =", trimmed_huffman_dc_code)
+        print(f"{name} huffman_dc_code_length =", huffman_dc_code_length)
+        print(f"{name} trimmed_huffman_dc_code_list =", trimmed_huffman_dc_code_list)
+        print(f"{name} huffman_dc_code_list_size =", huffman_dc_code_list_size)
+
+    # 連結して最終出力とする
+    final_dc = trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
+    print(f"{name} dc final_output =", final_dc)
+    final_dc_container[name] = final_dc
+
+
+# ---------------------------------------------------
+# sub AC 関数
+async def run_huffman_ac(module, name, debug_flag, final_output_container, clock):
+    num_detected = 0
+    done = False
+    local_output = ""
+    print("==========================================================================")
+    print("6.2: Huffman AC Code")
+    while num_detected < 48 and not done:
+        # jpeg_out_enable の立ち上がりを待機
+        await RisingEdge(module.jpeg_out_enable)
+        print(f"{get_sim_time('ns')} ns:")
+        await FallingEdge(clock)
+
+        huffman_code_bin = str(module.ac_out.value)
+        huffman_code_length = int(module.length.value)
+        trimmed_huffman_code = huffman_code_bin[-huffman_code_length:]
+        code_out = str(module.code_out.value)
+        code_size_out = int(module.code_size_out.value)
+        code_out_bin = code_out[-code_size_out:]
+        
+        if debug_flag:
+            print("huffman_code(bin) =", trimmed_huffman_code)
+            print("huffman_code_length =", huffman_code_length)
+            print("code_out(bin) =", code_out_bin)
+            print("code_size_out =", code_size_out)
+        
+        # ビット列を最終出力に連結
+        if int(module.Huffmanenc_active.value) == 1:
+            if int(module.jpeg_out_end.value) == 1:
+                print("final bit")
+                local_output += trimmed_huffman_code 
+            else:
+                local_output += trimmed_huffman_code + code_out_bin 
+
+        num_detected += 1
+
+        print("now_JPEG_output=", local_output)
+        print("--------------")
+
+        # jpeg_out_enable が Low になる（立ち下がり）を待機する
+        await FallingEdge(module.jpeg_out_enable)
+        await RisingEdge(clock)
+    
+        # デバッグ用：Huffmanenc_active の値を表示
+        print("Huffmanenc_active=", int(module.Huffmanenc_active.value))
+        
+        # 状態が 0 になったら終了
+        if int(module.Huffmanenc_active.value) == 0:
+            print(f"{get_sim_time('ns')} ns:")
+            print("Loop End")
+            done = True
+
+    final_output_container[name] = local_output
 
 # ---------------------------------------------------
 # sub メイン関数
+
+# Debug 8x8 matrix out
+matrix_debug_out = 1
+
 async def sub_test_JPEGenc(dut):
     print("==========================================================================")
 
@@ -108,10 +202,10 @@ async def sub_test_JPEGenc(dut):
     print("==========================================================================")
     print("1: DCT 2D Start")
 
-    if matrix_debug_out == 1:
-        await sub_Debug_func.dump_Dct_Y_input(dut)
-        await sub_Debug_func.dump_Dct_Cb_input(dut)
-        await sub_Debug_func.dump_Dct_Cr_input(dut)
+    #if matrix_debug_out == 1:
+        #await sub_Debug_func.dump_Dct_Y_input(dut)
+        #await sub_Debug_func.dump_Dct_Cb_input(dut)
+        #await sub_Debug_func.dump_Dct_Cr_input(dut)
 
     # DCT 2D Start
     await RisingEdge(dut.clock)
@@ -127,10 +221,10 @@ async def sub_test_JPEGenc(dut):
     await RisingEdge(dut.clock)
 
     print("1.2: DCT 2D Output Data")
-    if matrix_debug_out == 1:
-        await sub_Debug_func.dump_Dct_Y_output(dut)
-        await sub_Debug_func.dump_Dct_Cb_output(dut)
-        await sub_Debug_func.dump_Dct_Cr_output(dut)
+    #if matrix_debug_out == 1:
+        #await sub_Debug_func.dump_Dct_Y_output(dut)
+        #await sub_Debug_func.dump_Dct_Cb_output(dut)
+        #await sub_Debug_func.dump_Dct_Cr_output(dut)
 
     print("==========================================================================")
     print("2: Quantize Start")
@@ -152,8 +246,8 @@ async def sub_test_JPEGenc(dut):
         await RisingEdge(dut.clock)
     print("2: Quantize End")
 
-    if matrix_debug_out == 1:
-        await sub_Debug_func.dump_Quantized_Y_output(dut)
+    #if matrix_debug_out == 1:
+        #await sub_Debug_func.dump_Quantized_Y_output(dut)
         #await sub_Debug_func.dump_Quantized_Cb_output(dut)
         #await sub_Debug_func.dump_Quantized_Cr_output(dut)
 
@@ -171,8 +265,8 @@ async def sub_test_JPEGenc(dut):
     print("==========================================================================")
     print("4: Zigzag Input Data (8x8 matrix):")
     
-    if matrix_debug_out == 1:
-        await sub_Debug_func.dump_Zigzag_Y_Input(dut)
+    #if matrix_debug_out == 1:
+        #await sub_Debug_func.dump_Zigzag_Y_Input(dut)
         #await sub_Debug_func.dump_Zigzag_Cb_Input(dut)
         #await sub_Debug_func.dump_Zigzag_Cr_Input(dut)
 
@@ -184,105 +278,64 @@ async def sub_test_JPEGenc(dut):
 
     if matrix_debug_out == 1:
         await sub_Debug_func.dump_Zigzag_Y_output(dut)
-        #await sub_Debug_func.dump_Zigzag_Cb_output(dut)
-        #await sub_Debug_func.dump_Zigzag_Cr_output(dut)
+        await sub_Debug_func.dump_Zigzag_Cb_output(dut)
+        await sub_Debug_func.dump_Zigzag_Cr_output(dut)
 
     print("==========================================================================")
     print("6: Huffman enc Start")
+    print("6.1: Huffman DC Code")
     # Huffman start
     dut.Huffman_start.value = 1
     await RisingEdge(dut.clock)
     dut.Huffman_start.value = 0
 
-    num_detected = 0
-    done = False  # ここで done を初期化
-    final_output = ""  # 最終出力となるビット列を格納
-
-    while 1:
-        await RisingEdge(dut.clock)
-        if int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.state.value) == 6:
-            break
-
     # Debug on
     Huffman_debug = 1
-        
-    print("6.1: Huffman DC Code")
-    huffman_dc_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out.value)
-    huffman_dc_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out_length.value)
-    huffman_dc_code_list = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_code_list.value)
-    huffman_dc_code_list_size = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.dc_out_code_size.value)
-    
-    if Huffman_debug == 1:
-        print("huffman_dc_code_bin(bin) =", huffman_dc_code_bin)
-        print("huffman_dc_code_list(bin) =", huffman_dc_code_list)
-    trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
-    trimmed_huffman_dc_code_list = trimmed_huffman_dc_code_list[-huffman_dc_code_list_size:]
 
-    trimmed_huffman_dc_code = huffman_dc_code_bin[:huffman_dc_code_length]
-    if Huffman_debug == 1:
-        print("huffman_dc_code(bin) =", trimmed_huffman_dc_code)
-        print("huffman_dc_code_length =", huffman_dc_code_length)
-        print("trimmed_huffman_dc_code_list =", trimmed_huffman_dc_code_list)
-        print("huffman_dc_code_list_size =", huffman_dc_code_list_size)
-        
-    # ビット列を最終出力に連結
-    final_output += trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
-    print("dc final_output=", final_output)
+    print("6.1: Huffman DC Code")
+    # DC コード部分を各モジュールで並列に実行
+    final_dc_container = {}
+    task_dc_y = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", Huffman_debug, final_dc_container, dut.clock))
+    task_dc_cb = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", Huffman_debug, final_dc_container, dut.clock))
+    task_dc_cr = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", Huffman_debug, final_dc_container, dut.clock))
+
+    # 並列タスクの終了を待機
+    await task_dc_y.join()
+    await task_dc_cb.join()
+    await task_dc_cr.join()
+
+    # 各モジュールの DC コード出力を個別に表示
+    print("Y dc final_output =", final_dc_container.get("Y", ""))
+    print("Cb dc final_output =", final_dc_container.get("Cb", ""))
+    print("Cr dc final_output =", final_dc_container.get("Cr", ""))
 
     print("==========================================================================")
     # 例えば36回検出するか、state が 0 になったらループ終了
     print("6.2: Huffman AC Code")
-    while num_detected < 48 and not done:
-            
-        # jpeg_out_enable の立ち上がりを待機
-        await RisingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
-        print(f"{get_sim_time('ns')} ns:")
-        #print("code count = {} ".format(num_detected))
-        await FallingEdge(dut.clock)
 
-        huffman_code_bin = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.ac_out.value)
-        huffman_code_length = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.length.value)
-        trimmed_huffman_code = huffman_code_bin[-huffman_code_length:]
-        code_out = str(dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_out.value)
-        code_size_out = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.code_size_out.value)
-        code_out_bin = code_out[-code_size_out:]
-        
-        if Huffman_debug == 1:
-            print("huffman_code(bin) =", trimmed_huffman_code)
-            print("huffman_code_length =", huffman_code_length)
-            print("code_out(bin) =", code_out_bin)
-            print("code_size_out =", code_size_out)
-        
-        # ビット列を最終出力に連結
-        if(dut.HW_JPEGenc_Y.mHuffman_enc_controller.Huffmanenc_active.value==1):
-            if(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_end.value==1):
-                print("final bit")
-                final_output += trimmed_huffman_code 
-            else:
-                final_output += trimmed_huffman_code + code_out_bin 
+    # 出力を格納するための辞書
+    final_output_container = {}
 
-        num_detected += 1
+    # 並列に各モジュールの Huffman AC Code 部分を実行（共通のクロック信号を渡す）
+    task_y = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", True, final_output_container, dut.clock))
+    task_cb = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", True, final_output_container, dut.clock))
+    task_cr = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", True, final_output_container, dut.clock))
 
-        print("now_JPEG_output=", final_output)
-        print("--------------")
+    # 並列タスクの終了を待機
+    await task_y.join()
+    await task_cb.join()
+    await task_cr.join()
 
-        # jpeg_out_enable が Low になる（立ち下がり）を待機する
-        await FallingEdge(dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_out_enable)
-        await RisingEdge(dut.clock)
-    
-        # デバッグ用：state の値を表示
-        #current_state = int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.state.value)
-        #print("Current state value:", current_state)
-
-        print("Huffmanenc_active=", int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.Huffmanenc_active.value))
-
-        # 状態が 0 になったら終了
-        if int(dut.HW_JPEGenc_Y.mHuffman_enc_controller.Huffmanenc_active.value) == 0:
-            print(f"{get_sim_time('ns')} ns:")
-            print("Loop End")
-            done = True
+    # 各モジュールの結果を個別に表示する
+    print("Y final_output =", final_output_container.get("Y", ""))
+    print("Cb final_output =", final_output_container.get("Cb", ""))
+    print("Cr final_output =", final_output_container.get("Cr", ""))
 
     #print("jpeg_dc_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out.value)
+
+    final_Y_output = final_dc_container.get("Y", "") + final_output_container.get("Y", "")
+    final_Cb_output = final_dc_container.get("Cb", "") + final_output_container.get("Cb", "")
+    final_Cr_output = final_dc_container.get("Cr", "") + final_output_container.get("Cr", "")
 
     print("==========================================================================")
     print("7: Huffman enc End")
@@ -295,9 +348,9 @@ async def sub_test_JPEGenc(dut):
     #final_output = final_output + "1100"
 
     # 最終出力が8ビットの倍数でない場合、末尾に'0'を追加して調整する
-    if len(final_output) % 8 != 0:
-        padding = 8 - (len(final_output) % 8)
-        final_output += '0' * padding
+    if len(final_Y_output) % 8 != 0:
+        padding = 8 - (len(final_Y_output) % 8)
+        final_Y_output += '0' * padding
 
     '''
     formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])
@@ -307,7 +360,7 @@ async def sub_test_JPEGenc(dut):
         print("Compression Rate:", 100*len(final_output)/512, "%")
     '''
 
-    return final_output
+    return (final_Y_output, final_Cb_output, final_Cr_output)
 
     print("==========================================================================")
     for _ in range(100):
