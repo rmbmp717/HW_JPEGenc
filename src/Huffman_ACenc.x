@@ -660,7 +660,13 @@ fn encode_ac(ac_data: s10[63], is_luminance: bool) -> (bits[16], u8, bits[8], u8
     // すべて 0 なら EOB を返す
     if run == u4:15 {
         trace!("EOB");
-        (EOB_LUM_EXT, u8:2, bits[8]:0, u8:4, u4:0)
+        if is_luminance {
+            let (huff_code, huff_length) = lookup_ACLuminanceSizeToCode([u8:0, u8:0]);
+            (huff_code, huff_length, bits[8]:0, u8:4, u4:0)
+        } else {
+            let (huff_code, huff_length) = lookup_ACChrominanceToCode([u8:0, u8:0]);
+            (huff_code, huff_length, bits[8]:0, u8:4, u4:0)
+        }
     } else {
         let value: s10 = ac_data[run];  // `run` の次の非ゼロ値
         let size: u8 = bit_length(value);
@@ -725,7 +731,13 @@ fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, is_luminance: bool) -> (bits[
         bin_value
     };
     if is_all_zero(ac) {
-        (EOB_LUM_EXT, u8:4, code_list, u8:4, u4:15)  // EOB（ルミナンス用）
+      if is_luminance {
+          let (huff_code, huff_length) = lookup_ACLuminanceSizeToCode([u8:0, u8:0]);
+          (huff_code, huff_length, code_list, u8:0, u4:15)
+      } else {
+          let (huff_code, huff_length) = lookup_ACChrominanceToCode([u8:0, u8:0]);
+          (huff_code, huff_length, code_list, u8:0, u4:15)
+      }
     } else {
         encode_ac(ac, is_luminance)  // Luminance 用 Huffman 符号化
     }
@@ -813,13 +825,13 @@ fn test0_Huffman_ACenc_allzero() {
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1100;     
-    let expected_length: u8 = u8:4;             
+    let expected_output: bits[16] = bits[16]:0b01;     
+    let expected_length: u8 = u8:2;             
     let expected_code: bits[8] = bits[8]:0b1111_1111;  
-    let expected_code_size: u8 = u8:4;  
+    let expected_code_size: u8 = u8:0;  
     let expected_run: u4 = u4:15;                        
     let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:1, true);  
+                = Huffman_ACenc(test_matrix, u8:1, false);  
 
     trace!(actual_output);
     trace!(actual_length);
