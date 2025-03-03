@@ -20,13 +20,14 @@ module HW_JPEGenc_top(
     input  wire             Huffman_start,
     // JPEG Data 
     output wire             jpeg_out_enable,  
-    output wire [7:0]       jpeg_dc_out,          // 最終 JPEG 出力 DC
+    output wire [8:0]       jpeg_dc_out,          // 最終 JPEG 出力 DC
     output reg  [7:0]       jpeg_dc_out_length,   // 最終 JPEG 出力 DC
     output reg  [7:0]       jpeg_dc_code_list,    // 最終 JPEG 出力 DC
     output reg  [7:0]       jpeg_dc_code_size,
     output wire [15:0]      huffman_code,         // 最終 JPEG 出力（16ビット）
     output wire [7:0]       huffman_code_length,  // 最終 JPEG 出力のビット幅
-    output wire [7:0]       code_out              // 最終 JPEG 出力 CODE
+    output wire [7:0]       code_out,             // 最終 JPEG 出力 CODE
+    output wire [7:0]       code_size_out         // 最終 JPEG 出力 CODE
 );
 
     // VCD ダンプ用ブロック
@@ -111,7 +112,7 @@ module HW_JPEGenc_top(
         .matrix_row             (matrix_row),
         .Huffman_start          (Huffman_start),
         //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
-        .is_luminance           (1'b1),
+        .is_luminance           (1'b0),
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (),
         .jpeg_dc_out_length     (),
@@ -135,7 +136,7 @@ module HW_JPEGenc_top(
         .matrix_row             (matrix_row),
         .Huffman_start          (Huffman_start),
         //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
-        .is_luminance           (1'b1),
+        .is_luminance           (1'b0),
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (),
         .jpeg_dc_out_length     (),

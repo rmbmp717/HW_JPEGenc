@@ -20,7 +20,7 @@ module HW_JPEGenc(
     input  wire             is_luminance,
     // JPEG Output
     output wire             jpeg_out_enable,
-    output wire [7:0]       jpeg_dc_out,
+    output wire [8:0]       jpeg_dc_out,
     output wire [7:0]       jpeg_dc_out_length,
     output wire [7:0]       jpeg_dc_code_list,
     output wire [7:0]       jpeg_dc_code_size,
@@ -53,7 +53,7 @@ module HW_JPEGenc(
     wire [640-1:0] ac_matrix;
 
     // Huffmann enc out
-    wire [7:0]  dc_out;
+    wire [8:0]  dc_out;             // 9 bits
     wire [7:0]  dc_out_length;
     wire [7:0]  dc_out_code_list;
     wire [7:0]  dc_out_code_size;
@@ -165,6 +165,7 @@ module HW_JPEGenc(
     Huffman_enc_controller mHuffman_enc_controller (
         .clock              (clock),
         .reset_n            (reset_n),
+        .is_luminance       (is_luminance),
         .Huffman_start      (Huffman_start),
         .zigzag_pix_in      (pix_data_out),
         .dc_matrix          (dc_matrix),

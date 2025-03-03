@@ -1,13 +1,14 @@
 module Huffman_enc_controller(
   input  wire               clock,
   input  wire               reset_n,
+  input  wire               is_luminance,
   input  wire               Huffman_start,
   input  wire  [639:0]      zigzag_pix_in,
   output reg   [639:0]      dc_matrix,
   output reg   [639:0]      ac_matrix,
   output reg   [7:0]        start_pix,
   // from enc module
-  input  wire  [7:0]        dc_out,
+  input  wire  [8:0]        dc_out,       // 9 bits
   input  wire  [7:0]        dc_out_length,
   input  wire  [7:0]        dc_out_code_list,
   input  wire  [7:0]        dc_out_code_size,
@@ -20,7 +21,7 @@ module Huffman_enc_controller(
   output reg                Huffmanenc_active,
   output reg                jpeg_out_enable,
   output reg                jpeg_out_end,
-  output reg   [7:0]        jpeg_dc_out,
+  output reg   [8:0]        jpeg_dc_out,
   output reg   [7:0]        jpeg_dc_out_length,
   output reg   [7:0]        jpeg_dc_code_list,
   output reg   [7:0]        jpeg_dc_code_size,
@@ -108,19 +109,37 @@ module Huffman_enc_controller(
           code_out <= code; 
           code_size_out <= code_size;
           jpeg_out_enable <= 1;
-          if(ac_out[3:0]==4'b1100 && length==8'd4) begin
-            jpeg_out_end <= 1;
+          if(is_luminance) begin
+            if(ac_out[3:0]==4'b1100 && length==8'd4) begin
+              jpeg_out_end <= 1;
+            end
+          end else begin
+            if(ac_out[1:0]==2'b01 && length==8'd2) begin
+              jpeg_out_end <= 1;
+            end
           end
         end
         10: begin
-          if(ac_out[3:0]==4'b1100 && length==8'd4) begin
-            jpeg_out_enable <= 0;
-            jpeg_out_end <= 0;
-            state <= 0;
-            Huffmanenc_active <= 0;
+          if(is_luminance) begin
+            if(ac_out[3:0]==4'b1100 && length==8'd4) begin
+              jpeg_out_enable <= 0;
+              jpeg_out_end <= 0;
+              state <= 0;
+              Huffmanenc_active <= 0;
+            end else begin
+              jpeg_out_enable <= 0;
+              state <= 3;
+            end
           end else begin
-            jpeg_out_enable <= 0;
-            state <= 3;
+            if(ac_out[1:0]==2'b01 && length==8'd2) begin
+              jpeg_out_enable <= 0;
+              jpeg_out_end <= 0;
+              state <= 0;
+              Huffmanenc_active <= 0;
+            end else begin
+              jpeg_out_enable <= 0;
+              state <= 3;
+            end
           end
         end
       endcase
