@@ -1129,17 +1129,19 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         j = i
         while 1:
             if(ACArray[j]!=0):
-                #print("i=", i, "j=", j)
-                #print("ACArray")
+                print("i=", i, "j=", j)
+                print("ACArray")
                 break
             if(j==maxI - 1):
-                #print("i=", i, "j=", j)
+                print("i=", i, "j=", j)
                 if (isLuminance == 1):
                     bitStream.append(ACLuminanceSizeToCode['00'])  # EOB
+                    print("EOB")
                     if (debugMode == 1):
                         print('EOB: code=', ACLuminanceSizeToCode['00'])
                 else:
                     bitStream.append(ACChrominanceToCode['00'])
+                    print("EOB")
                     if (debugMode == 1):
                         print('EOB: code=', ACChrominanceToCode['00'])
                 #print("bitStream=", bitStream.bin)
@@ -1161,14 +1163,14 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         value = ACArray[i]
 
         if(value==0 and run!=15):
-            #print("runt!15")
+            print("runt!15")
             break # Rest of the components are zeros therefore we simply put the EOB to signify this fact
 
         size = int(value).bit_length()
 
         print("run=", run)
         print("hex(run)=", hex(run))
-        print("size=", run)
+        print("size=", size)
         print("hex(size)=", hex(size))
 
         runSizeStr = str.upper(str(hex(run))[2:]) + str.upper(str(hex(size))[2:])
@@ -1210,6 +1212,8 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
             else:
                 print('isLuminance=',isLuminance,'(run,size,value)=',run,size,value,'code=',ACChrominanceToCode[runSizeStr],codeList)
 
+        print("ACLuminanceSizeToCode=", ACLuminanceSizeToCode[runSizeStr])
+        print("codeList=", codeList)
         print("bitStream=", bitStream.bin)
         i = i + 1
 

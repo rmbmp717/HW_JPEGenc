@@ -201,15 +201,21 @@ def main():
             if (DEBUG_MODE == 1):
                 print("encode yAC:", yZCode[1:])
             huffmanEncode.encodeACBlock(sosBitStream, yZCode[1:], 1, DEBUG_MODE)
+    
+            print("Debug: sosBitStream:", sosBitStream.bin)
 
             # encode uDC
             if(DEBUG_MODE==1):
                 print("encode duDC:",duDC[blockNum])
             sosBitStream.append(huffmanEncode.encodeDCToBoolList(duDC[blockNum],0, DEBUG_MODE))
+            ###
+            print("Debug uDC:", huffmanEncode.encodeDCToBoolList(duDC[blockNum],0, 0))
             # encode uAC
             if (DEBUG_MODE == 1):
                 print("encode uAC:", uZCode[1:])
             huffmanEncode.encodeACBlock(sosBitStream, uZCode[1:], 0, DEBUG_MODE)
+            ###
+            #print("Debug uAC:", huffmanEncode.encodeACBlock(sosBitStream, uZCode[1:], 0, 0))
 
             # encode vDC
             if(DEBUG_MODE==1):
@@ -223,7 +229,7 @@ def main():
 
             blockNum = blockNum + 1
 
-
+    print("sosBitStream:", sosBitStream.bin)
 
     jpegFile = open(outputJPEGFileName, 'wb+')
     # write jpeg header
@@ -292,11 +298,22 @@ def debug_main():
     
     yImage,uImage,vImage = Image.fromarray(addedImageMatrix).split()
 
+    '''
     yImage =  [-15,   6,   6,   0,   5,   0,  -1,   0,
                  0,  -1,   0,  -1,   0,  -1,   0,   0,
                  0,   0,   0,   0,  -1,  -2,   0,   0,
                  0,   0,   0,  14,   0,   0,   0,   0,
                  0,   0,   0,   1,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0]
+    '''
+
+    yImage =  [  0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
                  0,   0,   0,   0,   0,   0,   0,   0,
                  0,   0,   0,   0,   0,   0,   0,   0,
                  0,   0,   0,   0,   0,   0,   0,   0]
@@ -311,12 +328,21 @@ def debug_main():
     print("Input yZCode:")
     print(yZCode)
     
-    sosBitStream.append(huffmanEncode.encodeDCToBoolList(yZCode[0],1, 1))
+    sosBitStream.append(huffmanEncode.encodeDCToBoolList(yZCode[0],0, 1))
     print("sosBitStream DC:")
     print(sosBitStream.bin)
 
     print("encode yAC:", yZCode[1:])
-    huffmanEncode.encodeACBlock(sosBitStream, yZCode[1:], 1, 1)
+    huffmanEncode.encodeACBlock(sosBitStream, yZCode[1:], 0, 1)
+
+    # 現在のビット列を取得
+    binary_str = sosBitStream.bin
+    bit_length = len(binary_str)
+
+    # 8の倍数になるために追加する0の個数を計算
+    #if bit_length % 8 != 0:
+    #    pad = 8 - (bit_length % 8)
+    #    sosBitStream.bin += '0' * pad
 
     print("================================")
     print("sosBitStream:")
@@ -326,5 +352,5 @@ def debug_main():
 
 
 if __name__ == '__main__':
-    #main()
-    debug_main()
+    main()
+    #debug_main()
