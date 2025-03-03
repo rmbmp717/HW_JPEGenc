@@ -34,9 +34,14 @@ async def run_huffman_dc(module, name, debug_flag, final_dc_container, clock):
 
     # 余分な 0 を除去し、リストサイズ分を取り出す
     trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
-    trimmed_huffman_dc_code_list = trimmed_huffman_dc_code_list[-huffman_dc_code_list_size:]
+    
+    if huffman_dc_code_list_size == 0:
+        trimmed_huffman_dc_code_list = []
+    else:
+        trimmed_huffman_dc_code_list = trimmed_huffman_dc_code_list[-huffman_dc_code_list_size:]
+
     # DC コード本体は先頭部分から取り出す
-    trimmed_huffman_dc_code = huffman_dc_code_bin[:huffman_dc_code_length]
+    trimmed_huffman_dc_code = huffman_dc_code_bin[-huffman_dc_code_length:]
 
     if debug_flag:
         print(f"{name} huffman_dc_code(bin) =", trimmed_huffman_dc_code)
@@ -45,9 +50,14 @@ async def run_huffman_dc(module, name, debug_flag, final_dc_container, clock):
         print(f"{name} huffman_dc_code_list_size =", huffman_dc_code_list_size)
 
     # 連結して最終出力とする
-    final_dc = trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
+    if huffman_dc_code_list_size == 0:
+        final_dc = trimmed_huffman_dc_code
+    else:
+        final_dc = trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
+
     print(f"{name} dc final_output =", final_dc)
     final_dc_container[name] = final_dc
+    print("--------------")
 
 
 # ---------------------------------------------------
@@ -143,25 +153,21 @@ async def sub_test_JPEGenc(dut):
     # Set input_enable high and initialize pix_data with 1's
     #dut.input_enable.value = 1
 
-    # 0〜63のならび
-    #dut.pix_data.value = list(range(1, 65))
-    # すべて0
-    #dut.pix_data.value = [0] * 64
-    # すべて255
-    #dut.pix_data.value = [255] * 64
     # 左上が80
-    #dut.pix_data.value = [80 if (i < 4 and j < 4) else 0 for i in range(8) for j in range(8)]
-    input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    #input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    #input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
     #input_matrix_r = [[j + 1 for j in range(8)] for i in range(8)]
     #input_matrix_g = [[j + 1 for j in range(8)] for i in range(8)]
     #input_matrix_b = [[j + 1 for j in range(8)] for i in range(8)]
-
-    # 80, 0, 80, 0 ...
-    #dut.pix_data.value = [80, 0] * 32
-    # ランダムパターン
-    #input_matrix = [[random.randint(0, 255) for _ in range(8)] for _ in range(8)]
+    # 赤チャネル: 255、他は0
+    #input_matrix_r = [[255 for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[0 for j in range(8)] for i in range(8)]
+    #input_matrix_b = [[0 for j in range(8)] for i in range(8)]
+    # 各チャネルで左上から右下に向かって 0～255 のグラデーションを生成
+    input_matrix_r = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
+    input_matrix_g = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
+    input_matrix_b = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
 
     # flat化
     flat_data_r = [input_matrix_r[i][j] for i in range(8) for j in range(8)]
@@ -294,10 +300,11 @@ async def sub_test_JPEGenc(dut):
 
     print("6.1: Huffman DC Code")
     # DC コード部分を各モジュールで並列に実行
+    dc_debug = 1
     final_dc_container = {}
-    task_dc_y = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", Huffman_debug, final_dc_container, dut.clock))
-    task_dc_cb = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", Huffman_debug, final_dc_container, dut.clock))
-    task_dc_cr = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", Huffman_debug, final_dc_container, dut.clock))
+    task_dc_y = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", True, final_dc_container, dut.clock))
+    task_dc_cb = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", True, final_dc_container, dut.clock))
+    task_dc_cr = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", True, final_dc_container, dut.clock))
 
     # 並列タスクの終了を待機
     await task_dc_y.join()
@@ -317,9 +324,9 @@ async def sub_test_JPEGenc(dut):
     final_output_container = {}
 
     # 並列に各モジュールの Huffman AC Code 部分を実行（共通のクロック信号を渡す）
-    task_y = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", True, final_output_container, dut.clock))
+    task_y = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", False, final_output_container, dut.clock))
     task_cb = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", True, final_output_container, dut.clock))
-    task_cr = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", True, final_output_container, dut.clock))
+    task_cr = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", False, final_output_container, dut.clock))
 
     # 並列タスクの終了を待機
     await task_y.join()
@@ -348,9 +355,11 @@ async def sub_test_JPEGenc(dut):
     #final_output = final_output + "1100"
 
     # 最終出力が8ビットの倍数でない場合、末尾に'0'を追加して調整する
+    '''
     if len(final_Y_output) % 8 != 0:
         padding = 8 - (len(final_Y_output) % 8)
         final_Y_output += '0' * padding
+    '''
 
     '''
     formatted_output = '_'.join([final_output[i:i+8] for i in range(0, len(final_output), 8)])

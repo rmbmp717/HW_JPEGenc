@@ -10,6 +10,9 @@ from cocotb.triggers import Timer, RisingEdge
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../cocotb_sim/')))
 import sub_test_JPEGenc
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../cocotb_sim/')))
+import sub_test_JPEG_write
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python/')))
 import my_JPEG_dec
 
@@ -48,3 +51,9 @@ async def main_JPEGenc_top(dut):
 
     print("==========================================================================")
     print("Main test End")
+
+
+    print("==========================================================================")
+    print("JPEG File Write")
+    
+    await sub_test_JPEG_write.file_write(dut, final_Y_output, final_Cb_output, final_Cr_output)
