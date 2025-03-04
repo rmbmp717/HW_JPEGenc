@@ -1,58 +1,58 @@
 // NISHIHARU
 
 // 入力された s10 型の値を -511 ～ 511 の範囲にクリップする関数
-fn clip_s10(input: s10) -> s10 {
-    let output: s10 = if input > s10:511 {
-        s10:511
-    } else if input < s10:-511 {
-        s10:-511
+fn clip_s12(input: s12) -> s12 {
+    let output: s12 = if input > s12:511 {
+        s12:511
+    } else if input < s12:-511 {
+        s12:-511
     } else {
         input
     };
     output
 }
 
-// 2 つの s16 値の乗算を行い、255 で除算して結果を s16 で返す（スケーリング付き乗算）
-fn mul_s16x2(a_in: s16, b_in: s16) -> s16 {
-    // a_in * b_in を 32 ビット整数に拡張してから計算し、255 で割る
-    let outdata: s32 = (a_in as s32 * b_in as s32) / s32:255;
-    outdata as s16
+// 2 つの s16 値の乗算を行い、255 で除算して結果を s32 で返す
+fn mul_s16x2(a_in: s16, b_in: s16) -> s32 {
+    // a_in * b_in を 32 ビット整数に拡張してから計算
+    let outdata: s32 = (a_in as s32 * b_in as s32) ;
+    outdata
 }
 
 // RGB 8bit 値 (r, g, b) を YCbCr 色空間 (s10 型) に変換する関数
 //
 // 変換式（近似値、整数演算）:
 //   Y  = (77 * R + 150 * G + 29 * B) >> 8  (計算後、128 を引いて中心化)
-//   Cb = (-43 * R - 85 * G + 128 * B) >> 8  (計算後、128 を引いて中心化)
-//   Cr = (128 * R - 107 * G - 21 * B) >> 8  (計算後、128 を引いて中心化)
+//   Cb = (-43 * R - 85 * G + 128 * B) >> 8 
+//   Cr = (128 * R - 107 * G - 21 * B) >> 8 
 //
-// ※各成分は clip_s10 で -511～511 にクリップされる
-fn RGB_to_YCbCr(r: u8, g: u8, b: u8) -> (s10, s10, s10) {
+// ※各成分は clip_s12 で -511～511 にクリップされる
+fn RGB_to_YCbCr(r: u8, g: u8, b: u8) -> (s12, s12, s12) {
     // 8bit の RGB 値を s16 に変換
     let r_16bit = r as s16;
     let g_16bit = g as s16;
     let b_16bit = b as s16;
     
     // 輝度 Y の計算
-    let y_16: s16 = (mul_s16x2(s16:77, r_16bit) +
-                     mul_s16x2(s16:150, g_16bit) +
-                     mul_s16x2(s16:29, b_16bit)) as s16;
+    let y_16: s16 = ((mul_s16x2(s16:77, r_16bit) +
+                      mul_s16x2(s16:150, g_16bit) +
+                      mul_s16x2(s16:29, b_16bit)) / s32:255 ) as s16;
     // レベルシフト：DCT前に中心化するために128を引く
-    let y = clip_s10((y_16 as s10 - s10:128) as s10);
+    let y = clip_s12((y_16 as s12 - s12:128) as s12);
     
     // 青色差成分 Cb の計算
-    let cb_16: s16 = (mul_s16x2(s16:-43, r_16bit) +
-                      mul_s16x2(s16:-85, g_16bit) +
-                      mul_s16x2(s16:128, b_16bit)) as s16;
+    let cb_16: s16 = ((mul_s16x2(s16:-43, r_16bit) +
+                       mul_s16x2(s16:-85, g_16bit) +
+                       mul_s16x2(s16:128, b_16bit)) / s32:255 ) as s16 ;
     // レベルシフトしない
-    let cb = clip_s10(cb_16 as s10 - s10:0);
+    let cb = clip_s12(cb_16 as s12);
 
     // 赤色差成分 Cr の計算
-    let cr_16: s16 = (mul_s16x2(s16:128, r_16bit) +
-                      mul_s16x2(s16:-107, g_16bit) +
-                      mul_s16x2(s16:-21, b_16bit)) as s16;
+    let cr_16: s16 = ((mul_s16x2(s16:128, r_16bit) +
+                       mul_s16x2(s16:-107, g_16bit) +
+                       mul_s16x2(s16:-21, b_16bit)) / s32:255 ) as s16;
     // レベルシフトしない
-    let cr = clip_s10(cr_16 as s10 - s10:0);
+    let cr = clip_s12(cr_16 as s12);
 
     trace!(y);
     trace!(cb);
@@ -73,9 +73,9 @@ fn test1_rgb_to_ycbcr() {
     let b = u8:0;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // 期待値はそれぞれの計算結果に基づく（ここでは例として設定）
-    assert_eq(y, s10:-51);
-    assert_eq(cb, s10:-43);
-    assert_eq(cr, s10:128);
+    assert_eq(y, s12:-51);
+    assert_eq(cb, s12:-43);
+    assert_eq(cr, s12:128);
 }
 
 #[test]
@@ -86,9 +86,9 @@ fn test2_rgb_to_ycbcr() {
     let b = u8:0;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // 黒の場合、Y, Cb, Cr それぞれ -128 となる（レベルシフト後）
-    assert_eq(y, s10:-128);
-    assert_eq(cb, s10:0);
-    assert_eq(cr, s10:0);
+    assert_eq(y, s12:-128);
+    assert_eq(cb, s12:0);
+    assert_eq(cr, s12:0);
 }
 
 #[test]
@@ -99,9 +99,9 @@ fn test3_rgb_to_ycbcr() {
     let b = u8:255;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // 白の場合、Y は 128 (中心化後) となり、Cb, Cr は -128（中心化後）となる
-    assert_eq(y, s10:128);
-    assert_eq(cb, s10:0);
-    assert_eq(cr, s10:0);
+    assert_eq(y, s12:128);
+    assert_eq(cb, s12:0);
+    assert_eq(cr, s12:0);
 }
 
 #[test]
@@ -112,9 +112,9 @@ fn test4_rgb_to_ycbcr() {
     let b = u8:0;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
     // 期待値は計算結果に依存します。ここでは例として設定（適宜調整してください）
-    assert_eq(y, s10:22);
-    assert_eq(cb, s10:-85);
-    assert_eq(cr, s10:-107);
+    assert_eq(y, s12:22);
+    assert_eq(cb, s12:-85);
+    assert_eq(cr, s12:-107);
 }
 
 #[test]
@@ -124,9 +124,9 @@ fn test5_rgb_to_ycbcr() {
     let g = u8:255;
     let b = u8:255;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
-    assert_eq(y, s10:128);
-    assert_eq(cb, s10:0);
-    assert_eq(cr, s10:0);
+    assert_eq(y, s12:128);
+    assert_eq(cb, s12:0);
+    assert_eq(cr, s12:0);
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn test6_rgb_to_ycbcr() {
     let g = u8:80;
     let b = u8:80;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
-    assert_eq(y, s10:-48);
-    assert_eq(cb, s10:1);
-    assert_eq(cr, s10:1);
+    assert_eq(y, s12:-48);
+    assert_eq(cb, s12:0);
+    assert_eq(cr, s12:0);
 }
