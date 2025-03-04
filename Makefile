@@ -32,7 +32,6 @@ VERILOG_DIR      := ./verilog
 VERILOG_FILES    := $(VERILOG_DIR)/HW_JPEGenc_top.v \
                     $(VERILOG_DIR)/RGB_to_YCbCr.v \
                     $(VERILOG_DIR)/HW_JPEGenc.v \
-                    $(VERILOG_DIR)/databuffer_64x10bit.v \
                     $(VERILOG_DIR)/databuffer_64x12bit.v \
                     $(VERILOG_DIR)/DCT_2D.v \
                     $(VERILOG_DIR)/dct_1d_s12.v \
