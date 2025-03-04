@@ -3,10 +3,10 @@
 #================================================================
 
 # Top-level module & source settings
-TOP              := Huffman_DCenc
-INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
+TOP              := RGB_to_YCbCr
+#INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
 #INPUT_FILE     := ./src/Huffman_ACenc.x   # PIPE_LINE_STAGE = 4
-#INPUT_FILE 	:= ./src/RGB_YCbCr.x
+INPUT_FILE 	:= ./src/RGB_YCbCr.x
 #INPUT_FILE 	:= ./src/Quantize.x
 #INPUT_FILE 	:= ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE 	:= ./src/DCT_2D.x
@@ -33,8 +33,9 @@ VERILOG_FILES    := $(VERILOG_DIR)/HW_JPEGenc_top.v \
                     $(VERILOG_DIR)/RGB_to_YCbCr.v \
                     $(VERILOG_DIR)/HW_JPEGenc.v \
                     $(VERILOG_DIR)/databuffer_64x10bit.v \
+                    $(VERILOG_DIR)/databuffer_64x12bit.v \
                     $(VERILOG_DIR)/DCT_2D.v \
-                    $(VERILOG_DIR)/dct_1d_s10.v \
+                    $(VERILOG_DIR)/dct_1d_s12.v \
                     $(VERILOG_DIR)/databuffer_zigzag64x10bit.v \
                     $(VERILOG_DIR)/Zigzag_reorder.v \
                     $(VERILOG_DIR)/Quantize.v \
