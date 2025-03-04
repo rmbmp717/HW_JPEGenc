@@ -8,6 +8,7 @@ from cocotb.triggers import First, Timer, RisingEdge, FallingEdge
 from cocotb.utils import get_sim_time
 
 import sys, os
+import math
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../cocotb_sim/')))
 import sub_Debug_func
@@ -154,20 +155,36 @@ async def sub_test_JPEGenc(dut):
     #dut.input_enable.value = 1
 
     # 左上が80
-    #input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    #input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    #input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    #input_matrix_r = [[j + 1 for j in range(8)] for i in range(8)]
-    #input_matrix_g = [[j + 1 for j in range(8)] for i in range(8)]
-    #input_matrix_b = [[j + 1 for j in range(8)] for i in range(8)]
+    input_matrix_r = [[250 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_g = [[250 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_b = [[250 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    # 左上からインクリメント
+    #input_matrix_r = [[j + 14 for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[j + 14 for j in range(8)] for i in range(8)]
+    #input_matrix_b = [[j + 14 for j in range(8)] for i in range(8)]
     # 赤チャネル: 255、他は0
     #input_matrix_r = [[255 for j in range(8)] for i in range(8)]
     #input_matrix_g = [[0 for j in range(8)] for i in range(8)]
     #input_matrix_b = [[0 for j in range(8)] for i in range(8)]
     # 各チャネルで左上から右下に向かって 0～255 のグラデーションを生成
-    input_matrix_r = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
-    input_matrix_g = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
-    input_matrix_b = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
+    #input_matrix_r = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
+    #input_matrix_b = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
+    # 右上から左下へインクリメント
+    #input_matrix_r = [[int((i + (7 - j)) / 14 * 255) for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[0 for j in range(8)] for i in range(8)]
+    #input_matrix_b = [[0 for j in range(8)] for i in range(8)]
+    # math.sin() の出力は -1～1 なので、(sin + 1)/2 で 0～1 に正規化し、255 をかけます。
+    '''
+    width = 8
+    height = 8
+    input_matrix_r = [
+        [int((math.sin(1 * math.pi * (i + j) / (width + height - 2)) + 1) / 2 * 255) for j in range(width)]
+        for i in range(height)
+    ]
+    input_matrix_g = [[0 for j in range(8)] for i in range(8)]
+    input_matrix_b = [[0 for j in range(8)] for i in range(8)]
+    '''
 
     # flat化
     flat_data_r = [input_matrix_r[i][j] for i in range(8) for j in range(8)]
