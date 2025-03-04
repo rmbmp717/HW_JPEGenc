@@ -48,7 +48,7 @@ module databuffer_64x12bit #(
     generate
       for (idx = 0; idx < DEPTH; idx = idx + 1) begin : pack_gen
         // buffer[idx] を 12 ビットずつ、最上位に buffer[0]、最下位に buffer[63] を配置
-        assign buffer_768bits[768 - idx*12 -: 12] = buffer[(DEPTH-1) - idx];
+        assign buffer_768bits[767 - idx*12 -: 12] = buffer[(DEPTH-1) - idx];
       end
     endgenerate
 

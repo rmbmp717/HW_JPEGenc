@@ -94,9 +94,8 @@ module HW_JPEGenc(
     // ---------------------------------------------------------------------
     // databuffer_64x12bit インスタンス (DCT2D 結果のバッファ)
     // ---------------------------------------------------------------------
-    localparam DATA_WIDTH_12 = 12;
     databuffer_64x12bit #(
-        .DATA_WIDTH         (DATA_WIDTH_12),
+        .DATA_WIDTH         (DATA_WIDTH),
         .DEPTH              (DEPTH)
     ) m1_databuffer_64x12bit (
         .clock              (clock),

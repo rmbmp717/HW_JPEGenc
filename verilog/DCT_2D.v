@@ -5,24 +5,24 @@ module DCT_2D(
   input  wire             clock,
   input  wire             reset_n,
   input  wire             dct_enable,       // DCT 動作のON/OFF制御信号
-  input  wire [11:0]      pix_data [0:63],  // 8x8 の s12ビットピクセル（行優先）
+  input  wire [11:0]      pix_data [0:63],  // 8x8 の s12ビットピクセル（行優先）768 bits
   output reg  [11:0]      out      [0:63]   // 最終 2D DCT 結果（行優先）
 );
 
   // Debug 
-  wire [639:0] pix_data_flat;
+  wire [767:0] pix_data_flat;
   genvar idx;
   generate
     for (idx = 0; idx < 64; idx = idx + 1) begin : flatten
       // pix_data_flat の最上位10ビットに pix_data[0]、その次に pix_data[1]、…、最下位に pix_data[63]
-      assign pix_data_flat[639 - idx*10 -: 10] = pix_data[idx];
+      assign pix_data_flat[767 - idx*12 -: 12] = pix_data[idx];
     end
   endgenerate
 
   // Debug 
   `ifdef DEBUG
-  // 行0 (out[0]～out[7]) を 80ビットにまとめる
-  wire [79:0] out_row0 = { out[7],  out[6],  out[5],  out[4],  out[3],  out[2],  out[1],  out[0]  },
+  // 行0 (out[0]～out[7]) を 96ビットにまとめる
+  wire [95:0] out_row0 = { out[7],  out[6],  out[5],  out[4],  out[3],  out[2],  out[1],  out[0]  },
               out_row1 = { out[15], out[14], out[13], out[12], out[11], out[10], out[9],  out[8]  },
               out_row2 = { out[23], out[22], out[21], out[20], out[19], out[18], out[17], out[16] },
               out_row3 = { out[31], out[30], out[29], out[28], out[27], out[26], out[25], out[24] },
@@ -31,32 +31,32 @@ module DCT_2D(
               out_row6 = { out[55], out[54], out[53], out[52], out[51], out[50], out[49], out[48] },
               out_row7 = { out[63], out[62], out[61], out[60], out[59], out[58], out[57], out[56] };
 
-  wire [9:0] row_in0_0;
-  wire [9:0] row_in0_1;
-  wire [9:0] row_in0_2;
-  wire [9:0] row_in0_3;
-  wire [9:0] row_in0_4;
-  wire [9:0] row_in0_5;
-  wire [9:0] row_in0_6;
-  wire [9:0] row_in0_7;
+  wire [11:0] row_in0_0;
+  wire [11:0] row_in0_1;
+  wire [11:0] row_in0_2;
+  wire [11:0] row_in0_3;
+  wire [11:0] row_in0_4;
+  wire [11:0] row_in0_5;
+  wire [11:0] row_in0_6;
+  wire [11:0] row_in0_7;
 
-  assign row_in0_0 = row_in0[9:0];
-  assign row_in0_1 = row_in0[19:10];
-  assign row_in0_2 = row_in0[29:20];
-  assign row_in0_3 = row_in0[39:30];
-  assign row_in0_4 = row_in0[49:40];
-  assign row_in0_5 = row_in0[59:50];
-  assign row_in0_6 = row_in0[69:60];
-  assign row_in0_7 = row_in0[79:70];
+  assign row_in0_0 = row_in0[12-1  :   0];
+  assign row_in0_1 = row_in0[12*2-1:12*1];
+  assign row_in0_2 = row_in0[12*3-1:12*2];
+  assign row_in0_3 = row_in0[12*4-1:12*3];
+  assign row_in0_4 = row_in0[12*5-1:12*4];
+  assign row_in0_5 = row_in0[12*6-1:12*5];
+  assign row_in0_6 = row_in0[12*7-1:12*6];
+  assign row_in0_7 = row_in0[12*8-1:12*7];
 
-  wire [79:0] row_in0;
-  wire [79:0] row_in1;
-  wire [79:0] row_in2;
-  wire [79:0] row_in3;
-  wire [79:0] row_in4;
-  wire [79:0] row_in5;
-  wire [79:0] row_in6;
-  wire [79:0] row_in7;
+  wire [95:0] row_in0;
+  wire [95:0] row_in1;
+  wire [95:0] row_in2;
+  wire [95:0] row_in3;
+  wire [95:0] row_in4;
+  wire [95:0] row_in5;
+  wire [95:0] row_in6;
+  wire [95:0] row_in7;
 
   assign row_in0 = row_in[0];
   assign row_in1 = row_in[1];
@@ -67,28 +67,28 @@ module DCT_2D(
   assign row_in6 = row_in[6];
   assign row_in7 = row_in[7];
 
-  wire [9:0] col_buffer0_0;
-  wire [9:0] col_buffer0_1;
-  wire [9:0] col_buffer0_2;
-  wire [9:0] col_buffer0_3;
-  wire [9:0] col_buffer0_4;
-  wire [9:0] col_buffer0_5;
-  wire [9:0] col_buffer0_6;
-  wire [9:0] col_buffer0_7;
+  wire [11:0] col_buffer0_0;
+  wire [11:0] col_buffer0_1;
+  wire [11:0] col_buffer0_2;
+  wire [11:0] col_buffer0_3;
+  wire [11:0] col_buffer0_4;
+  wire [11:0] col_buffer0_5;
+  wire [11:0] col_buffer0_6;
+  wire [11:0] col_buffer0_7;
 
-  assign col_buffer0_0 = col_buffer0[9:0];
-  assign col_buffer0_1 = col_buffer0[19:10];
-  assign col_buffer0_2 = col_buffer0[29:20];
-  assign col_buffer0_3 = col_buffer0[39:30];
+  assign col_buffer0_0 = col_buffer0[12-1  :   0];
+  assign col_buffer0_1 = col_buffer0[12*2-1:12*1];
+  assign col_buffer0_2 = col_buffer0[12*3-1:12*2];
+  assign col_buffer0_3 = col_buffer0[12*4-1:12*3];
 
-  wire [79:0] col_buffer0;
-  wire [79:0] col_buffer1;
-  wire [79:0] col_buffer2;
-  wire [79:0] col_buffer3;
-  wire [79:0] col_buffer4;
-  wire [79:0] col_buffer5;
-  wire [79:0] col_buffer6;
-  wire [79:0] col_buffer7;
+  wire [95:0] col_buffer0;
+  wire [95:0] col_buffer1;
+  wire [95:0] col_buffer2;
+  wire [95:0] col_buffer3;
+  wire [95:0] col_buffer4;
+  wire [95:0] col_buffer5;
+  wire [95:0] col_buffer6;
+  wire [95:0] col_buffer7;
 
   assign col_buffer0 = col_buffer[0];
   assign col_buffer1 = col_buffer[1];
@@ -99,32 +99,32 @@ module DCT_2D(
   assign col_buffer6 = col_buffer[6];
   assign col_buffer7 = col_buffer[7];
 
-  wire [9:0] row_buffer0_0;
-  wire [9:0] row_buffer0_1;
-  wire [9:0] row_buffer0_2;
-  wire [9:0] row_buffer0_3;
-  wire [9:0] row_buffer0_4;
-  wire [9:0] row_buffer0_5;
-  wire [9:0] row_buffer0_6;
-  wire [9:0] row_buffer0_7;
+  wire [11:0] row_buffer0_0;
+  wire [11:0] row_buffer0_1;
+  wire [11:0] row_buffer0_2;
+  wire [11:0] row_buffer0_3;
+  wire [11:0] row_buffer0_4;
+  wire [11:0] row_buffer0_5;
+  wire [11:0] row_buffer0_6;
+  wire [11:0] row_buffer0_7;
 
-  assign row_buffer0_0 = row_buffer0[9:0];
-  assign row_buffer0_1 = row_buffer0[19:10];
-  assign row_buffer0_2 = row_buffer0[29:20];
-  assign row_buffer0_3 = row_buffer0[39:30];
-  assign row_buffer0_4 = row_buffer0[49:40];
-  assign row_buffer0_5 = row_buffer0[59:50];
-  assign row_buffer0_6 = row_buffer0[69:60];
-  assign row_buffer0_7 = row_buffer0[79:70];
+  assign row_buffer0_0 = row_buffer0[12-1:0];
+  assign row_buffer0_1 = row_buffer0[12*2-1:12*1];
+  assign row_buffer0_2 = row_buffer0[12*3-1:12*2];
+  assign row_buffer0_3 = row_buffer0[12*4-1:12*3];
+  assign row_buffer0_4 = row_buffer0[12*5-1:12*4];
+  assign row_buffer0_5 = row_buffer0[12*6-1:12*5];
+  assign row_buffer0_6 = row_buffer0[12*7-1:12*6];
+  assign row_buffer0_7 = row_buffer0[12*8-1:12*7];
 
-  wire [79:0] row_buffer0;
-  wire [79:0] row_buffer1;
-  wire [79:0] row_buffer2;
-  wire [79:0] row_buffer3;
-  wire [79:0] row_buffer4;
-  wire [79:0] row_buffer5;
-  wire [79:0] row_buffer6;
-  wire [79:0] row_buffer7;
+  wire [95:0] row_buffer0;
+  wire [95:0] row_buffer1;
+  wire [95:0] row_buffer2;
+  wire [95:0] row_buffer3;
+  wire [95:0] row_buffer4;
+  wire [95:0] row_buffer5;
+  wire [95:0] row_buffer6;
+  wire [95:0] row_buffer7;
 
   assign row_buffer0 = row_buffer[0];
   assign row_buffer1 = row_buffer[1];
@@ -135,24 +135,24 @@ module DCT_2D(
   assign row_buffer6 = row_buffer[6];
   assign row_buffer7 = row_buffer[7];
 
-  wire [9:0] col_vector0_0;
-  wire [9:0] col_vector0_1;
-  wire [9:0] col_vector0_2;
-  wire [9:0] col_vector0_3;
+  wire [11:0] col_vector0_0;
+  wire [11:0] col_vector0_1;
+  wire [11:0] col_vector0_2;
+  wire [11:0] col_vector0_3;
 
-  assign col_vector0_0 = col_vector0[9:0];
-  assign col_vector0_1 = col_vector0[19:10];
-  assign col_vector0_2 = col_vector0[29:20];
-  assign col_vector0_3 = col_vector0[39:30];
+  assign col_vector0_0 = col_vector0[12-1:0];
+  assign col_vector0_1 = col_vector0[12*2-1:12*1];
+  assign col_vector0_2 = col_vector0[12*3-1:12*2];
+  assign col_vector0_3 = col_vector0[12*4-1:12*3];
 
-  wire [79:0] col_vector0;
-  wire [79:0] col_vector1;
-  wire [79:0] col_vector2;
-  wire [79:0] col_vector3;
-  wire [79:0] col_vector4;
-  wire [79:0] col_vector5;
-  wire [79:0] col_vector6;
-  wire [79:0] col_vector7;
+  wire [95:0] col_vector0;
+  wire [95:0] col_vector1;
+  wire [95:0] col_vector2;
+  wire [95:0] col_vector3;
+  wire [95:0] col_vector4;
+  wire [95:0] col_vector5;
+  wire [95:0] col_vector6;
+  wire [95:0] col_vector7;
 
   assign col_vector0 = col_vector[0];
   assign col_vector1 = col_vector[1];
@@ -163,41 +163,41 @@ module DCT_2D(
   assign col_vector6 = col_vector[6];
   assign col_vector7 = col_vector[7];
 
-  wire [9:0] dct_in_0_0;
-  wire [9:0] dct_in_0_1;
-  wire [9:0] dct_in_0_2;
-  wire [9:0] dct_in_0_3;
-  wire [9:0] dct_in_0_4;
-  wire [9:0] dct_in_0_5;
-  wire [9:0] dct_in_0_6;
-  wire [9:0] dct_in_0_7;
+  wire [11:0] dct_in_0_0;
+  wire [11:0] dct_in_0_1;
+  wire [11:0] dct_in_0_2;
+  wire [11:0] dct_in_0_3;
+  wire [11:0] dct_in_0_4;
+  wire [11:0] dct_in_0_5;
+  wire [11:0] dct_in_0_6;
+  wire [11:0] dct_in_0_7;
 
-  assign dct_in_0_0 = dct_in_0[9:0];
-  assign dct_in_0_1 = dct_in_0[19:10];
-  assign dct_in_0_2 = dct_in_0[29:20];
-  assign dct_in_0_3 = dct_in_0[39:30];
-  assign dct_in_0_4 = dct_in_0[49:40];
-  assign dct_in_0_5 = dct_in_0[59:50];
-  assign dct_in_0_6 = dct_in_0[69:60];
-  assign dct_in_0_7 = dct_in_0[79:70];
+  assign dct_in_0_0 = dct_in_0[12-1:0];
+  assign dct_in_0_1 = dct_in_0[12*2-1:12*1];
+  assign dct_in_0_2 = dct_in_0[12*3-1:12*2];
+  assign dct_in_0_3 = dct_in_0[12*4-1:12*3];
+  assign dct_in_0_4 = dct_in_0[12*5-1:12*4];
+  assign dct_in_0_5 = dct_in_0[12*6-1:12*5];
+  assign dct_in_0_6 = dct_in_0[12*7-1:12*6];
+  assign dct_in_0_7 = dct_in_0[12*8-1:12*7];
 
-  wire [9:0] dct_out_0_0;
-  wire [9:0] dct_out_0_1;
-  wire [9:0] dct_out_0_2;
-  wire [9:0] dct_out_0_3;
-  wire [9:0] dct_out_0_4;
-  wire [9:0] dct_out_0_5;
-  wire [9:0] dct_out_0_6;
-  wire [9:0] dct_out_0_7;
+  wire [11:0] dct_out_0_0;
+  wire [11:0] dct_out_0_1;
+  wire [11:0] dct_out_0_2;
+  wire [11:0] dct_out_0_3;
+  wire [11:0] dct_out_0_4;
+  wire [11:0] dct_out_0_5;
+  wire [11:0] dct_out_0_6;
+  wire [11:0] dct_out_0_7;
 
-  assign dct_out_0_0 = dct_out_0[9:0];
-  assign dct_out_0_1 = dct_out_0[19:10];
-  assign dct_out_0_2 = dct_out_0[29:20];
-  assign dct_out_0_3 = dct_out_0[39:30];
-  assign dct_out_0_4 = dct_out_0[49:40];
-  assign dct_out_0_5 = dct_out_0[59:50];
-  assign dct_out_0_6 = dct_out_0[69:60];
-  assign dct_out_0_7 = dct_out_0[79:70];
+  assign dct_out_0_0 = dct_out_0[12-1:0];
+  assign dct_out_0_1 = dct_out_0[12*2-1:12*1];
+  assign dct_out_0_2 = dct_out_0[12*3-1:12*2];
+  assign dct_out_0_3 = dct_out_0[12*4-1:12*3];
+  assign dct_out_0_4 = dct_out_0[12*5-1:12*4];
+  assign dct_out_0_5 = dct_out_0[12*6-1:12*5];
+  assign dct_out_0_6 = dct_out_0[12*7-1:12*6];
+  assign dct_out_0_7 = dct_out_0[12*8-1:12*7];
   `endif
   // Debug End
 
@@ -222,13 +222,14 @@ module DCT_2D(
   dct_1d_s12 m0_dct_inst( .clk(clock), .x(dct_in_0), .out(dct_out_0));
   dct_1d_s12 m1_dct_inst( .clk(clock), .x(dct_in_1), .out(dct_out_1));
 
-  // 入力 pix_data を行単位でまとめる（行 i は row_in[i] とする）
-  wire [79:0] row_in [0:7];
+  // 入力 pix_data を行単位でまとめる（行 i は row_in[i] とする） 12 bit x 8 pixls
+  wire [95:0] row_in [0:7];
   genvar i, j;
   generate
     for(i = 0; i < 8; i = i + 1) begin: build_rows
       // 各行は、pix_data[ i*8 + 0 ] ～ pix_data[ i*8 + 7 ]
       assign row_in[i] = { pix_data[i*8+7],
+                           pix_data[i*8+6],
                            pix_data[i*8+6],
                            pix_data[i*8+5],
                            pix_data[i*8+4],
@@ -239,20 +240,20 @@ module DCT_2D(
     end
   endgenerate
 
-  // 列データのバッファ
-  wire [79:0] col_vector [0:7];
+  // 列データのバッファ 12 bit x 8 pixls
+  wire [95:0] col_vector [0:7];
   genvar col, row;
   generate
     for(col = 0; col < 8; col = col + 1) begin: build_col_vec
       assign col_vector[col] = {
-        row_buffer[7][col*10 +: 10],  // 第7行の `col` 番目の8ビット
-        row_buffer[6][col*10 +: 10],  // 第6行
-        row_buffer[5][col*10 +: 10],  // 第5行
-        row_buffer[4][col*10 +: 10],  // 第4行
-        row_buffer[3][col*10 +: 10],  // 第3行
-        row_buffer[2][col*10 +: 10],  // 第2行
-        row_buffer[1][col*10 +: 10],  // 第1行
-        row_buffer[0][col*10 +: 10]   // 第0行
+        row_buffer[7][col*12 +: 12],  // 第7行の `col` 番目の8ビット
+        row_buffer[6][col*12 +: 12],  // 第6行
+        row_buffer[5][col*12 +: 12],  // 第5行
+        row_buffer[4][col*12 +: 12],  // 第4行
+        row_buffer[3][col*12 +: 12],  // 第3行
+        row_buffer[2][col*12 +: 12],  // 第2行
+        row_buffer[1][col*12 +: 12],  // 第1行
+        row_buffer[0][col*12 +: 12]   // 第0行
       };
     end
   endgenerate
@@ -273,8 +274,8 @@ module DCT_2D(
       state_v   <= 0;
       state_v_end <= 0;
       for (sel = 0; sel < 8; sel = sel + 1) begin
-        row_buffer[sel] <= 80'b0;
-        col_buffer[sel] <= 80'b0;
+        row_buffer[sel] <= 96'b0;
+        col_buffer[sel] <= 96'b0;
       end
     end else begin
       // H DCT
@@ -412,7 +413,7 @@ module DCT_2D(
 
   // Debug 
  `ifdef DEBUG
-  wire [79:0] out_w0, out_w1, out_w2, out_w3, out_w4, out_w5, out_w6, out_w7;
+  wire [95:0] out_w0, out_w1, out_w2, out_w3, out_w4, out_w5, out_w6, out_w7;
   assign out_w0 = { out_w[ 0], out_w[ 1], out_w[ 2], out_w[ 3], out_w[ 4], out_w[ 5], out_w[ 6], out_w[ 7] };
   assign out_w1 = { out_w[ 8], out_w[ 9], out_w[10], out_w[11], out_w[12], out_w[13], out_w[14], out_w[15] };
   assign out_w2 = { out_w[16], out_w[17], out_w[18], out_w[19], out_w[20], out_w[21], out_w[22], out_w[23] };
@@ -425,14 +426,14 @@ module DCT_2D(
   // Debug End
 
   // 最終出力（行優先）を生成するための中間 wire 配列
-  wire [9:0] out_w [0:63];
+  wire [11:0] out_w [0:63];
 
   genvar r, c;
   generate
     for(r = 0; r < 8; r = r + 1) begin: out_row
       for(c = 0; c < 8; c = c + 1) begin: out_col
         // ここで、(7 - r) によって行順序を反転させている
-        assign out_w[r*8 + c] = col_buffer[c][(r*10) +: 10];
+        assign out_w[r*8 + c] = col_buffer[c][(r*12) +: 12];
       end
     end
   endgenerate
@@ -442,7 +443,7 @@ module DCT_2D(
   always @(posedge clock or negedge reset_n) begin
     if(!reset_n)
       for(integer i = 0; i < 64; i = i + 1)
-        out[i] <= 10'd0;
+        out[i] <= 12'd0;
     else if(state_v_end) // V DCT が終了したタイミングで
       for(integer i = 0; i < 64; i = i + 1)
         out[i] <= out_w[i];
