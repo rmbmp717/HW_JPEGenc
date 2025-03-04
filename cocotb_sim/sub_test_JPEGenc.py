@@ -72,7 +72,8 @@ async def run_huffman_ac(module, name, debug_flag, final_output_container, clock
     while num_detected < 48 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(module.jpeg_out_enable)
-        print(f"{get_sim_time('ns')} ns:")
+        if debug_flag:
+            print(f"{get_sim_time('ns')} ns:")
         await FallingEdge(clock)
 
         huffman_code_bin = str(module.ac_out.value)
@@ -98,15 +99,17 @@ async def run_huffman_ac(module, name, debug_flag, final_output_container, clock
 
         num_detected += 1
 
-        print("now_JPEG_output=", local_output)
-        print("--------------")
+        if debug_flag:
+            print("now_JPEG_output=", local_output)
+            print("--------------")
 
         # jpeg_out_enable が Low になる（立ち下がり）を待機する
         await FallingEdge(module.jpeg_out_enable)
         await RisingEdge(clock)
     
         # デバッグ用：Huffmanenc_active の値を表示
-        print("Huffmanenc_active=", int(module.Huffmanenc_active.value))
+        if debug_flag:
+            print("Huffmanenc_active=", int(module.Huffmanenc_active.value))
         
         # 状態が 0 になったら終了
         if int(module.Huffmanenc_active.value) == 0:
@@ -155,13 +158,15 @@ async def sub_test_JPEGenc(dut):
     #dut.input_enable.value = 1
 
     # 左上が80
-    input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    # 左上からインクリメント
-    #input_matrix_r = [[j + 14 for j in range(8)] for i in range(8)]
-    #input_matrix_g = [[j + 14 for j in range(8)] for i in range(8)]
-    #input_matrix_b = [[j + 14 for j in range(8)] for i in range(8)]
+    #input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    #input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    # 8×8のマトリクスを生成（行優先の順で50から250まで増加）
+    # 線形補間のステップ（64要素なので、63ステップ）
+    #step = (250 - 50) / (64 - 1)  # 200 / 63
+    #input_matrix_r = [[int(round(50 + (i * 8 + j) * step)) for j in range(8)] for i in range(8)]
+    #input_matrix_g = [[int(round(50 + (i * 8 + j) * step)) for j in range(8)] for i in range(8)]
+    #nput_matrix_b = [[int(round(50 + (i * 8 + j) * step)) for j in range(8)] for i in range(8)]
     # 赤チャネル: 255、他は0
     #input_matrix_r = [[255 for j in range(8)] for i in range(8)]
     #input_matrix_g = [[0 for j in range(8)] for i in range(8)]
@@ -171,9 +176,9 @@ async def sub_test_JPEGenc(dut):
     #input_matrix_g = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
     #input_matrix_b = [[int((i + j) / 14 * 255) for j in range(8)] for i in range(8)]
     # 右上から左下へインクリメント
-    #input_matrix_r = [[int((i + (7 - j)) / 14 * 255) for j in range(8)] for i in range(8)]
-    #input_matrix_g = [[0 for j in range(8)] for i in range(8)]
-    #input_matrix_b = [[0 for j in range(8)] for i in range(8)]
+    input_matrix_r = [[int((i + (7 - j)) / 14 * 255) for j in range(8)] for i in range(8)]
+    input_matrix_g = [[0 for j in range(8)] for i in range(8)]
+    input_matrix_b = [[0 for j in range(8)] for i in range(8)]
     # math.sin() の出力は -1～1 なので、(sin + 1)/2 で 0～1 に正規化し、255 をかけます。
     '''
     width = 8
@@ -216,8 +221,8 @@ async def sub_test_JPEGenc(dut):
 
     if matrix_debug_out == 1:
         await sub_Debug_func.dump_Input_Y(dut)
-        await sub_Debug_func.dump_Input_Cb(dut)
-        await sub_Debug_func.dump_Input_Cr(dut)
+        #await sub_Debug_func.dump_Input_Cb(dut)
+        #await sub_Debug_func.dump_Input_Cr(dut)
 
     for _ in range(4):
         await RisingEdge(dut.clock)
@@ -225,8 +230,8 @@ async def sub_test_JPEGenc(dut):
     print("==========================================================================")
     print("1: DCT 2D Start")
 
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Dct_Y_input(dut)
+    if matrix_debug_out == 1:
+        await sub_Debug_func.dump_Dct_Y_input(dut)
         #await sub_Debug_func.dump_Dct_Cb_input(dut)
         #await sub_Debug_func.dump_Dct_Cr_input(dut)
 
@@ -244,8 +249,8 @@ async def sub_test_JPEGenc(dut):
     await RisingEdge(dut.clock)
 
     print("1.2: DCT 2D Output Data")
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Dct_Y_output(dut)
+    if matrix_debug_out == 1:
+        await sub_Debug_func.dump_Dct_Y_output(dut)
         #await sub_Debug_func.dump_Dct_Cb_output(dut)
         #await sub_Debug_func.dump_Dct_Cr_output(dut)
 
@@ -269,8 +274,8 @@ async def sub_test_JPEGenc(dut):
         await RisingEdge(dut.clock)
     print("2: Quantize End")
 
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Quantized_Y_output(dut)
+    if matrix_debug_out == 1:
+        await sub_Debug_func.dump_Quantized_Y_output(dut)
         #await sub_Debug_func.dump_Quantized_Cb_output(dut)
         #await sub_Debug_func.dump_Quantized_Cr_output(dut)
 
@@ -288,8 +293,8 @@ async def sub_test_JPEGenc(dut):
     print("==========================================================================")
     print("4: Zigzag Input Data (8x8 matrix):")
     
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Zigzag_Y_Input(dut)
+    if matrix_debug_out == 1:
+        await sub_Debug_func.dump_Zigzag_Y_Input(dut)
         #await sub_Debug_func.dump_Zigzag_Cb_Input(dut)
         #await sub_Debug_func.dump_Zigzag_Cr_Input(dut)
 
@@ -301,8 +306,8 @@ async def sub_test_JPEGenc(dut):
 
     if matrix_debug_out == 1:
         await sub_Debug_func.dump_Zigzag_Y_output(dut)
-        await sub_Debug_func.dump_Zigzag_Cb_output(dut)
-        await sub_Debug_func.dump_Zigzag_Cr_output(dut)
+    #    await sub_Debug_func.dump_Zigzag_Cb_output(dut)
+    #    await sub_Debug_func.dump_Zigzag_Cr_output(dut)
 
     print("==========================================================================")
     print("6: Huffman enc Start")
@@ -319,9 +324,9 @@ async def sub_test_JPEGenc(dut):
     # DC コード部分を各モジュールで並列に実行
     dc_debug = 1
     final_dc_container = {}
-    task_dc_y = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", True, final_dc_container, dut.clock))
-    task_dc_cb = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", True, final_dc_container, dut.clock))
-    task_dc_cr = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", True, final_dc_container, dut.clock))
+    task_dc_y = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", False, final_dc_container, dut.clock))
+    task_dc_cb = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", False, final_dc_container, dut.clock))
+    task_dc_cr = cocotb.start_soon(run_huffman_dc(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", False, final_dc_container, dut.clock))
 
     # 並列タスクの終了を待機
     await task_dc_y.join()
@@ -342,7 +347,7 @@ async def sub_test_JPEGenc(dut):
 
     # 並列に各モジュールの Huffman AC Code 部分を実行（共通のクロック信号を渡す）
     task_y = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Y.mHuffman_enc_controller, "Y", False, final_output_container, dut.clock))
-    task_cb = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", True, final_output_container, dut.clock))
+    task_cb = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cb.mHuffman_enc_controller, "Cb", False, final_output_container, dut.clock))
     task_cr = cocotb.start_soon(run_huffman_ac(dut.HW_JPEGenc_Cr.mHuffman_enc_controller, "Cr", False, final_output_container, dut.clock))
 
     # 並列タスクの終了を待機
@@ -351,9 +356,9 @@ async def sub_test_JPEGenc(dut):
     await task_cr.join()
 
     # 各モジュールの結果を個別に表示する
-    print("Y final_output =", final_output_container.get("Y", ""))
-    print("Cb final_output =", final_output_container.get("Cb", ""))
-    print("Cr final_output =", final_output_container.get("Cr", ""))
+    #print("Y final_output =", final_output_container.get("Y", ""))
+    #print("Cb final_output =", final_output_container.get("Cb", ""))
+    #print("Cr final_output =", final_output_container.get("Cr", ""))
 
     #print("jpeg_dc_out =", dut.HW_JPEGenc_Y.mHuffman_enc_controller.jpeg_dc_out.value)
 
@@ -389,9 +394,6 @@ async def sub_test_JPEGenc(dut):
     return (final_Y_output, final_Cb_output, final_Cr_output)
 
     print("==========================================================================")
-    for _ in range(100):
-        await RisingEdge(dut.clock)
-
     
     # Wait additional time for processing
     for _ in range(100):

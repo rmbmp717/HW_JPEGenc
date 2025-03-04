@@ -57,3 +57,6 @@ async def main_JPEGenc_top(dut):
     print("JPEG File Write")
     
     await sub_test_JPEG_write.file_write(dut, final_Y_output, final_Cb_output, final_Cr_output)
+
+    print("JPEG File Write End.")
+
