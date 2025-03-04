@@ -5,7 +5,7 @@ module HW_JPEGenc_top(
     input  wire             clock,
     input  wire             reset_n,
     input  wire             input_1pix_enable,  
-    input  wire [9:0]       pix_1pix_data,      // s10
+    input  wire [11:0]      pix_1pix_data,      // s12
     input  wire [7:0]       Red,
     input  wire [7:0]       Green,
     input  wire [7:0]       Blue,
@@ -60,7 +60,7 @@ module HW_JPEGenc_top(
     end
     `endif
 
-    wire [9:0]  Y_data, Cb_data, Cr_data;
+    wire [11:0]  Y_data, Cb_data, Cr_data;   // s12
 
     // RGB -> YCbCr
     RGB_to_YCbCr mRGB_to_YCbCr(

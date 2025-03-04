@@ -5,8 +5,8 @@ module DCT_2D(
   input  wire             clock,
   input  wire             reset_n,
   input  wire             dct_enable,       // DCT 動作のON/OFF制御信号
-  input  wire [9:0]       pix_data [0:63],  // 8x8 の 10ビットピクセル（行優先）
-  output reg  [9:0]       out      [0:63]   // 最終 2D DCT 結果（行優先）
+  input  wire [11:0]      pix_data [0:63],  // 8x8 の s12ビットピクセル（行優先）
+  output reg  [11:0]      out      [0:63]   // 最終 2D DCT 結果（行優先）
 );
 
   // Debug 
@@ -207,20 +207,20 @@ module DCT_2D(
   reg [3:0] row_idx;
   reg [3:0] col_idx;
 
-  // row_buffer: 各行の DCT 出力を保持（各行は 80 ビット）
-  reg [79:0] row_buffer [0:7];
-  // col_buffer: 各列の DCT 出力を保持（各列は 80 ビット）
-  reg [79:0] col_buffer [0:7];
+  // row_buffer: 各行の DCT 出力を保持（各行は 96 ビット）
+  reg [95:0] row_buffer [0:7];
+  // col_buffer: 各列の DCT 出力を保持（各列は 96 ビット）
+  reg [95:0] col_buffer [0:7];
 
-  // dct_1d_s10 用の入力・出力（1回分の 80 ビットベクトル）
-  reg  [79:0] dct_in_0, dct_in_1;
-  wire [79:0] dct_out_0, dct_out_1;
+  // dct_1d_s12 用の入力・出力（1回分の 96 ビットベクトル）
+  reg  [95:0] dct_in_0, dct_in_1;
+  wire [95:0] dct_out_0, dct_out_1;
 
   // --------------------------------------------------------------------
   // dct_1d_s10 のインスタンス（3クロックレイテンシで結果が得られると仮定）
   // PIPE_LINE_STAGE = 3
-  dct_1d_s10 m0_dct_inst( .clk(clock), .x(dct_in_0), .out(dct_out_0));
-  dct_1d_s10 m1_dct_inst( .clk(clock), .x(dct_in_1), .out(dct_out_1));
+  dct_1d_s12 m0_dct_inst( .clk(clock), .x(dct_in_0), .out(dct_out_0));
+  dct_1d_s12 m1_dct_inst( .clk(clock), .x(dct_in_1), .out(dct_out_1));
 
   // 入力 pix_data を行単位でまとめる（行 i は row_in[i] とする）
   wire [79:0] row_in [0:7];

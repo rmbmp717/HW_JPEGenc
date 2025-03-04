@@ -9,14 +9,14 @@ module HW_JPEGenc(
     input  wire             reset_n,
     input  wire             input_enable,  
     input  wire             input_1pix_enable,  
-    input  wire [9:0]       pix_1pix_data, 
+    input  wire [11:0]      pix_1pix_data,  // s12
     input  wire             dct_enable,
     input  wire             dct_end_enable,
     input  wire             zigzag_input_enable,
     input  wire             zigag_enable,
     input  wire [7:0]       matrix_row, 
     input  wire             Huffman_start,
-    input  wire [9:0]       pix_data [0:63], // 64個の8ビットピクセル（行優先）
+    input  wire [11:0]      pix_data [0:63], // 64個の12ビットピクセル（行優先）
     input  wire             is_luminance,
     // JPEG Output
     output wire             jpeg_out_enable,
@@ -31,7 +31,7 @@ module HW_JPEGenc(
 );
 
     // パラメータ定義
-    localparam DATA_WIDTH = 10;
+    localparam DATA_WIDTH = 12;
     localparam DEPTH      = 64;
     
     // 内部信号の宣言
@@ -39,10 +39,10 @@ module HW_JPEGenc(
     wire [DATA_WIDTH-1:0] buffer [0:DEPTH-1];
 
     // 2D DCT の出力
-    wire [9:0] dct2d_out [0:63];
+    wire [11:0] dct2d_out [0:63];
 
     // Quantize 用のバッファ（DCT2D 出力を Quantize 用にバッファリング）
-    wire [640-1:0]          quantim_buffer;
+    wire [768-1:0]          quantim_buffer;
     wire [80-1:0]           quantim_out;
 
     // Zigzag バッファ出力（最終出力）
@@ -64,12 +64,12 @@ module HW_JPEGenc(
     wire [3:0]  run;
 
     // ---------------------------------------------------------------------
-    // databuffer_64x10bit インスタンス (入力データのバッファ)
+    // databuffer_64x120bit インスタンス (入力データのバッファ)
     // ---------------------------------------------------------------------
-    databuffer_64x10bit #(
+    databuffer_64x12bit #(
         .DATA_WIDTH         (DATA_WIDTH),
         .DEPTH              (DEPTH)
-    ) m0_databuffer_64x10bit (
+    ) m0_databuffer_64x12bit (
         .clock              (clock),
         .reset_n            (reset_n),
         .input_enable       (input_enable),
@@ -77,7 +77,7 @@ module HW_JPEGenc(
         .pix_1pix_data      (pix_1pix_data),     
         .pix_data           (pix_data),   // 64個のピクセル 一括書き込み用
         .buffer             (buffer),
-        .buffer_640bits     ()
+        .buffer_768bits     ()
     );
     
     // ---------------------------------------------------------------------
@@ -92,20 +92,21 @@ module HW_JPEGenc(
     );
 
     // ---------------------------------------------------------------------
-    // databuffer_64x10bit インスタンス (DCT2D 結果のバッファ)
+    // databuffer_64x12bit インスタンス (DCT2D 結果のバッファ)
     // ---------------------------------------------------------------------
-    databuffer_64x10bit #(
-        .DATA_WIDTH         (DATA_WIDTH),
+    localparam DATA_WIDTH_12 = 12;
+    databuffer_64x12bit #(
+        .DATA_WIDTH         (DATA_WIDTH_12),
         .DEPTH              (DEPTH)
-    ) m1_databuffer_64x10bit (
+    ) m1_databuffer_64x12bit (
         .clock              (clock),
         .reset_n            (reset_n),
         .input_enable       (dct_end_enable),
         .input_1pix_enable  (1'b0),
-        .pix_1pix_data      (10'd0),     
+        .pix_1pix_data      (12'd0),     
         .pix_data           (dct2d_out),       // DCT_2D の出力を接続
         .buffer             (),
-        .buffer_640bits     (quantim_buffer)
+        .buffer_768bits     (quantim_buffer)
     );
 
     // ---------------------------------------------------------------------
