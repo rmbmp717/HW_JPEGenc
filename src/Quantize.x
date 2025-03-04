@@ -85,7 +85,7 @@ pub fn Quantize(dct_coeffs: s12[N][N], matrix_row: u8, is_luminance: bool, quant
     let clipped: s10 = if divided > s32:255 {
       s10:255
     } else if divided < s32:-255 {
-      s10:0
+      s10:-255
     } else {
       divided as s10
     };
@@ -100,7 +100,7 @@ pub fn Quantize(dct_coeffs: s12[N][N], matrix_row: u8, is_luminance: bool, quant
 fn test0_quantize_block() -> () {
   // test_block の行0のみ使用。その他は 0 で埋める。
   let test_block: s12[8][8] = [
-    s12[8]:[s12:200, s12:150, s12:100, s12:-50, s12:30, s12:20, s12:10, s12:5],
+    s12[8]:[s12:-873, s12:150, s12:100, s12:-50, s12:30, s12:20, s12:10, s12:5],
     s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
     s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
     s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
@@ -113,7 +113,7 @@ fn test0_quantize_block() -> () {
   // ※ 本テストでは、輝度の場合 (is_luminance == true)
   // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
   let expected_result: s10[8] = [
-    s10:6, s10:6, s10:5, s10:-1, s10:0, s10:0, s10:0, s10:0
+    s10:-27, s10:6, s10:5, s10:-1, s10:0, s10:0, s10:0, s10:0
   ];
 
   let result = Quantize(test_block, u8:0, true, false);
