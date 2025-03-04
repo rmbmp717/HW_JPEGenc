@@ -18,6 +18,17 @@ def convert_s10(raw: int) -> int:
     else:
         return raw
 
+def convert_s12(raw: int) -> int:
+    """
+    12ビットの符号付き整数（符号付き12bit値）として解釈する。
+    入力 raw は 0～4095 の範囲の整数と仮定し、
+    2048以上の場合は 4096 を引いて負の値に変換する。
+    """
+    if raw >= 2048:
+        return raw - 4096
+    else:
+        return raw
+
 async def dump_Input_Y(dut):
     print("==========================================================================")
     # buffer は 64 要素の配列と仮定
@@ -26,7 +37,7 @@ async def dump_Input_Y(dut):
         row = []
         for j in range(8):
             index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Y.m0_databuffer_64x10bit.buffer[index].value.integer))
+            row.append(convert_s12(dut.HW_JPEGenc_Y.m0_databuffer_64x12bit.buffer[index].value.integer))
         matrix.append(row)
     
     print("Y Buffer (8x8 matrix):")
@@ -43,7 +54,7 @@ async def dump_Input_Cb(dut):
         row = []
         for j in range(8):
             index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Cb.m0_databuffer_64x10bit.buffer[index].value.integer))
+            row.append(convert_s12(dut.HW_JPEGenc_Cb.m0_databuffer_64x12bit.buffer[index].value.integer))
         matrix.append(row)
     
     print("Cb Buffer (8x8 matrix):")
@@ -60,7 +71,7 @@ async def dump_Input_Cr(dut):
         row = []
         for j in range(8):
             index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Cr.m0_databuffer_64x10bit.buffer[index].value.integer))
+            row.append(convert_s12(dut.HW_JPEGenc_Cr.m0_databuffer_64x12bit.buffer[index].value.integer))
         matrix.append(row)
     
     print("Cb Buffer (8x8 matrix):")
@@ -79,7 +90,7 @@ async def dump_Dct_Y_input(dut):
         row = []
         for j in range(8):
             index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Y.mDCT_2D.pix_data[index].value.integer))
+            row.append(convert_s12(dut.HW_JPEGenc_Y.mDCT_2D.pix_data[index].value.integer))
         matrix_dctin.append(row)
     
     print("DCT Y Input Buffer (8x8 matrix):")
@@ -97,7 +108,7 @@ async def dump_Dct_Cb_input(dut):
         row = []
         for j in range(8):
             index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Cb.mDCT_2D.pix_data[index].value.integer))
+            row.append(convert_s12(dut.HW_JPEGenc_Cb.mDCT_2D.pix_data[index].value.integer))
         matrix_dctin.append(row)
     
     print("DCT Cb Input Buffer (8x8 matrix):")
@@ -115,7 +126,7 @@ async def dump_Dct_Cr_input(dut):
         row = []
         for j in range(8):
             index = i * 8 + j
-            row.append(convert_s10(dut.HW_JPEGenc_Cr.mDCT_2D.pix_data[index].value.integer))
+            row.append(convert_s12(dut.HW_JPEGenc_Cr.mDCT_2D.pix_data[index].value.integer))
         matrix_dctin.append(row)
     
     print("DCT Cr Input Buffer (8x8 matrix):")
@@ -132,7 +143,7 @@ async def dump_Dct_Y_output(dut):
     dct2d_data = []
     for d in dut.HW_JPEGenc_Y.dct2d_out.value:
         # 各要素を 10 進数に変換してリストに追加
-        dct2d_data.append(convert_s10(int(d.binstr, 2)))
+        dct2d_data.append(convert_s12(int(d.binstr, 2)))
 
     print("DCT2D Y Output (8x8 matrix):")
     for row in range(8):
@@ -148,7 +159,7 @@ async def dump_Dct_Cb_output(dut):
     dct2d_data = []
     for d in dut.HW_JPEGenc_Cb.dct2d_out.value:
         # 各要素を 10 進数に変換してリストに追加
-        dct2d_data.append(convert_s10(int(d.binstr, 2)))
+        dct2d_data.append(convert_s12(int(d.binstr, 2)))
 
     print("DCT2D Cb Output (8x8 matrix):")
     for row in range(8):
@@ -164,7 +175,7 @@ async def dump_Dct_Cr_output(dut):
     dct2d_data = []
     for d in dut.HW_JPEGenc_Cr.dct2d_out.value:
         # 各要素を 10 進数に変換してリストに追加
-        dct2d_data.append(convert_s10(int(d.binstr, 2)))
+        dct2d_data.append(convert_s12(int(d.binstr, 2)))
 
     print("DCT2D Cr Output (8x8 matrix):")
     for row in range(8):

@@ -155,9 +155,9 @@ async def sub_test_JPEGenc(dut):
     #dut.input_enable.value = 1
 
     # 左上が80
-    input_matrix_r = [[250 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_g = [[250 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
-    input_matrix_b = [[250 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_r = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_g = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
+    input_matrix_b = [[80 if (i < 4 and j < 4) else 0 for j in range(8)] for i in range(8)]
     # 左上からインクリメント
     #input_matrix_r = [[j + 14 for j in range(8)] for i in range(8)]
     #input_matrix_g = [[j + 14 for j in range(8)] for i in range(8)]
