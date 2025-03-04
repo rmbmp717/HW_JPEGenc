@@ -105,8 +105,56 @@ pub fn dct_1d_s10(x: s10[N]) -> s10[N] {
   result
 }
 
+// s12 型入力の 1D DCT 計算
+pub fn dct_1d_s12(x: s12[N]) -> s12[N] {
+  // 1. 入力のレベルシフト: Q8.8 表現にする
+  let x_q88: s32[N] = for (i, acc): (u32, s32[N]) in range(u32:0, N) {
+      let shifted: s32 = (x[i] as s32) * s32:256;
+      update(acc, i, shifted)
+  }(s32[N]:[s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0]);
+
+  // 2. Q8.8 固定小数点 DCT を計算
+  let y_q88: s32[N] = dct_1d(x_q88);
+
+  // 3. Q8.8 表現から整数に変換（四捨五入: +128 して右シフト 8 ビット）
+  let y_int32: s32[N] = for (i, acc): (u32, s32[N]) in range(u32:0, N) {
+      let val: s32 = y_q88[i] as s32;
+      let rounded: s32 = (val + s32:128) >> 8;
+      update(acc, i, rounded)
+  }(s32[N]:[s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0, s32:0]);
+
+  // 4. 逆レベルシフト: 各値に +128 して、手計算版と同じスケールに復帰
+  let result: s12[N] = for (i, acc): (u32, s12[N]) in range(u32:0, N) {
+      let adjusted: s32 = y_int32[i];
+      let clipped: s12 = if adjusted < s32:-2048 {
+          s12:-2048
+      } else if adjusted > s32:2047 {
+          s12:2047
+      } else {
+          adjusted as s12
+      };
+      update(acc, i, clipped)
+  }(s12[N]:[ s12:0, s12:0, s12:0, s12:0, s12:0, s12:0, s12:0, s12:0 ]);
+
+  result
+}
+
 //----------------------------------------------------------------------
 // テスト関数
+#[test]
+fn test0_dct_s12() {
+  let x = s12[8]:[8, 70, 6, 5, 4, 3, 25, 12]; // テスト用の入力データ
+  let expected = s12[8]:[47, 18, 22, -8, -27, -38, -34, -25];
+  trace!(x);
+
+  let result = dct_1d_s12(x); // 実際の計算結果
+  trace!(expected);
+  trace!(result);
+  assert_eq(result, expected);
+}
+
+//----------------------------------------------------------------------
+// s10: テスト関数
 #[test]
 fn test0_dct_1d() {
   let x = s10[8]:[8, 70, 6, 5, 4, 3, 25, 12]; // テスト用の入力データ
