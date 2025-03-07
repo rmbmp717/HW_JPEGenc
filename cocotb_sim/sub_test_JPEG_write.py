@@ -5,6 +5,7 @@ JPEG HW Encoder Data Write to File
 import cocotb
 import random
 import numpy
+import logging
 from bitstring import BitArray, BitStream
 from cocotb.triggers import First, Timer, RisingEdge, FallingEdge
 from cocotb.utils import get_sim_time
@@ -44,31 +45,15 @@ def hexToBytes(hexStr):
     ret = bytes(ret)
     return ret
 
-async def file_write(dut, final_Y_output, final_Cb_output, final_Cr_output):
-    print("Write JPEG File to : ./image/output.jpeg")
-
-    print("Y :", final_Y_output)
-    print("Cb :", final_Cb_output)
-    print("Cr :", final_Cr_output)
-
-    srcImageWidth  = 8
-    srcImageHeight = 8
-    imageWidth  = 8
-    imageHeight = 8
-
-    sosBitStream = BitStream()
-
-    # 各データを `BitStream` に変換して結合
-    sosBitStream.append(BitArray(bin=final_Y_output))
-    sosBitStream.append(BitArray(bin=final_Cb_output))
-    sosBitStream.append(BitArray(bin=final_Cr_output))
+async def file_write(dut, outputJPEGFileName, srcImageHeight, srcImageWidth, sosBitStream):
 
     #sosBitStream.append(BitArray(bin="00100100100111100110111101010111100011111100001101001010011110111110001010101"))
 
-    print(type(sosBitStream))
+    #print(type(sosBitStream))
+    #print(sosBitStream)
 
-    outputJPEGFileName = "./image/output.jpeg"
     quality = 25    # Quantize.x と合わせること！
+    print("quality = ", quality)
 
     # ==============================================================
     if(quality <= 0):
