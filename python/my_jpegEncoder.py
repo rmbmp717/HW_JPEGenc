@@ -41,19 +41,18 @@ def main():
     # example:
     # ./lena.bmp ./output.jpg 80 0
 
-    #if(len(sys.argv)!=5):
-    if(len(sys.argv)!=4):
-        print('outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1)')
+    if(len(sys.argv)!=5):
+        print('inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1)')
         print('example:')
         print('./lena.bmp ./output.jpg 80 0')
         return
 
-    #srcFileName = sys.argv[1]
-    outputJPEGFileName = sys.argv[1]
-    quality = float(sys.argv[2])
-    DEBUG_MODE = int(sys.argv[3])
+    srcFileName = sys.argv[1]
+    outputJPEGFileName = sys.argv[2]
+    quality = float(sys.argv[3])
+    DEBUG_MODE = int(sys.argv[4])
 
-    '''
+    
     numpy.set_printoptions(threshold=numpy.inf)
     srcImage = Image.open(srcFileName)
     srcImageWidth, srcImageHeight = srcImage.size
@@ -70,24 +69,17 @@ def main():
         imageHeight = srcImageHeight // 8 * 8 + 8
 
     print('added to: ', imageWidth, imageHeight)
-    '''
-
-    '''
+        
     # copy data from srcImageMatrix to addedImageMatrix
     addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
     for y in range(srcImageHeight):
         for x in range(srcImageWidth):
             addedImageMatrix[y][x] = srcImageMatrix[y][x]
-    '''
-    
-    srcImageWidth  = 8
-    srcImageHeight = 8
-    imageWidth  = 8
-    imageHeight = 8
-    addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
+
+    #addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
 
     #addedImageMatrix = numpy.full((imageHeight, imageWidth, 3), 255, dtype=numpy.uint8)     # All pixel White
-    addedImageMatrix[:4, :4] = 80
+    #addedImageMatrix[:4, :4] = 80
     #addedImageMatrix[:4, :4, 0] = 0  # R チャネルに255
     #addedImageMatrix[:4, :4, 1] = 255    # G チャネルに0
     #addedImageMatrix[:4, :4, 2] = 0    # B チャネルに0
@@ -153,6 +145,7 @@ def main():
     blockNum = 0
     for y in range(0, imageHeight, 8):
         for x in range(0, imageWidth, 8):
+            print("===============================================================")
             print('block (y,x): ',y, x, ' -> ', y + 8, x + 8)
             yDctMatrix = fftpack.dct(fftpack.dct(yImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
             uDctMatrix = fftpack.dct(fftpack.dct(uImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T

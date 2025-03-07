@@ -43,17 +43,16 @@ def main():
     # example:
     # ./lena.bmp ./output.jpg 80 0
 
-    #if(len(sys.argv)!=5):
-    if(len(sys.argv)!=4):
+    if(len(sys.argv)!=5):
         print('inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1)')
         print('example:')
         print('./lena.bmp ./output.jpg 80 0')
         return
 
-    #srcFileName = sys.argv[1]
-    outputJPEGFileName = sys.argv[1]
-    quality = float(sys.argv[2])
-    DEBUG_MODE = int(sys.argv[3])
+    srcFileName = sys.argv[1]
+    outputJPEGFileName = sys.argv[2]
+    quality = float(sys.argv[3])
+    DEBUG_MODE = int(sys.argv[4])
 
     '''
     numpy.set_printoptions(threshold=numpy.inf)
