@@ -12,8 +12,8 @@ module HW_JPEGenc(
     input  wire [11:0]      pix_1pix_data,  // s12
     input  wire             dct_enable,
     input  wire             dct_end_enable,
-    input  wire             zigzag_input_enable,
     input  wire             zigag_enable,
+    input  wire             zigzag_input_enable,
     input  wire [7:0]       matrix_row, 
     input  wire             Huffman_start,
     input  wire [11:0]      pix_data [0:63], // 64個の12ビットピクセル（行優先）

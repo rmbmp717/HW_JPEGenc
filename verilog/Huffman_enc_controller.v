@@ -75,6 +75,7 @@ module Huffman_enc_controller(
         3: begin
           if(start_pix >= 63) begin
             state <= 0;
+            Huffmanenc_active <= 0;
           end else begin
             jpeg_out_enable <= 0;
             ac_matrix <= zigzag_pix_in;
@@ -121,7 +122,7 @@ module Huffman_enc_controller(
         end
         10: begin
           if(is_luminance) begin
-            if(ac_out[3:0]==4'b1100 && length==8'd4) begin
+            if(ac_out[3:0]==4'b1100 && length==8'd4 || start_pix >= 63) begin
               jpeg_out_enable <= 0;
               jpeg_out_end <= 0;
               state <= 0;
@@ -131,7 +132,7 @@ module Huffman_enc_controller(
               state <= 3;
             end
           end else begin
-            if(ac_out[1:0]==2'b01 && length==8'd2) begin
+            if((ac_out[1:0]==2'b01 && length==8'd2) || start_pix >= 63) begin
               jpeg_out_enable <= 0;
               jpeg_out_end <= 0;
               state <= 0;

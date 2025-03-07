@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`define DUMP_VCD
 `define DEBUG
 
 module HW_JPEGenc_top(
@@ -31,10 +32,12 @@ module HW_JPEGenc_top(
 );
 
     // VCD ダンプ用ブロック
+    `ifdef DUMP_VCD
     initial begin
         $dumpfile("./vcd/hw_jpeg_top.vcd");
         $dumpvars(0, HW_JPEGenc_top);
     end
+    `endif
 
     // CLK数カウンタ
     `ifdef DEBUG

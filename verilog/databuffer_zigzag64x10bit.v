@@ -14,7 +14,7 @@ module databuffer_zigzag64x10bit #(
     input  wire                          input_data_enable,
     output reg  [DATA_WIDTH-1:0]         buffer   [0:DEPTH-1],
     output reg  [DEPTH-1:0]              buffer_80bit [0:DATA_WIDTH-1],
-    output reg  [640-1:0]                zigzag_pix_out 
+    output reg  [640-1:0]                zigzag_pix_out
 );
 
     // Debug
@@ -43,6 +43,7 @@ module databuffer_zigzag64x10bit #(
     // Address Delay
     reg   input_data_enable_d1;
     reg   input_data_enable_d2;
+    reg   input_data_enable_d3;
     reg [7:0]   matrix_row_d1;
     reg [7:0]   matrix_row_d2;
 
@@ -50,11 +51,13 @@ module databuffer_zigzag64x10bit #(
         if (!reset_n) begin
             input_data_enable_d1 <= 0;
             input_data_enable_d2 <= 0;
+            input_data_enable_d3 <= 0;
             matrix_row_d1 <= 0;
             matrix_row_d2 <= 0;
         end else begin
             input_data_enable_d1 <= input_data_enable;
             input_data_enable_d2 <= input_data_enable_d1;
+            input_data_enable_d3 <= input_data_enable_d2;
             matrix_row_d1 <= matrix_row;
             matrix_row_d2 <= matrix_row_d1;
         end
@@ -109,22 +112,57 @@ module databuffer_zigzag64x10bit #(
         .out        (zigzag_pix_data)
     );
 
+    // 中間信号 diff を符号付きワイヤとして宣言
+    wire signed [639:0] diff;
+
+    genvar j;
+    generate
+        for (j = 0; j < 64; j = j + 1) begin : diff_gen
+            // 各10ビット要素ごとに符号付き減算を行う
+            assign diff[(j+1)*10-1 : j*10] = $signed(zigzag_pix_data[(j+1)*10-1 : j*10])
+                                            - $signed(zigzag_pix_out_pre[(j+1)*10-1 : j*10]);
+        end
+    endgenerate
+
     reg zigag_enable_d1;
     reg zigag_enable_d2;
+    reg zigag_enable_d3;
 
     // 1 CLK
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
             zigag_enable_d1 <= 0;
             zigag_enable_d2 <= 0;
+            zigag_enable_d3 <= 0;
             zigzag_pix_out <= 0;
         end else begin
             zigag_enable_d1 <= zigag_enable;
             zigag_enable_d2 <= zigag_enable_d1;
+            zigag_enable_d3 <= zigag_enable_d2;
             if(zigag_enable_d2) begin
-                zigzag_pix_out <= zigzag_pix_data;
+                zigzag_pix_out <= diff;
             end
         end
     end
+    
+    reg  [640-1:0]  zigzag_pix_out_pre;
+
+    // クロックエッジで diff の値を zigzag_pix_out_1 に反映させる例
+    always @(posedge clock or negedge reset_n) begin
+    if (!reset_n)
+        zigzag_pix_out_pre <= 0;
+    else
+        if(input_data_enable_d3) begin
+            zigzag_pix_out_pre <= zigzag_pix_out;
+        end
+    end
+
+`ifdef DEBUG
+    wire [9:0] debug_zigzag_pix_out0 = zigzag_pix_out[9:0];
+    wire [9:0] debug_zigzag_pix_data0 = zigzag_pix_data[9:0];
+    wire [9:0] debug_zigzag_pix_out_pre0 = zigzag_pix_out_pre[9:0];
+    wire [9:0] debug_diff0 = diff[9:0];
+    wire [9:0] debug_calc_diff0 = $signed(debug_zigzag_pix_data0) - $signed(debug_zigzag_pix_out_pre0);
+`endif
 
 endmodule
