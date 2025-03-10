@@ -1149,12 +1149,12 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
             j = j + 1
             #print("j=", j)
 
-        #print("next while")
+        print("next while")
 
         while 1:
             if(ACArray[i]!=0 or i==maxI - 1 or run==15):
-                #print("ACArray[i]=", ACArray[i])
-                #print("run15")
+                print("ACArray[i]=", ACArray[i])
+                print("run15")
                 break
             else:
                 run = run + 1
@@ -1176,7 +1176,6 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         runSizeStr = str.upper(str(hex(run))[2:]) + str.upper(str(hex(size))[2:])
 
         print("test runSizeStr :", runSizeStr)
-        print("test runSizeStr int:", int(runSizeStr))
 
         if (isLuminance == 1):
             print("ACLuminanceSizeToCode :", ACLuminanceSizeToCode[runSizeStr])

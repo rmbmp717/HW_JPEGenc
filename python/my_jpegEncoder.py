@@ -343,7 +343,75 @@ def debug_main():
     formatted = '_'.join([binary_str[i:i+8] for i in range(0, len(binary_str), 8)])
     print(formatted)
 
+def debug_JPEGenc_main():
+    
+    srcImageWidth  = 8
+    srcImageHeight = 8
+    imageWidth  = 8
+    imageHeight = 8
+    addedImageMatrix = numpy.zeros((imageHeight, imageWidth, 3), dtype=numpy.uint8)
+
+    # Image Input
+    addedImageMatrix[:4, :4] = 0    # 0 format
+    
+    yImage,uImage,vImage = Image.fromarray(addedImageMatrix).split()
+
+    '''
+    yImage =  [-15,   6,   6,   0,   5,   0,  -1,   0,
+                 0,  -1,   0,  -1,   0,  -1,   0,   0,
+                 0,   0,   0,   0,  -1,  -2,   0,   0,
+                 0,   0,   0,  14,   0,   0,   0,   0,
+                 0,   0,   0,   1,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0]
+    '''
+
+    yImage = [ -17, -13,  0,  0,  0, -1,  0,  0,
+                    0,   0,  0,  0,  0,  0,  0,  0,
+                    0,   0,  0,  0,  0, -1,  0,  0,
+                    0,   0,  0, 15,  0,  0,  0,  0,
+                    0,   0,  0,  0,  0,  0,  0,  0,
+                    0,   0,  0,  0,  0,  0,  0,  0,
+                    0,   0,  0,  0,  0,  0,  0,  0,
+                    0,   0,  0,  0,  0,  0,  0,  0 ]
+
+
+    yArray = numpy.asarray(yImage)
+    yZCode = yArray.reshape([64])
+
+    # BitStream
+    sosBitStream = BitStream()
+
+    # 各チャネルのマトリックスを表示
+    print("Input yZCode:")
+    print(yZCode)
+    
+    sosBitStream.append(huffmanEncode.encodeDCToBoolList(yZCode[0],1, 1))
+    print("sosBitStream DC:", sosBitStream.bin)
+
+    print("encode yAC:", yZCode[1:])
+    huffmanEncode.encodeACBlock(sosBitStream, yZCode[1:], 1, 1)
+
+    print("sosBitStream: ", sosBitStream.bin)
+
+    # 現在のビット列を取得
+    binary_str = sosBitStream.bin
+    bit_length = len(binary_str)
+
+    # 8の倍数になるために追加する0の個数を計算
+    #if bit_length % 8 != 0:
+    #    pad = 8 - (bit_length % 8)
+    #    sosBitStream.bin += '0' * pad
+
+    print("================================")
+    print("sosBitStream:")
+    binary_str = sosBitStream.bin
+    formatted = '_'.join([binary_str[i:i+8] for i in range(0, len(binary_str), 8)])
+    print(formatted)
+
 
 if __name__ == '__main__':
-    main()
+    #main()
     #debug_main()
+    debug_JPEGenc_main()
