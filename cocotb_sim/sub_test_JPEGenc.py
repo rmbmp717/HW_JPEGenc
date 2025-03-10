@@ -18,15 +18,15 @@ import sub_Debug_func
 # sub DC 関数
 async def run_huffman_dc(module, name, final_dc_container, clock):
 
-    # ログ設定: level を DEBUG にすると全てのログを出力、INFO にすると debug は抑制されるなど
+    # ログ設定: level を DEBUG にすれば詳細なログが出る
     logging.basicConfig(
-        level=logging.DEBUG,  # ここを DEBUG にすれば詳細なログが出る
+        level=logging.DEBUG,
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)  # 明示的にレベルを DEBUG に設定
 
-    # 各モジュールの DC 部分の処理を行う関数
     # モジュールの state が 6 になるまで待機
     while True:
         await RisingEdge(clock)
@@ -39,8 +39,8 @@ async def run_huffman_dc(module, name, final_dc_container, clock):
     huffman_dc_code_list = str(module.jpeg_dc_code_list.value)
     huffman_dc_code_list_size = int(module.dc_out_code_size.value)
 
-    logger.debug(f"{name} huffman_dc_code_bin(bin) =", huffman_dc_code_bin)
-    logger.debug(f"{name} huffman_dc_code_list(bin) =", huffman_dc_code_list)
+    logger.debug(f"{name} huffman_dc_code_bin(bin) = {huffman_dc_code_bin}")
+    logger.debug(f"{name} huffman_dc_code_list(bin) = {huffman_dc_code_list}")
 
     # 余分な 0 を除去し、リストサイズ分を取り出す
     trimmed_huffman_dc_code_list = huffman_dc_code_list.lstrip('0')
@@ -53,10 +53,10 @@ async def run_huffman_dc(module, name, final_dc_container, clock):
     # DC コード本体は先頭部分から取り出す
     trimmed_huffman_dc_code = huffman_dc_code_bin[-huffman_dc_code_length:]
 
-    logger.debug(f"{name} huffman_dc_code(bin) =", trimmed_huffman_dc_code)
-    logger.debug(f"{name} huffman_dc_code_length =", huffman_dc_code_length)
-    logger.debug(f"{name} trimmed_huffman_dc_code_list =", trimmed_huffman_dc_code_list)
-    logger.debug(f"{name} huffman_dc_code_list_size =", huffman_dc_code_list_size)
+    logger.debug(f"{name} huffman_dc_code(bin) = {trimmed_huffman_dc_code}")
+    logger.debug(f"{name} huffman_dc_code_length = {huffman_dc_code_length}")
+    logger.debug(f"{name} trimmed_huffman_dc_code_list = {trimmed_huffman_dc_code_list}")
+    logger.debug(f"{name} huffman_dc_code_list_size = {huffman_dc_code_list_size}")
 
     # 連結して最終出力とする
     if huffman_dc_code_list_size == 0:
@@ -64,22 +64,22 @@ async def run_huffman_dc(module, name, final_dc_container, clock):
     else:
         final_dc = trimmed_huffman_dc_code + trimmed_huffman_dc_code_list
 
-    logger.debug(f"{name} dc final_output =", final_dc)
+    logger.debug(f"{name} dc final_output = {final_dc}")
     final_dc_container[name] = final_dc
     logger.debug("--------------")
-
 
 # ---------------------------------------------------
 # sub AC 関数
 async def run_huffman_ac(module, name, final_output_container, clock):
 
-    # ログ設定: level を DEBUG にすると全てのログを出力、INFO にすると debug は抑制されるなど
+    # ログ設定: level を DEBUG にすれば詳細なログが出る
     logging.basicConfig(
-        level=logging.DEBUG,  # ここを DEBUG にすれば詳細なログが出る
+        level=logging.DEBUG,
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)  # 明示的にレベルを DEBUG に設定
 
     num_detected = 0
     done = False
@@ -89,7 +89,6 @@ async def run_huffman_ac(module, name, final_output_container, clock):
     while num_detected < 63 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(module.jpeg_out_enable)
-        #print(f"{get_sim_time('ns')} ns:")
         await FallingEdge(clock)
 
         huffman_code_bin = str(module.ac_out.value)
@@ -99,10 +98,10 @@ async def run_huffman_ac(module, name, final_output_container, clock):
         code_size_out = int(module.code_size_out.value)
         code_out_bin = code_out[-code_size_out:]
         
-        logger.debug("huffman_code(bin) =", trimmed_huffman_code)
-        logger.debug("huffman_code_length =", huffman_code_length)
-        logger.debug("code_out(bin) =", code_out_bin)
-        logger.debug("code_size_out =", code_size_out)
+        logger.debug(f"huffman_code(bin) = {trimmed_huffman_code}")
+        logger.debug(f"huffman_code_length = {huffman_code_length}")
+        logger.debug(f"code_out(bin) = {code_out_bin}")
+        logger.debug(f"code_size_out = {code_size_out}")
         
         # ビット列を最終出力に連結
         if int(module.Huffmanenc_active.value) == 1:
@@ -114,7 +113,7 @@ async def run_huffman_ac(module, name, final_output_container, clock):
 
         num_detected += 1
 
-        logger.debug("now_JPEG_output=", local_output)
+        logger.debug(f"now_JPEG_output = {local_output}")
         logger.debug("--------------")
 
         # jpeg_out_enable が Low になる（立ち下がり）を待機する
@@ -122,7 +121,7 @@ async def run_huffman_ac(module, name, final_output_container, clock):
         await RisingEdge(clock)
     
         # デバッグ用：Huffmanenc_active の値を表示
-        logger.debug("Huffmanenc_active=", int(module.Huffmanenc_active.value))
+        logger.debug(f"Huffmanenc_active = {int(module.Huffmanenc_active.value)}")
         
         # 状態が 0 になったら終了
         if int(module.Huffmanenc_active.value) == 0:
@@ -140,14 +139,15 @@ matrix_debug_out = 1
 
 async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
-    # ログ設定: level を DEBUG にすると全てのログを出力、INFO にすると debug は抑制されるなど
+    # ログ設定: level を DEBUG にすれば詳細なログが出る
     logging.basicConfig(
         level=logging.INFO,  # ここを DEBUG にすれば詳細なログが出る
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger = logging.getLogger(__name__)
-    
+    logger.setLevel(logging.DEBUG)  # 明示的にログレベルを DEBUG に設定
+
     logger.debug("==========================================================================")
    
     for _ in range(10):
@@ -167,7 +167,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     #pix_data_list = [int(p.binstr, 2) for p in dut.pix_data.value]
 
     for pix in range(64):
-        if pix > 1 :
+        if pix > 1:
             dut.input_1pix_enable.value = 1
         dut.Red.value   = flat_data_r[pix]
         dut.Green.value = flat_data_g[pix]
@@ -309,9 +309,9 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     await task_dc_cr
 
     # 各モジュールの DC コード出力を個別に表示
-    logger.debug("Y dc final_output =", final_dc_container.get("Y", ""))
-    logger.debug("Cb dc final_output =", final_dc_container.get("Cb", ""))
-    logger.debug("Cr dc final_output =", final_dc_container.get("Cr", ""))
+    logger.debug(f"Y dc final_output = {final_dc_container.get('Y', '')}")
+    logger.debug(f"Cb dc final_output = {final_dc_container.get('Cb', '')}")
+    logger.debug(f"Cr dc final_output = {final_dc_container.get('Cr', '')}")
 
     logger.debug("==========================================================================")
     # 例えば36回検出するか、state が 0 になったらループ終了
@@ -343,7 +343,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     logger.debug("==========================================================================")
     logger.debug("7: Huffman enc End")
-    logger.debug("count =", int(dut.counter.value), "clk")
+    logger.debug(f"count = {int(dut.counter.value)} clk")
 
     logger.debug("==========================================================================")
     logger.debug("8: Final Output")
@@ -365,6 +365,10 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
         print("Total Bits:", len(final_output))
         print("Compression Rate:", 100*len(final_output)/512, "%")
     '''
+
+    print(f"Y = {final_Y_output}")
+    print(f"Cb = {final_Cb_output}")
+    print(f"Cr = {final_Cr_output}")
 
     return (final_Y_output, final_Cb_output, final_Cr_output)
 

@@ -33,6 +33,9 @@ async def main_JPEGenc_top(dut):
     srcFileName = "./image/image8x16.bmp"
     outputJPEGFileName = "./image/image8x16.jpg"
 
+    print("srcFileName:", srcFileName)
+    print("outputJPEGFileName:", outputJPEGFileName)
+
     numpy.set_printoptions(threshold=numpy.inf)
     srcImage = Image.open(srcFileName)
     srcImageWidth, srcImageHeight = srcImage.size
