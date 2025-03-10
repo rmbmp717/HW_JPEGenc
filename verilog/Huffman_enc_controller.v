@@ -150,4 +150,7 @@ module Huffman_enc_controller(
   //assign jpeg_out = 0;
   //assign jpeg_data_bits = 0;
 
+  //Debug
+  wire [9:0] dc_input = dc_matrix[9:0];
+
 endmodule
