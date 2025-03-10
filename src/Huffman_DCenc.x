@@ -293,7 +293,7 @@ fn test1_Huffman_DCenc() {
 #[test]
 fn test2_Huffman_DCenc() {
     let test_matrix: s10[8][8] = [
-        [s10:-15, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:-17, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
@@ -304,10 +304,10 @@ fn test2_Huffman_DCenc() {
     ];
     
 
-    let expected_output: bits[9] = bits[9]:0b00000000;     
+    let expected_output: bits[9] = bits[9]:0b00000001;     
     let expected_length: u8 = u8:3;  
-    let expected_code: bits[8] = bits[8]:0b1111_0000;   
-    let expected_code_size: u8 = u8:4;                       
+    let expected_code: bits[8] = bits[8]:0b1110_1110;   
+    let expected_code_size: u8 = u8:5;                       
     let (BooList, Length, CodeList, Code_size): (bits[9], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
 
     trace!(BooList);

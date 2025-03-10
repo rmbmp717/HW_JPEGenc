@@ -485,7 +485,9 @@ fn get_ac(flat: u8[64]) -> u8[63] {
 }
 
 // スタート位置を指定してAC 成分（63 要素）を取得する関数
-fn get_ac_start(flat: s10[64], start_index: u8) -> s10[63] {
+fn get_ac_list(flat: s10[64]) -> s10[63] {
+    // start 
+    let start_index = u8:0;
     // 63個の要素がすべて0の配列を用意（要素数を正確に63個並べる）
     let zero_array: s10[63] = [
       s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
@@ -527,47 +529,169 @@ fn get_ac_start(flat: s10[64], start_index: u8) -> s10[63] {
     result
   }
   
-
-// AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする
-// AC 配列 ac のうち、インデックス start から連続する 0 の数をカウントする関数
-// 最大で15個までカウントし、途中で0以外の値が出たらそこで打ち切る
+// AC 配列 ac のうち、インデックス start 以前に連続する 0 の数をカウントする
 fn count_run(ac: s10[63], start: u32) -> u4 {
-    if start >= u32:63 {
-      u4:0
-    } else if ac[start] != s10:0 {
-      u4:0
-    } else if start + u32:1 >= u32:63 || ac[start + u32:1] != s10:0 {
-      u4:1
-    } else if start + u32:2 >= u32:63 || ac[start + u32:2] != s10:0 {
-      u4:2
-    } else if start + u32:3 >= u32:63 || ac[start + u32:3] != s10:0 {
-      u4:3
-    } else if start + u32:4 >= u32:63 || ac[start + u32:4] != s10:0 {
-      u4:4
-    } else if start + u32:5 >= u32:63 || ac[start + u32:5] != s10:0 {
-      u4:5
-    } else if start + u32:6 >= u32:63 || ac[start + u32:6] != s10:0 {
-      u4:6
-    } else if start + u32:7 >= u32:63 || ac[start + u32:7] != s10:0 {
-      u4:7
-    } else if start + u32:8 >= u32:63 || ac[start + u32:8] != s10:0 {
-      u4:8
-    } else if start + u32:9 >= u32:63 || ac[start + u32:9] != s10:0 {
-      u4:9
-    } else if start + u32:10 >= u32:63 || ac[start + u32:10] != s10:0 {
-      u4:10
-    } else if start + u32:11 >= u32:63 || ac[start + u32:11] != s10:0 {
-      u4:11
-    } else if start + u32:12 >= u32:63 || ac[start + u32:12] != s10:0 {
-      u4:12
-    } else if start + u32:13 >= u32:63 || ac[start + u32:13] != s10:0 {
-      u4:13
-    } else if start + u32:14 >= u32:63 || ac[start + u32:14] != s10:0 {
-      u4:14
-    } else {
-      u4:15
-    }
+  trace!(ac);
+  trace!(start);
+  trace!(ac[start]);
+  if start == u32:0 {
+    // インデックス 0 の場合、先行要素はないので 0 を返す
+    u4:0
+  } else if ac[start - u32:1] != s10:0 {
+    // 直前の要素が 0 でなければ連続 0 はない
+    u4:0
+  } else if start == u32:1 {
+    u4:1
+  } else if ac[start - u32:2] != s10:0 {
+    u4:1
+  } else if start == u32:2 {
+    u4:2
+  } else if ac[start - u32:3] != s10:0 {
+    u4:2
+  } else if start == u32:3 {
+    u4:3
+  } else if ac[start - u32:4] != s10:0 {
+    u4:3
+  } else if start == u32:4 {
+    u4:4
+  } else if ac[start - u32:5] != s10:0 {
+    u4:4
+  } else if start == u32:5 {
+    u4:5
+  } else if ac[start - u32:6] != s10:0 {
+    u4:5
+  } else if start == u32:6 {
+    u4:6
+  } else if ac[start - u32:7] != s10:0 {
+    u4:6
+  } else if start == u32:7 {
+    u4:7
+  } else if ac[start - u32:8] != s10:0 {
+    u4:7
+  } else if start == u32:8 {
+    u4:8
+  } else if ac[start - u32:9] != s10:0 {
+    u4:8
+  } else if start == u32:9 {
+    u4:9
+  } else if ac[start - u32:10] != s10:0 {
+    u4:9
+  } else if start == u32:10 {
+    u4:10
+  } else if ac[start - u32:11] != s10:0 {
+    u4:10
+  } else if start == u32:11 {
+    u4:11
+  } else if ac[start - u32:12] != s10:0 {
+    u4:11
+  } else if start == u32:12 {
+    u4:12
+  } else if ac[start - u32:13] != s10:0 {
+    u4:12
+  } else if start == u32:13 {
+    u4:13
+  } else if ac[start - u32:14] != s10:0 {
+    u4:13
+  } else if start == u32:14 {
+    u4:14
+  } else if ac[start - u32:15] != s10:0 {
+    u4:14
+  } else {
+    u4:15
   }
+}
+
+#[test]
+fn test0_count_run() {
+  let ac_matrix: s10[63] = [ // 先頭 2個が 0
+      s10:0, s10:0, s10:0, s10:0, s10:7, s10:0, s10:0, s10:0, s10:0, s10:0,
+      s10:5, s10:6, s10:7, s10:8, s10:9, s10:10, s10:11, s10:12, s10:13, s10:14,
+      s10:15, s10:16, s10:17, s10:18, s10:19, s10:20, s10:21, s10:22, s10:23, s10:24,
+      s10:25, s10:26, s10:27, s10:28, s10:29, s10:30, s10:31, s10:32, s10:33, s10:34,
+      s10:35, s10:36, s10:37, s10:38, s10:39, s10:40, s10:41, s10:42, s10:43, s10:44,
+      s10:45, s10:46, s10:47, s10:48, s10:49, s10:50, s10:51, s10:52, s10:53, s10:3,
+      s10:45, s10:46, s10:47
+  ];
+
+    // 各テストケース
+    let result1: u4 = count_run(ac_matrix, u32:4);
+    let result2: u4 = count_run(ac_matrix, u32:3);
+    let result3: u4 = count_run(ac_matrix, u32:5);
+
+    trace!(result1);
+    trace!(result2);
+    trace!(result3);
+
+    // 期待値と比較
+    assert_eq(result1, u4:4);
+    assert_eq(result2, u4:3);
+    assert_eq(result3, u4:0);
+}
+
+// AC 配列 ac のうち、インデックス start + 1 から連続する 0 の数をカウントする
+// AC 配列 ac のうち、インデックス start + 1 から連続する 0 の数をカウントする関数
+// 最大で15個までカウントし、途中で0以外の値が出たらそこで打ち切る
+fn next_pix(ac: s10[63], start: u32) -> u4 {
+  trace!(ac);
+  trace!(start);
+  trace!(ac[start]);
+  if start + u32:1 >= u32:63 {
+    u4:0
+  } else if ac[start + u32:1] != s10:0 {
+    u4:0
+  } else if start + u32:2 >= u32:63 || ac[start + u32:2] != s10:0 {
+    u4:1
+  } else if start + u32:3 >= u32:63 || ac[start + u32:3] != s10:0 {
+    u4:2
+  } else if start + u32:4 >= u32:63 || ac[start + u32:4] != s10:0 {
+    u4:3
+  } else if start + u32:5 >= u32:63 || ac[start + u32:5] != s10:0 {
+    u4:4
+  } else if start + u32:6 >= u32:63 || ac[start + u32:6] != s10:0 {
+    u4:5
+  } else if start + u32:7 >= u32:63 || ac[start + u32:7] != s10:0 {
+    u4:6
+  } else if start + u32:8 >= u32:63 || ac[start + u32:8] != s10:0 {
+    u4:7
+  } else if start + u32:9 >= u32:63 || ac[start + u32:9] != s10:0 {
+    u4:8
+  } else if start + u32:10 >= u32:63 || ac[start + u32:10] != s10:0 {
+    u4:9
+  } else if start + u32:11 >= u32:63 || ac[start + u32:11] != s10:0 {
+    u4:10
+  } else if start + u32:12 >= u32:63 || ac[start + u32:12] != s10:0 {
+    u4:11
+  } else if start + u32:13 >= u32:63 || ac[start + u32:13] != s10:0 {
+    u4:12
+  } else if start + u32:14 >= u32:63 || ac[start + u32:14] != s10:0 {
+    u4:13
+  } else if start + u32:15 >= u32:63 || ac[start + u32:15] != s10:0 {
+    u4:14
+  } else {
+    u4:15
+  }
+}
+
+#[test]
+fn test0_next_pix() {
+  let ac_matrix: s10[63] = [ // 先頭 2個が 0
+      s10:0, s10:0, s10:0, s10:0, s10:7, s10:0, s10:0, s10:0, s10:0, s10:0,
+      s10:5, s10:6, s10:7, s10:8, s10:9, s10:10, s10:11, s10:12, s10:13, s10:14,
+      s10:15, s10:16, s10:17, s10:18, s10:19, s10:20, s10:21, s10:22, s10:23, s10:24,
+      s10:25, s10:26, s10:27, s10:28, s10:29, s10:30, s10:31, s10:32, s10:33, s10:34,
+      s10:35, s10:36, s10:37, s10:38, s10:39, s10:40, s10:41, s10:42, s10:43, s10:44,
+      s10:45, s10:46, s10:47, s10:48, s10:49, s10:50, s10:51, s10:52, s10:53, s10:3,
+      s10:45, s10:46, s10:47
+  ];
+
+    // 各テストケース
+    let result1: u4 = next_pix(ac_matrix, u32:4);
+
+    trace!(result1);
+
+    // 期待値と比較
+    assert_eq(result1, u4:5);
+}
   
 // ビット数を求める関数
 fn bit_length(x: s10) -> u8 {
@@ -652,23 +776,25 @@ fn encode_value(value: u8) -> bits[8] {
 }
 
 // AC 成分の Huffman 符号化（ループなし）
-fn encode_ac(ac_data: s10[63], is_luminance: bool) -> (bits[16], u8, bits[8], u8, u4) {
-    let run: u4 = count_run(ac_data, u32:0);
+// Output: code[15:0] + length[7:0] + code_list[7:0] + code_size[7:0] + run[3:0] + next_pix[3:0]
+fn encode_ac(ac_data: s10[63], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u4, u4) {
+    let next_pix: u4 = next_pix(ac_data, start_pix as u32) + u4:1;
+    let run: u4 = count_run(ac_data, start_pix as u32);
     trace!(ac_data);
-    trace!(run);
+    trace!(next_pix);
 
     // すべて 0 なら EOB を返す
     if run == u4:15 {
         trace!("EOB");
         if is_luminance {
             let (huff_code, huff_length) = lookup_ACLuminanceSizeToCode([u8:0, u8:0]);
-            (huff_code, huff_length, bits[8]:0, u8:4, u4:0)
+            (huff_code, huff_length, bits[8]:0, u8:4, u4:0, u4:0)
         } else {
             let (huff_code, huff_length) = lookup_ACChrominanceToCode([u8:0, u8:0]);
-            (huff_code, huff_length, bits[8]:0, u8:4, u4:0)
+            (huff_code, huff_length, bits[8]:0, u8:4, u4:0, u4:0)
         }
     } else {
-        let value: s10 = ac_data[run];  // `run` の次の非ゼロ値
+        let value: s10 = ac_data[start_pix]; 
         let size: u8 = bit_length(value);
         let Code_size = size;
         //let run_size_str: u8[2] = encode_run_size(run as u32, size);
@@ -705,18 +831,19 @@ fn encode_ac(ac_data: s10[63], is_luminance: bool) -> (bits[16], u8, bits[8], u8
     
         trace!(Code_list);
 
-        (Huffman_code_full, Huffman_length, Code_list, Code_size, run)
+        (Huffman_code_full, Huffman_length, Code_list, Code_size, run, next_pix)
     }
 }
 
 // --------------------------------
 // メイン関数
-// Output: code[15:0] + length[7:0] + code_list[7:0] + run[3:0]
-fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u4) {
+// Output: code[15:0] + length[7:0] + code_list[7:0] + run[3:0] + next_pix[3:0]
+fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u4, u4) {
     let flat: s10[64] = flatten(matrix);
-    let ac: s10[63] = get_ac_start(flat, start_pix);
+    let ac: s10[63] = get_ac_list(flat);
+    trace!(ac);
 
-    let value = matrix[0][0];
+    let value =ac[start_pix];
     let ac_value_s16 = value as s16;
     
     let code_list: bits[8] =
@@ -733,13 +860,13 @@ fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, is_luminance: bool) -> (bits[
     if is_all_zero(ac) {
       if is_luminance {
           let (huff_code, huff_length) = lookup_ACLuminanceSizeToCode([u8:0, u8:0]);
-          (huff_code, huff_length, code_list, u8:0, u4:15)
+          (huff_code, huff_length, code_list, u8:0, u4:15, u4:15)
       } else {
           let (huff_code, huff_length) = lookup_ACChrominanceToCode([u8:0, u8:0]);
-          (huff_code, huff_length, code_list, u8:0, u4:15)
+          (huff_code, huff_length, code_list, u8:0, u4:15, u4:15)
       }
     } else {
-        encode_ac(ac, is_luminance)  // Luminance 用 Huffman 符号化
+        encode_ac(ac, start_pix, is_luminance)  // Luminance 用 Huffman 符号化
     }
 }
 
@@ -759,23 +886,26 @@ fn test_v0_Huffman_ACenc() {
       [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1011;     
-    let expected_length: u8 = u8:4;             
+    let expected_output: bits[16] = bits[16]:501;     
+    let expected_length: u8 = u8:9;             
     let expected_code: bits[8] = bits[8]:11;  
     let expected_code_size: u8 = u8:4;  
-    let expected_run: u4 = u4:0;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
+    let expected_run: u4 = u4:1;              
+    let expected_next_pix: u4 = u4:1;                 
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
                 = Huffman_ACenc(test_matrix, u8:1, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
     assert_eq(actual_run, expected_run);
+    assert_eq(expected_next_pix, actual_next_pix);
     assert_eq(actual_code_size, expected_code_size);
 }
 
@@ -792,23 +922,26 @@ fn test_v1_Huffman_ACenc() {
       [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1011;     
-    let expected_length: u8 = u8:4;             
-    let expected_code: bits[8] = bits[8]:0b1011;  
-    let expected_code_size: u8 = u8:4;  
-    let expected_run: u4 = u4:0;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:1, true);  
+    let expected_output: bits[16] = bits[16]:0b100;     
+    let expected_length: u8 = u8:3;             
+    let expected_code: bits[8] = bits[8]:0b101;  
+    let expected_code_size: u8 = u8:3;  
+    let expected_run: u4 = u4:0;           
+    let expected_next_pix: u4 = u4:1;                        
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
+                = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
     assert_eq(actual_run, expected_run);
+    assert_eq(expected_next_pix, actual_next_pix);
     assert_eq(actual_code_size, expected_code_size);
 }
 
@@ -829,19 +962,22 @@ fn test0_Huffman_ACenc_allzero() {
     let expected_length: u8 = u8:2;             
     let expected_code: bits[8] = bits[8]:0b1111_1111;  
     let expected_code_size: u8 = u8:0;  
-    let expected_run: u4 = u4:15;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
+    let expected_run: u4 = u4:15;         
+    let expected_next_pix: u4 = u4:15;               
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
                 = Huffman_ACenc(test_matrix, u8:1, false);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
     assert_eq(actual_run, expected_run);
+    assert_eq(expected_next_pix, actual_next_pix);
     assert_eq(actual_code_size, expected_code_size);
 }
 
@@ -858,18 +994,19 @@ fn test1_Huffman_ACenc() {
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1010;  
-    let expected_length: u8 = u8:4;         
+    let expected_output: bits[16] = bits[16]:27;  
+    let expected_length: u8 = u8:5;         
     let expected_code: bits[8] = bits[8]:0b000_0001;   
     let expected_code_size: u8 = u8:1;   
-    let expected_run: u4 = u4:1;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:1, true);  
+    let expected_run: u4 = u4:2;                        
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
+                = Huffman_ACenc(test_matrix, u8:2, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
@@ -882,7 +1019,7 @@ fn test1_Huffman_ACenc() {
 fn test2_Huffman_ACenc() {
     let test_matrix: s10[8][8] = [
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:5, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+      [s10:0, s10:5, s10:0, s10:0, s10:1, s10:0, s10:0, s10:0],
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
@@ -891,18 +1028,19 @@ fn test2_Huffman_ACenc() {
       [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
     ];
 
-    let expected_output: bits[16] = bits[16]:0b1111111110011110;
+    let expected_output: bits[16] = bits[16]:65425;
     let expected_length: u8 = u8:16;         
     let expected_code: bits[8] = bits[8]:0b000_0101;    
     let expected_code_size: u8 = u8:3;  
-    let expected_run: u4 = u4:8;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:1, true);  
+    let expected_run: u4 = u4:9;                        
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
+                = Huffman_ACenc(test_matrix, u8:9, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
@@ -913,70 +1051,6 @@ fn test2_Huffman_ACenc() {
 
 #[test]
 fn test3_Huffman_ACenc() {
-    let test_matrix: s10[8][8] = [
-      [s10:64, s10:0, s10:128, s10:0, s10:0, s10:0, s10:26, s10:0],
-      [s10:0, s10:5, s10:0, s10:0, s10:0, s10:23, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
-    ];
-    let expected_output: bits[16] = bits[16]:0b1111111110100001;  
-    let expected_length: u8 = u8:16;         
-    let expected_code: bits[8] = bits[8]:128;    
-    let expected_code_size: u8 = u8:8;  
-    let expected_run: u4 = u4:1;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:1, true);  
-
-    trace!(actual_output);
-    trace!(actual_length);
-    trace!(actual_code);
-    trace!(actual_run);
-
-    assert_eq(actual_output, expected_output);
-    assert_eq(actual_length, expected_length);
-    assert_eq(actual_code, expected_code);
-    assert_eq(actual_run, expected_run);
-    assert_eq(actual_code_size, expected_code_size);
-}
-
-#[test]
-fn test4_Huffman_ACenc() {
-    let test_matrix: s10[8][8] = [
-      [s10:64, s10:-8, s10:128, s10:0, s10:0, s10:0, s10:26, s10:0],
-      [s10:0, s10:5, s10:0, s10:0, s10:0, s10:23, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
-      [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
-    ];
-    let expected_output: bits[16] = bits[16]:0b1011;  
-    let expected_length: u8 = u8:4;         
-    let expected_code: bits[8] = bits[8]:0b11110111;
-    let expected_code_size: u8 = u8:4;  
-    let expected_run: u4 = u4:0;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:1, true);  
-
-    trace!(actual_output);
-    trace!(actual_length);
-    trace!(actual_code);
-    trace!(actual_run);
-
-    assert_eq(actual_output, expected_output);
-    assert_eq(actual_length, expected_length);
-    assert_eq(actual_code, expected_code);
-    assert_eq(actual_run, expected_run);
-    assert_eq(actual_code_size, expected_code_size);
-}
-
-#[test]
-fn test5_Huffman_ACenc() {
     let test_matrix: s10[8][8] = [
       [s10:-15, s10:6,  s10:6, s10:0,  s10:5,  s10:0,  s10:-1, s10:0],
       [s10:0,   s10:-1, s10:0, s10:-1, s10:0,  s10:-1, s10:0,  s10:0],
@@ -991,16 +1065,17 @@ fn test5_Huffman_ACenc() {
     trace!("No.1");
     let expected_output: bits[16] = bits[16]:0b0100;  
     let expected_length: u8 = u8:3;         
-    let expected_code: bits[8] = bits[8]:0b110;
+    let expected_code: bits[8] = bits[8]:6;
     let expected_code_size: u8 = u8:3;  
     let expected_run: u4 = u4:0;                        
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
                 = Huffman_ACenc(test_matrix, u8:1, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
@@ -1010,20 +1085,21 @@ fn test5_Huffman_ACenc() {
 
     // No.2
     trace!("No.2");
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4) 
-                = Huffman_ACenc(test_matrix, u8:3, true);  
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
+                = Huffman_ACenc(test_matrix, u8:2, true);  
 
-    let expected_output: bits[16] = bits[16]:0b0111_1010;  
-    let expected_length: u8 = u8:7;         
-    let expected_code: bits[8] = bits[8]:0b101;
+    let expected_output: bits[16] = bits[16]:4;  
+    let expected_length: u8 = u8:3;         
+    let expected_code: bits[8] = bits[8]:6;
     let expected_code_size: u8 = u8:3;  
-    let expected_run: u4 = u4:1;           
+    let expected_run: u4 = u4:0;           
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_code_size);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
@@ -1033,20 +1109,21 @@ fn test5_Huffman_ACenc() {
 
     // No.3
     trace!("No.3");
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_run): (bits[16], u8, bits[8], u8, u4)    
-                = Huffman_ACenc(test_matrix, u8:28, true);   
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4)    
+                = Huffman_ACenc(test_matrix, u8:27, true);   
 
-    let expected_output: bits[16] = bits[16]:0b1111_1001;  
-    let expected_length: u8 = u8:8;         
-    let expected_code: bits[8] = bits[8]:0b1;
-    let expected_code_size: u8 = u8:1;  
-    let expected_run: u4 = u4:7;              
+    let expected_output: bits[16] = bits[16]:65430;  
+    let expected_length: u8 = u8:16;         
+    let expected_code: bits[8] = bits[8]:14;
+    let expected_code_size: u8 = u8:4;  
+    let expected_run: u4 = u4:5;              
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_code_size);
     trace!(actual_run);
+    trace!(actual_next_pix);
 
     assert_eq(actual_output, expected_output);
     assert_eq(actual_length, expected_length);
@@ -1056,123 +1133,60 @@ fn test5_Huffman_ACenc() {
 }
 
 
+#[test]
+fn test4_Huffman_ACenc() {
+    let test_matrix: s10[8][8] = [
+      [s10:-17, s10:-13, s10:0,   s10:0, s10:0,  s10:-1, s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:-1, s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:15, s10:0,  s10:0,  s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0],
+      [s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0]
+    ];
+    let expected_output: bits[16] = bits[16]:58;  
+    let expected_length: u8 = u8:6;         
+    let expected_code: bits[8] = bits[8]:254;
+    let expected_code_size: u8 = u8:1;  
+    let expected_run: u4 = u4:3;                        
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_run, actual_next_pix): (bits[16], u8, bits[8], u8, u4, u4) 
+                = Huffman_ACenc(test_matrix, u8:5, true);  
+
+    trace!(actual_output);
+    trace!(actual_length);
+    trace!(actual_code);
+    trace!(actual_code_size);
+    trace!(actual_run);
+    trace!(actual_next_pix);
+
+    assert_eq(actual_output, expected_output);
+    assert_eq(actual_length, expected_length);
+    assert_eq(actual_code, expected_code);
+    assert_eq(actual_code_size, expected_code_size);
+    assert_eq(actual_run, expected_run);
+}
+
 
 // =======================
 // 過去のテストケース
 // =======================
 #[test]
-fn test_count_run() {
-  let ac1: s10[63] = [ // 先頭 10 個が 0
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:5, s10:6, s10:7, s10:8, s10:9, s10:10, s10:11, s10:12, s10:13, s10:14,
-      s10:15, s10:16, s10:17, s10:18, s10:19, s10:20, s10:21, s10:22, s10:23, s10:24,
-      s10:25, s10:26, s10:27, s10:28, s10:29, s10:30, s10:31, s10:32, s10:33, s10:34,
-      s10:35, s10:36, s10:37, s10:38, s10:39, s10:40, s10:41, s10:42, s10:43, s10:44,
-      s10:45, s10:46, s10:47, s10:48, s10:49, s10:50, s10:51, s10:52, s10:53, s10:3,
-      s10:45, s10:46, s10:47
-  ];
-  
-  let ac2: s10[63] = [ // 先頭 15 個が 0
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:1, s10:2, s10:3, s10:4, s10:5, s10:6, s10:7, s10:8, s10:9, s10:10,
-      s10:11, s10:12, s10:13, s10:14, s10:15, s10:16, s10:17, s10:18, s10:19, s10:20,
-      s10:21, s10:22, s10:23, s10:24, s10:25, s10:26, s10:27, s10:28, s10:29, s10:30,
-      s10:31, s10:32, s10:33, s10:34, s10:35, s10:36, s10:37, s10:38, s10:39, s10:40,
-      s10:41, s10:42, s10:43, s10:44, s10:45, s10:43, s10:44, s10:45
-  ];
+fn test1_count_run() {
+  let ac1: s10[63] = 
+    [s10:-13, s10:0,   s10:0, s10:0,  s10:-1, s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:-1, s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:15, s10:0,  s10:0,  s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0,
+     s10:0,   s10:0,   s10:0,   s10:0, s10:0,  s10:0,  s10:0, s10:0];
 
-  let ac3: s10[63] = [ // すべて 0
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:43, s10:44, s10:45, s10:5
-  ];
-  
-  let ac4: s10[63] = [ // すべて 0 ではない
-      s10:1, s10:2, s10:3, s10:4, s10:5, s10:6, s10:7, s10:8, s10:9, s10:10,
-      s10:11, s10:12, s10:13, s10:14, s10:15, s10:16, s10:17, s10:18, s10:19, s10:20,
-      s10:21, s10:22, s10:23, s10:24, s10:25, s10:26, s10:27, s10:28, s10:29, s10:30,
-      s10:31, s10:32, s10:33, s10:34, s10:35, s10:36, s10:37, s10:38, s10:39, s10:40,
-      s10:41, s10:42, s10:43, s10:44, s10:45, s10:46, s10:47, s10:48, s10:49, s10:50,
-      s10:51, s10:52, s10:53, s10:54, s10:55, s10:56, s10:57, s10:58, s10:59, s10:5,
-      s10:51, s10:52, s10:53
-  ];
+  // 各テストケース
+  let result1: u4 = count_run(ac1, u32:4);
 
-  let ac5: s10[63] = [ // 先頭 2個が 0
-      s10:0, s10:0, s10:1, s10:1, s10:1, s10:0, s10:0, s10:0, s10:0, s10:0,
-      s10:5, s10:6, s10:7, s10:8, s10:9, s10:10, s10:11, s10:12, s10:13, s10:14,
-      s10:15, s10:16, s10:17, s10:18, s10:19, s10:20, s10:21, s10:22, s10:23, s10:24,
-      s10:25, s10:26, s10:27, s10:28, s10:29, s10:30, s10:31, s10:32, s10:33, s10:34,
-      s10:35, s10:36, s10:37, s10:38, s10:39, s10:40, s10:41, s10:42, s10:43, s10:44,
-      s10:45, s10:46, s10:47, s10:48, s10:49, s10:50, s10:51, s10:52, s10:53, s10:3,
-      s10:45, s10:46, s10:47
-  ];
+  // 期待値と比較
+  assert_eq(result1, u4:3); 
 
-    // 各テストケース
-    let result1: u4 = count_run(ac1, u32:0);
-    let result2: u4 = count_run(ac2, u32:0);
-    let result3: u4 = count_run(ac3, u32:0);
-    let result4: u4 = count_run(ac4, u32:0);
-    let result5: u4 = count_run(ac5, u32:0);
-
-    trace!(result1);
-    trace!(result2);
-    trace!(result3);
-    trace!(result4);
-    trace!(result5);
-
-    // 期待値と比較
-    assert_eq(result1, u4:10); // 最初の 10 個が 0
-    assert_eq(result2, u4:15); // 最初の 15 個が 0
-    assert_eq(result3, u4:15); // すべて 0 でも最大 15 まで
-    assert_eq(result4, u4:0);  // すべて 0 でない
-    assert_eq(result5, u4:2);  
-}
-
-#[test]
-fn test_get_ac2() {
-  // テスト用の flat 配列を用意 (64 要素)
-  let flat: s10[64] = [
-    s10:10, s10:11, s10:12, s10:13, s10:14, s10:15, s10:16, s10:17,
-    s10:18, s10:19, s10:20, s10:21, s10:22, s10:23, s10:24, s10:25,
-    s10:26, s10:27, s10:28, s10:29, s10:30, s10:31, s10:32, s10:33,
-    s10:34, s10:35, s10:36, s10:37, s10:38, s10:39, s10:40, s10:41,
-    s10:42, s10:43, s10:44, s10:45, s10:46, s10:47, s10:48, s10:49,
-    s10:50, s10:51, s10:52, s10:53, s10:54, s10:55, s10:56, s10:57,
-    s10:58, s10:59, s10:60, s10:61, s10:62, s10:63, s10:64, s10:65,
-    s10:66, s10:67, s10:68, s10:69, s10:70, s10:71, s10:72, s10:73
-  ];
-
-  // start_index を bits[4] にキャストし、たとえば 3 を渡す（0～15 の範囲）
-  let si: u8 = u8:3;
-
-  // テスト対象の関数を呼び出し
-  let actual_result: s10[63] = get_ac_start(flat, si);
-
-  // 期待値を作る
-  // start_index=3 なので、flat[3..(3+63-1)]→flat[3..65], ただし65は範囲外なので
-  // 実際には flat[3..63] で残りは0が埋まる
-  let expected: s10[63] = [
-    // flat[3..64]: (要素数61個)
-    s10:13, s10:14, s10:15, s10:16, s10:17, s10:18, s10:19, s10:20,
-    s10:21, s10:22, s10:23, s10:24, s10:25, s10:26, s10:27, s10:28,
-    s10:29, s10:30, s10:31, s10:32, s10:33, s10:34, s10:35, s10:36,
-    s10:37, s10:38, s10:39, s10:40, s10:41, s10:42, s10:43, s10:44,
-    s10:45, s10:46, s10:47, s10:48, s10:49, s10:50, s10:51, s10:52,
-    s10:53, s10:54, s10:55, s10:56, s10:57, s10:58, s10:59, s10:60,
-    s10:61, s10:62, s10:63, s10:64, s10:65, s10:66, s10:67, s10:68,
-    s10:69, s10:70, s10:71, s10:72, s10:73,
-    // 残り (63-61=2個) は 0
-    s10:0, s10:0
-  ];
-
-  // テスト結果をトレース出力
-  trace!(actual_result);
-
-  // アサーションで検証
-  assert_eq(actual_result, expected);
 }
