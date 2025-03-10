@@ -3,10 +3,13 @@
 #================================================================
 
 # Top-level module & source settings
-TOP              := RGB_to_YCbCr
+#TOP              := dct_2d_s12
+#TOP              := dct_1d_s12
+#TOP              := Huffman_DCenc
+TOP              := Huffman_ACenc
 #INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
-#INPUT_FILE     := ./src/Huffman_ACenc.x   # PIPE_LINE_STAGE = 4
-INPUT_FILE 	:= ./src/RGB_YCbCr.x
+INPUT_FILE     := ./src/Huffman_ACenc.x   # PIPE_LINE_STAGE = 4
+#INPUT_FILE 	:= ./src/RGB_YCbCr.x
 #INPUT_FILE 	:= ./src/Quantize.x
 #INPUT_FILE 	:= ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE 	:= ./src/DCT_2D.x
@@ -16,7 +19,7 @@ IR_FILE          := $(IR_DIR)/$(TOP).ir
 OPT_IR_FILE      := $(IR_DIR)/$(TOP)_opt.ir
 OUTPUT_FILE      := ./verilog/$(TOP).v
 
-PIPE_LINE_STAGE  := 1
+PIPE_LINE_STAGE  := 4
 SIM              := icarus
 COCOTB_DIR       := /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
 
@@ -42,7 +45,8 @@ VERILOG_FILES    := $(VERILOG_DIR)/HW_JPEGenc_top.v \
                     $(VERILOG_DIR)/Huffman_ACenc.v \
                     $(VERILOG_DIR)/Huffman_enc_controller.v
 
-COCOTB_FILE      := cocotb_sim.main_JPEGenc_top
+#COCOTB_FILE      := cocotb_sim.main_JPEGenc_top
+COCOTB_FILE      := cocotb_sim.main_BMP_to_JPEG_top
 
 # Phony targets
 .PHONY: all interpret ir_convert optimize codegen simulate activate gowin_copy
