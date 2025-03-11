@@ -387,7 +387,7 @@ fn lookup_ACChrominanceToCode_test() {
 
 
 // 8×8 の u8 行列を平坦化して 64 要素の u8 配列にする関数
-fn flatten(matrix: s10[8][8]) -> s10[64] {
+fn fn_flatten(matrix: s10[8][8]) -> s10[64] {
   let row0: s10[8] = matrix[0];
   let row1: s10[8] = matrix[1];
   let row2: s10[8] = matrix[2];
@@ -402,7 +402,7 @@ fn flatten(matrix: s10[8][8]) -> s10[64] {
 }
 
 // AC 成分（63 要素）のすべてが 0 かどうか判定する関数
-fn is_all_zero(ac: s10[63]) -> bool {
+fn fn_is_all_zero(ac: s10[63]) -> bool {
   ac[0]  == s10:0 &&
   ac[1]  == s10:0 &&
   ac[2]  == s10:0 &&
@@ -596,200 +596,8 @@ fn fn_count_run(ac: s10[63], start: u32) -> u8 {
     u8:14
   } else if ac[start - u32:15] != s10:0 {
     u8:14
-  } else if start == u32:15 {
-    u8:15
-  } else if ac[start - u32:16] != s10:0 {
-    u8:15
-  } else if start == u32:16 {
-    u8:16
-  } else if ac[start - u32:17] != s10:0 {
-    u8:16
-  } else if start == u32:17 {
-    u8:17
-  } else if ac[start - u32:18] != s10:0 {
-    u8:17
-  } else if start == u32:18 {
-    u8:18
-  } else if ac[start - u32:19] != s10:0 {
-    u8:18
-  } else if start == u32:19 {
-    u8:19
-  } else if ac[start - u32:20] != s10:0 {
-    u8:19
-  } else if start == u32:20 {
-    u8:20
-  } else if ac[start - u32:21] != s10:0 {
-    u8:20
-  } else if start == u32:21 {
-    u8:21
-  } else if ac[start - u32:22] != s10:0 {
-    u8:21
-  } else if start == u32:22 {
-    u8:22
-  } else if ac[start - u32:23] != s10:0 {
-    u8:22
-  } else if start == u32:23 {
-    u8:23
-  } else if ac[start - u32:24] != s10:0 {
-    u8:23
-  } else if start == u32:24 {
-    u8:24
-  } else if ac[start - u32:25] != s10:0 {
-    u8:24
-  } else if start == u32:25 {
-    u8:25
-  } else if ac[start - u32:26] != s10:0 {
-    u8:25
-  } else if start == u32:26 {
-    u8:26
-  } else if ac[start - u32:27] != s10:0 {
-    u8:26
-  } else if start == u32:27 {
-    u8:27
-  } else if ac[start - u32:28] != s10:0 {
-    u8:27
-  } else if start == u32:28 {
-    u8:28
-  } else if ac[start - u32:29] != s10:0 {
-    u8:28
-  } else if start == u32:29 {
-    u8:29
-  } else if ac[start - u32:30] != s10:0 {
-    u8:29
-  } else if start == u32:30 {
-    u8:30
-  } else if ac[start - u32:31] != s10:0 {
-    u8:30
-  } else if start == u32:31 {
-    u8:31
-  } else if ac[start - u32:32] != s10:0 {
-    u8:31
-  } else if start == u32:32 {
-    u8:32
-  } else if ac[start - u32:33] != s10:0 {
-    u8:32
-  } else if start == u32:33 {
-    u8:33
-  } else if ac[start - u32:34] != s10:0 {
-    u8:33
-  } else if start == u32:34 {
-    u8:34
-  } else if ac[start - u32:35] != s10:0 {
-    u8:34
-  } else if start == u32:35 {
-    u8:35
-  } else if ac[start - u32:36] != s10:0 {
-    u8:35
-  } else if start == u32:36 {
-    u8:36
-  } else if ac[start - u32:37] != s10:0 {
-    u8:36
-  } else if start == u32:37 {
-    u8:37
-  } else if ac[start - u32:38] != s10:0 {
-    u8:37
-  } else if start == u32:38 {
-    u8:38
-  } else if ac[start - u32:39] != s10:0 {
-    u8:38
-  } else if start == u32:39 {
-    u8:39
-  } else if ac[start - u32:40] != s10:0 {
-    u8:39
-  } else if start == u32:40 {
-    u8:40
-  } else if ac[start - u32:41] != s10:0 {
-    u8:40
-  } else if start == u32:41 {
-    u8:41
-  } else if ac[start - u32:42] != s10:0 {
-    u8:41
-  } else if start == u32:42 {
-    u8:42
-  } else if ac[start - u32:43] != s10:0 {
-    u8:42
-  } else if start == u32:43 {
-    u8:43
-  } else if ac[start - u32:44] != s10:0 {
-    u8:43
-  } else if start == u32:44 {
-    u8:44
-  } else if ac[start - u32:45] != s10:0 {
-    u8:44
-  } else if start == u32:45 {
-    u8:45
-  } else if ac[start - u32:46] != s10:0 {
-    u8:45
-  } else if start == u32:46 {
-    u8:46
-  } else if ac[start - u32:47] != s10:0 {
-    u8:46
-  } else if start == u32:47 {
-    u8:47
-  } else if ac[start - u32:48] != s10:0 {
-    u8:47
-  } else if start == u32:48 {
-    u8:48
-  } else if ac[start - u32:49] != s10:0 {
-    u8:48
-  } else if start == u32:49 {
-    u8:49
-  } else if ac[start - u32:50] != s10:0 {
-    u8:49
-  } else if start == u32:50 {
-    u8:50
-  } else if ac[start - u32:51] != s10:0 {
-    u8:50
-  } else if start == u32:51 {
-    u8:51
-  } else if ac[start - u32:52] != s10:0 {
-    u8:51
-  } else if start == u32:52 {
-    u8:52
-  } else if ac[start - u32:53] != s10:0 {
-    u8:52
-  } else if start == u32:53 {
-    u8:53
-  } else if ac[start - u32:54] != s10:0 {
-    u8:53
-  } else if start == u32:54 {
-    u8:54
-  } else if ac[start - u32:55] != s10:0 {
-    u8:54
-  } else if start == u32:55 {
-    u8:55
-  } else if ac[start - u32:56] != s10:0 {
-    u8:55
-  } else if start == u32:56 {
-    u8:56
-  } else if ac[start - u32:57] != s10:0 {
-    u8:56
-  } else if start == u32:57 {
-    u8:57
-  } else if ac[start - u32:58] != s10:0 {
-    u8:57
-  } else if start == u32:58 {
-    u8:58
-  } else if ac[start - u32:59] != s10:0 {
-    u8:58
-  } else if start == u32:59 {
-    u8:59
-  } else if ac[start - u32:60] != s10:0 {
-    u8:59
-  } else if start == u32:60 {
-    u8:60
-  } else if ac[start - u32:61] != s10:0 {
-    u8:60
-  } else if start == u32:61 {
-    u8:61
-  } else if ac[start - u32:62] != s10:0 {
-    u8:61
-  } else if start == u32:62 {
-    u8:62
-  } else if ac[start - u32:63] != s10:0 {
-    u8:62
   } else {
-    u8:63
+    u8:15
   }
 }
 
@@ -842,7 +650,8 @@ fn test0_count_run() {
     trace!(result5);
 
     // 期待値と比較
-    assert_eq(result5, u8:62);
+    // Max = 15 Limit
+    assert_eq(result5, u8:15);
 }
 
 // AC 配列 ac のうち、インデックス start + 1 から連続する 0 の数をカウントする
@@ -891,7 +700,7 @@ fn fn_next_pix(ac: s10[63], start: u32) -> u8 {
 
 #[test]
 fn test0_next_pix() {
-  let ac_matrix: s10[63] = [ // 先頭 2個が 0
+  let ac_matrix: s10[63] = [ // 先頭 4個が 0
       s10:0, s10:0, s10:0, s10:0, s10:7, s10:0, s10:0, s10:0, s10:0, s10:0,
       s10:5, s10:6, s10:7, s10:8, s10:9, s10:10, s10:11, s10:12, s10:13, s10:14,
       s10:15, s10:16, s10:17, s10:18, s10:19, s10:20, s10:21, s10:22, s10:23, s10:24,
@@ -902,12 +711,308 @@ fn test0_next_pix() {
   ];
 
     // 各テストケース
-    let result1: u8 = fn_next_pix(ac_matrix, u32:4);
+    let result1: u8 = fn_next_pix(ac_matrix, u32:1);
+    let result2: u8 = fn_next_pix(ac_matrix, u32:4);
 
     trace!(result1);
+    trace!(result2);
 
     // 期待値と比較
-    assert_eq(result1, u8:5);
+    assert_eq(result1, u8:2);
+    assert_eq(result2, u8:5);
+}
+
+// AC 配列 ac のうち、インデックス start + 1 から連続する 0 の数をカウントする関数
+// 最大で63個までカウントし、途中で0以外の値が出たらそこで打ち切る
+// AC 配列 ac のうち、インデックス start + 1 から連続する 0 の数をカウントする関数。
+// 以下の条件で動作する:
+// 1. インデックスが配列の範囲外になった時点でカウントを打ち切る。
+// 2. 途中で 0 以外の値が現れた時点で打ち切る。
+// 3. 最大で 63 個まで連続する 0 をカウントする。
+fn fn_jcount(ac: s10[64], start: u32) -> u8 {
+  if start + u32:1 >= u32:64 {
+    u8:0
+  } else if ac[start + u32:1] != s10:0 {
+    u8:0
+  } else if start + u32:2 >= u32:64 {
+    u8:1
+  } else if ac[start + u32:2] != s10:0 {
+    u8:1
+  } else if start + u32:3 >= u32:64 {
+    u8:2
+  } else if ac[start + u32:3] != s10:0 {
+    u8:2
+  } else if start + u32:4 >= u32:64 {
+    u8:3
+  } else if ac[start + u32:4] != s10:0 {
+    u8:3
+  } else if start + u32:5 >= u32:64 {
+    u8:4
+  } else if ac[start + u32:5] != s10:0 {
+    u8:4
+  } else if start + u32:6 >= u32:64 {
+    u8:5
+  } else if ac[start + u32:6] != s10:0 {
+    u8:5
+  } else if start + u32:7 >= u32:64 {
+    u8:6
+  } else if ac[start + u32:7] != s10:0 {
+    u8:6
+  } else if start + u32:8 >= u32:64 {
+    u8:7
+  } else if ac[start + u32:8] != s10:0 {
+    u8:7
+  } else if start + u32:9 >= u32:64 {
+    u8:8
+  } else if ac[start + u32:9] != s10:0 {
+    u8:8
+  } else if start + u32:10 >= u32:64 {
+    u8:9
+  } else if ac[start + u32:10] != s10:0 {
+    u8:9
+  } else if start + u32:11 >= u32:64 {
+    u8:10
+  } else if ac[start + u32:11] != s10:0 {
+    u8:10
+  } else if start + u32:12 >= u32:64 {
+    u8:11
+  } else if ac[start + u32:12] != s10:0 {
+    u8:11
+  } else if start + u32:13 >= u32:64 {
+    u8:12
+  } else if ac[start + u32:13] != s10:0 {
+    u8:12
+  } else if start + u32:14 >= u32:64 {
+    u8:13
+  } else if ac[start + u32:14] != s10:0 {
+    u8:13
+  } else if start + u32:15 >= u32:64 {
+    u8:14
+  } else if ac[start + u32:15] != s10:0 {
+    u8:14
+  } else if start + u32:16 >= u32:64 {
+    u8:15
+  } else if ac[start + u32:16] != s10:0 {
+    u8:15
+  } else if start + u32:17 >= u32:64 {
+    u8:16
+  } else if ac[start + u32:17] != s10:0 {
+    u8:16
+  } else if start + u32:18 >= u32:64 {
+    u8:17
+  } else if ac[start + u32:18] != s10:0 {
+    u8:17
+  } else if start + u32:19 >= u32:64 {
+    u8:18
+  } else if ac[start + u32:19] != s10:0 {
+    u8:18
+  } else if start + u32:20 >= u32:64 {
+    u8:19
+  } else if ac[start + u32:20] != s10:0 {
+    u8:19
+  } else if start + u32:21 >= u32:64 {
+    u8:20
+  } else if ac[start + u32:21] != s10:0 {
+    u8:20
+  } else if start + u32:22 >= u32:64 {
+    u8:21
+  } else if ac[start + u32:22] != s10:0 {
+    u8:21
+  } else if start + u32:23 >= u32:64 {
+    u8:22
+  } else if ac[start + u32:23] != s10:0 {
+    u8:22
+  } else if start + u32:24 >= u32:64 {
+    u8:23
+  } else if ac[start + u32:24] != s10:0 {
+    u8:23
+  } else if start + u32:25 >= u32:64 {
+    u8:24
+  } else if ac[start + u32:25] != s10:0 {
+    u8:24
+  } else if start + u32:26 >= u32:64 {
+    u8:25
+  } else if ac[start + u32:26] != s10:0 {
+    u8:25
+  } else if start + u32:27 >= u32:64 {
+    u8:26
+  } else if ac[start + u32:27] != s10:0 {
+    u8:26
+  } else if start + u32:28 >= u32:64 {
+    u8:27
+  } else if ac[start + u32:28] != s10:0 {
+    u8:27
+  } else if start + u32:29 >= u32:64 {
+    u8:28
+  } else if ac[start + u32:29] != s10:0 {
+    u8:28
+  } else if start + u32:30 >= u32:64 {
+    u8:29
+  } else if ac[start + u32:30] != s10:0 {
+    u8:29
+  } else if start + u32:31 >= u32:64 {
+    u8:30
+  } else if ac[start + u32:31] != s10:0 {
+    u8:30
+  } else if start + u32:32 >= u32:64 {
+    u8:31
+  } else if ac[start + u32:32] != s10:0 {
+    u8:31
+  } else if start + u32:33 >= u32:64 {
+    u8:32
+  } else if ac[start + u32:33] != s10:0 {
+    u8:32
+  } else if start + u32:34 >= u32:64 {
+    u8:33
+  } else if ac[start + u32:34] != s10:0 {
+    u8:33
+  } else if start + u32:35 >= u32:64 {
+    u8:34
+  } else if ac[start + u32:35] != s10:0 {
+    u8:34
+  } else if start + u32:36 >= u32:64 {
+    u8:35
+  } else if ac[start + u32:36] != s10:0 {
+    u8:35
+  } else if start + u32:37 >= u32:64 {
+    u8:36
+  } else if ac[start + u32:37] != s10:0 {
+    u8:36
+  } else if start + u32:38 >= u32:64 {
+    u8:37
+  } else if ac[start + u32:38] != s10:0 {
+    u8:37
+  } else if start + u32:39 >= u32:64 {
+    u8:38
+  } else if ac[start + u32:39] != s10:0 {
+    u8:38
+  } else if start + u32:40 >= u32:64 {
+    u8:39
+  } else if ac[start + u32:40] != s10:0 {
+    u8:39
+  } else if start + u32:41 >= u32:64 {
+    u8:40
+  } else if ac[start + u32:41] != s10:0 {
+    u8:40
+  } else if start + u32:42 >= u32:64 {
+    u8:41
+  } else if ac[start + u32:42] != s10:0 {
+    u8:41
+  } else if start + u32:43 >= u32:64 {
+    u8:42
+  } else if ac[start + u32:43] != s10:0 {
+    u8:42
+  } else if start + u32:44 >= u32:64 {
+    u8:43
+  } else if ac[start + u32:44] != s10:0 {
+    u8:43
+  } else if start + u32:45 >= u32:64 {
+    u8:44
+  } else if ac[start + u32:45] != s10:0 {
+    u8:44
+  } else if start + u32:46 >= u32:64 {
+    u8:45
+  } else if ac[start + u32:46] != s10:0 {
+    u8:45
+  } else if start + u32:47 >= u32:64 {
+    u8:46
+  } else if ac[start + u32:47] != s10:0 {
+    u8:46
+  } else if start + u32:48 >= u32:64 {
+    u8:47
+  } else if ac[start + u32:48] != s10:0 {
+    u8:47
+  } else if start + u32:49 >= u32:64 {
+    u8:48
+  } else if ac[start + u32:49] != s10:0 {
+    u8:48
+  } else if start + u32:50 >= u32:64 {
+    u8:49
+  } else if ac[start + u32:50] != s10:0 {
+    u8:49
+  } else if start + u32:51 >= u32:64 {
+    u8:50
+  } else if ac[start + u32:51] != s10:0 {
+    u8:50
+  } else if start + u32:52 >= u32:64 {
+    u8:51
+  } else if ac[start + u32:52] != s10:0 {
+    u8:51
+  } else if start + u32:53 >= u32:64 {
+    u8:52
+  } else if ac[start + u32:53] != s10:0 {
+    u8:52
+  } else if start + u32:54 >= u32:64 {
+    u8:53
+  } else if ac[start + u32:54] != s10:0 {
+    u8:53
+  } else if start + u32:55 >= u32:64 {
+    u8:54
+  } else if ac[start + u32:55] != s10:0 {
+    u8:54
+  } else if start + u32:56 >= u32:64 {
+    u8:55
+  } else if ac[start + u32:56] != s10:0 {
+    u8:55
+  } else if start + u32:57 >= u32:64 {
+    u8:56
+  } else if ac[start + u32:57] != s10:0 {
+    u8:56
+  } else if start + u32:58 >= u32:64 {
+    u8:57
+  } else if ac[start + u32:58] != s10:0 {
+    u8:57
+  } else if start + u32:59 >= u32:64 {
+    u8:58
+  } else if ac[start + u32:59] != s10:0 {
+    u8:58
+  } else if start + u32:60 >= u32:64 {
+    u8:59
+  } else if ac[start + u32:60] != s10:0 {
+    u8:59
+  } else if start + u32:61 >= u32:64 {
+    u8:60
+  } else if ac[start + u32:61] != s10:0 {
+    u8:60
+  } else if start + u32:62 >= u32:64 {
+    u8:61
+  } else if ac[start + u32:62] != s10:0 {
+    u8:61
+  } else if start + u32:63 >= u32:64 {
+    u8:62
+  } else if ac[start + u32:63] != s10:0 {
+    u8:62
+  } else {
+    u8:63
+  }
+}
+
+#[test]
+fn test0_jcount() {
+  let zero_array: s10[64] = [
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
+    s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0
+  ];    
+
+  // 各テストケース
+  let result1: u8 = fn_jcount(zero_array, u32:0);
+  let result2: u8 = fn_jcount(zero_array, u32:1);
+  let result3: u8 = fn_jcount(zero_array, u32:63);
+
+  trace!(result1);
+  trace!(result2);
+  trace!(result3);
+
+  // 期待値と比較
+  assert_eq(result1, u8:63);
+  assert_eq(result2, u8:62);
+  assert_eq(result3, u8:0);
 }
   
 // ビット数を求める関数
@@ -968,35 +1073,55 @@ fn test_encode_run_size() {
   assert_eq(result, expected);
 }
 
+// Code生成部分を関数化
+fn fn_code_list(value: s16) -> bits[8] {
+  let ac_value_s16 = value as s16;
+  if ac_value_s16 == s16:0 {
+    let bin_value: bits[8] = (-ac_value_s16) as bits[8];
+    trace!(bin_value);
+    let flipped: bits[8] = !bin_value;
+    trace!(flipped);
+    flipped
+  } else {
+    let bin_value: bits[8] = ac_value_s16 as bits[8];
+    bin_value
+  }
+}
+
 // AC 成分の Huffman 符号化（ループなし）
 // Output: code[15:0] + length[7:0] + code_list[7:0] + code_size[7:0] + next_pix[7:0]
 fn encode_ac(ac_data: s10[63], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8) {
     trace!(start_pix);
-    let next_pix = if start_pix == u8:2 && ac_data[1] == s10:0 {
+
+    // 配列[0]が0の時は、start_pixを修正する
+    let start_pix_1 = if start_pix == u8:1 && ac_data[1] == s10:0 {
       trace!("start_pix==1");
-      fn_next_pix(ac_data, start_pix as u32) + u8:2
-    } else {
       fn_next_pix(ac_data, start_pix as u32) + u8:1
+    } else {
+      start_pix
     };
 
-    let run: u8 = fn_count_run(ac_data, start_pix as u32);
+    // runの計算
+    let run: u8 = fn_count_run(ac_data, start_pix_1 as u32);
     trace!(ac_data);
+
+    // next_pixの計算
+    let next_pix = fn_next_pix(ac_data, start_pix_1 as u32) + u8:1;
     trace!(next_pix);
 
     // すべて 0 なら EOB を返す
-    if run == u8:16 {
+    if run == u8:15 {
         trace!("EOB");
         if is_luminance {
             let (huff_code, huff_length) = lookup_ACLuminanceSizeToCode([u8:0, u8:0]);
-            (huff_code, huff_length, bits[8]:0, u8:4, u8:0)
+            (huff_code, huff_length, bits[8]:0, u8:0, u8:15)
         } else {
             let (huff_code, huff_length) = lookup_ACChrominanceToCode([u8:0, u8:0]);
-            (huff_code, huff_length, bits[8]:0, u8:4, u8:0)
+            (huff_code, huff_length, bits[8]:0, u8:0, u8:15)
         }
     } else {
         let value: s10 = ac_data[start_pix]; 
         let size: u8 = bit_length(value);
-        let Code_size = size;
         //let run_size_str: u8[2] = encode_run_size(run as u32, size);
 
         trace!(value);
@@ -1016,20 +1141,9 @@ fn encode_ac(ac_data: s10[63], start_pix: u8, is_luminance: bool) -> (bits[16], 
         trace!(Huffman_code_full);
         trace!(Huffman_length);    
 
-        let ac_value_s16 = value as s16;
-        
-        let Code_list: bits[8] =
-        if ac_value_s16 <= s16:0 {
-            let bin_value:bits[8] = (-ac_value_s16) as bits[8];
-            trace!(bin_value);
-            let flipped:bits[8] = !bin_value;
-            trace!(flipped);
-            flipped
-        } else {
-            let bin_value: bits[8] = ac_value_s16 as bits[8];
-            bin_value
-        };
-    
+        // Code_Listの計算
+        let Code_list: bits[8] = fn_code_list(value as s16);
+        let Code_size = size;
         trace!(Code_list);
 
         (Huffman_code_full, Huffman_length, Code_list, Code_size, next_pix)
@@ -1038,56 +1152,45 @@ fn encode_ac(ac_data: s10[63], start_pix: u8, is_luminance: bool) -> (bits[16], 
 
 // --------------------------------
 // メイン関数
-// Output: code[15:0] + length[7:0] + code_list[7:0] + next_pix[7:0] + s10:now_pix_data
-fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8, s10) {
-    let flat: s10[64] = flatten(matrix);
-    let ac_0: s10[63] = get_ac_list(u8:0, flat);
-    let ac_1: s10[63] = get_ac_list(u8:1, flat);
-    let ac: s10[63] = get_ac_list(start_pix - u8:1, flat);
-    trace!(ac_0);
-    trace!(ac);
+// Output: code[15:0] + length[7:0] + code_list[7:0] + code_size:u8 + output_j[7:0] + next_pix[7:0] + now_pix_data:s10
+fn Huffman_ACenc(matrix: s10[8][8], input_j: u8, start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8, u8, s10) {
+    
+    // 1次元配列化
+    let flat_ac: s10[64] = fn_flatten(matrix);
+    let ac_in: s10[63] = get_ac_list(u8:0, flat_ac);
 
-    let value_tmp = ac_0[start_pix];
+    // jの計算
+    let j_count = fn_jcount(flat_ac, start_pix as u32);
+    trace!(j_count);
 
-    let value = if start_pix == u8:1 && value_tmp == s10:0 {
-      let next_pix_tmp: u8 = fn_next_pix(ac_0, start_pix as u32) + u8:2;
-      trace!(next_pix_tmp);
-      trace!("start_pix==1");
-      ac[next_pix_tmp]
+    // iの計算
+    let i_count: u8 = fn_next_pix(ac_in, start_pix as u32) + u8:1;
+    trace!(i_count);
+
+    // output_jの計算
+    let output_j = if j_count < input_j {
+      input_j
     } else {
-      ac_0[start_pix]
-    };
-    trace!(value);
-
-    let start_pix_1 = if start_pix == u8:1 && value_tmp == s10:0 {
-      start_pix + u8:1
-    } else {
-      start_pix
+      j_count
     };
 
-    let ac_value_s16 = value as s16;
-    let code_list: bits[8] =
-    if ac_value_s16 == s16:0 {
-        let bin_value:bits[8] = (-ac_value_s16) as bits[8];
-        trace!(bin_value);
-        let flipped:bits[8] = !bin_value;
-        trace!(flipped);
-        flipped
-    } else {
-        let bin_value: bits[8] = ac_value_s16 as bits[8];
-        bin_value
-    };
-    if is_all_zero(ac_1) {
+    // Code_Listの計算
+    let value:s10 = flat_ac[start_pix];
+    let Code_list: bits[8] = fn_code_list(value as s16);
+    trace!(Code_list);
+
+    // AC Huffman
+    if fn_is_all_zero(get_ac_list(start_pix, flat_ac)) {
       trace!("is_all_zero");
       if is_luminance {
-          let (huff_code, huff_length) = (bits[16]:0b1100, u8:4);
-          (huff_code, huff_length, code_list, u8:0, u8:63, value)
+        let (huff_code, huff_length, next_pix) = (bits[16]:0b1100, u8:4, u8:15);
+          (huff_code, huff_length, Code_list, u8:0, output_j, next_pix, value)
       } else {
-        let (huff_code, huff_length) = (bits[16]:0b01, u8:2);
-          (huff_code, huff_length, code_list, u8:0, u8:63, value)
+        let (huff_code, huff_length, next_pix) = (bits[16]:0b01, u8:2, u8:15);
+          (huff_code, huff_length, Code_list, u8:0, output_j, next_pix, value)
       }
     } else {
-      let (huff_code, huff_length, code_list, next_pix, now_pix_data) = encode_ac(ac_0, start_pix_1, is_luminance);
-      (huff_code, huff_length, code_list, next_pix, now_pix_data, value)
+      let (huff_code, huff_length, code_list, code_size, next_pix) = encode_ac(ac_in, start_pix, is_luminance);
+      (huff_code, huff_length, code_list, code_size, output_j, next_pix, value)
     }
 }
