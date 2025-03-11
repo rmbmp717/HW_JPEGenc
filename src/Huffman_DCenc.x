@@ -50,9 +50,11 @@ fn bit_length(x: s10) -> u8 {
 
 #[test]
 fn bit_length_test () {
-    let bit_value :s10 = s10: 33;
-    let bit_length_out = bit_length(bit_value);
-    trace!(bit_length_out);
+    let bit_length_out1 = bit_length(s10:-12);
+    trace!(bit_length_out1);
+
+    let bit_length_out2 = bit_length(s10:12);
+    trace!(bit_length_out2);
 }
 
 // 0〜15 の整数を 16 進数の文字 (0-9, A-F) に変換
@@ -308,6 +310,36 @@ fn test2_Huffman_DCenc() {
     let expected_length: u8 = u8:3;  
     let expected_code: bits[8] = bits[8]:0b1110_1110;   
     let expected_code_size: u8 = u8:5;                       
+    let (BooList, Length, CodeList, Code_size): (bits[9], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
+
+    trace!(BooList);
+    trace!(Length);
+    trace!(CodeList);
+
+    assert_eq(BooList, expected_output);
+    assert_eq(Length, expected_length);
+    assert_eq(CodeList, expected_code);
+    assert_eq(Code_size, expected_code_size);
+}
+
+#[test]
+fn test3_Huffman_DCenc() {
+    let test_matrix: s10[8][8] = [
+        [s10:-12, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0,  s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
+    ];
+    
+
+    let expected_output: bits[9] = bits[9]:0b00000000;     
+    let expected_length: u8 = u8:3;  
+    let expected_code: bits[8] = bits[8]:0b1111_0011;   
+    let expected_code_size: u8 = u8:4;                       
     let (BooList, Length, CodeList, Code_size): (bits[9], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
 
     trace!(BooList);
