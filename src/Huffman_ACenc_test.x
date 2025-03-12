@@ -1,10 +1,11 @@
 // =======================
 // 以下はHuffman_ACenc.x テストケース
 // =======================
+
 #[test]
 fn test_j_test0_Huffman_ACenc() {
   let test_matrix: s10[8][8] = [
-    [s10:0, s10:0, s10:0, s10:0, s10:0, s10:1, s10:1, s10:5],
+    [s10:0, s10:0, s10:0, s10:0, s10:0, s10:1, s10:2, s10:5],
     [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
     [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
     [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
@@ -14,23 +15,20 @@ fn test_j_test0_Huffman_ACenc() {
     [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
   ];
 
-    let input_j = u8:0;
     let start_pix = u8:1;
-    let expected_output: bits[16] = bits[16]:120;     
-    let expected_length: u8 = u8:7;             
+    let expected_output: bits[16] = bits[16]:59;     
+    let expected_length: u8 = u8:6;   
     let expected_code: bits[8] = bits[8]:1;  
     let expected_code_size: u8 = u8:1;  
-    let expected_j: u8 = u8:3;  
     let expected_next_pix: u8 = u8:1;   
     let expected_value: s10 = s10:0;              
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_j, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, u8, s10) 
-                = Huffman_ACenc(test_matrix, input_j, start_pix, true);  
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, s10) 
+                = Huffman_ACenc(test_matrix, start_pix, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_code_size);
-    trace!(actual_j);
     trace!(actual_next_pix);
     trace!(actual_value);
 
@@ -38,10 +36,10 @@ fn test_j_test0_Huffman_ACenc() {
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
     assert_eq(actual_code_size, expected_code_size);
-    assert_eq(actual_j, expected_j);
     assert_eq(expected_next_pix, actual_next_pix);
     assert_eq(expected_value, actual_value);
 }
+
 
 #[test]
 fn test_v0_Huffman_ACenc() {
@@ -631,7 +629,6 @@ fn test11_Huffman_ACenc() {
 }
 
 
-
 #[test]
 fn test12_Huffman_ACenc() {
     let test_matrix: s10[8][8] = [
@@ -645,23 +642,20 @@ fn test12_Huffman_ACenc() {
       [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0]
     ];
     
-    let input_j = u8:7;
     let start_pix = u8:49;
     let expected_output: bits[16] = bits[16]:0b1100;     
     let expected_length: u8 = u8:4;  
     let expected_code: bits[8] = bits[8]:255;  
     let expected_code_size: u8 = u8:0;  
-    let expected_j: u8 = u8:14;  
     let expected_next_pix: u8 = u8:15;   
     let expected_value: s10 = s10:0;              
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_j, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, u8, s10) 
-                = Huffman_ACenc(test_matrix, input_j, start_pix, true);  
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, s10) 
+                = Huffman_ACenc(test_matrix, start_pix, true);  
 
     trace!(actual_output);
     trace!(actual_length);
     trace!(actual_code);
     trace!(actual_code_size);
-    trace!(actual_j);
     trace!(actual_next_pix);
     trace!(actual_value);
 
@@ -669,7 +663,86 @@ fn test12_Huffman_ACenc() {
     assert_eq(actual_length, expected_length);
     assert_eq(actual_code, expected_code);
     assert_eq(actual_code_size, expected_code_size);
-    assert_eq(actual_j, expected_j);
     assert_eq(expected_next_pix, actual_next_pix);
     assert_eq(expected_value, actual_value);
 }
+
+
+
+#[test]
+fn test13_Huffman_ACenc() {
+    let test_matrix: s10[8][8] = [
+      [s10:-12, s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:-1, s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:15, s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0]
+    ];
+    
+    let start_pix = u8:1;
+    let expected_output: bits[16] = bits[16]:4083;     
+    let expected_length: u8 = u8:12;
+    let expected_code: bits[8] = bits[8]:255;  
+    let expected_code_size: u8 = u8:0;  
+    let expected_next_pix: u8 = u8:16;   
+    let expected_value: s10 = s10:0;              
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, s10) 
+                = Huffman_ACenc(test_matrix, start_pix, true);  
+
+    trace!(actual_output);
+    trace!(actual_length);
+    trace!(actual_code);
+    trace!(actual_code_size);
+    trace!(actual_next_pix);
+    trace!(actual_value);
+
+    assert_eq(actual_output, expected_output);
+    assert_eq(actual_length, expected_length);
+    assert_eq(actual_code, expected_code);
+    assert_eq(actual_code_size, expected_code_size);
+    assert_eq(expected_next_pix, actual_next_pix);
+    assert_eq(expected_value, actual_value);
+}
+
+
+#[test]
+fn test14_Huffman_ACenc() {
+    let test_matrix: s10[8][8] = [
+      [s10:-12, s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:-1, s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:15, s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
+      [s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0]
+    ];
+    
+    let start_pix = u8:17;
+    let expected_output: bits[16] = bits[16]:59;     
+    let expected_length: u8 = u8:6;
+    let expected_code: bits[8] = bits[8]:255;  
+    let expected_code_size: u8 = u8:1;  
+    let expected_next_pix: u8 = u8:6;   
+    let expected_value: s10 = s10:0;              
+    let (actual_output, actual_length, actual_code, actual_code_size, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, s10) 
+                = Huffman_ACenc(test_matrix, start_pix, true);  
+
+    trace!(actual_output);
+    trace!(actual_length);
+    trace!(actual_code);
+    trace!(actual_code_size);
+    trace!(actual_next_pix);
+    trace!(actual_value);
+
+    assert_eq(actual_output, expected_output);
+    assert_eq(actual_length, expected_length);
+    assert_eq(actual_code, expected_code);
+    assert_eq(actual_code_size, expected_code_size);
+    assert_eq(expected_next_pix, actual_next_pix);
+    assert_eq(expected_value, actual_value);
+}
+
