@@ -124,11 +124,11 @@ fn lookup_ChrominanceSizeToCode(index: u8) -> (bits[9], u8) {
 
 #[test]
 fn lookup_ChrominanceSizeToCode_test() {
-    let (code, length): (bits[9], u8) = lookup_ChrominanceSizeToCode(u8:6);
+    let (code, length): (bits[9], u8) = lookup_ChrominanceSizeToCode(u8:3);
     trace!(code);
     trace!(length);
-    assert_eq(code, bits[9]:0b000001110);
-    assert_eq(length, u8:4);
+    assert_eq(code, bits[9]:0b000000101);
+    assert_eq(length, u8:3);
 }
 
 // Chrominance 用の Huffman 符号を取得
@@ -207,10 +207,8 @@ fn encode_dc(dc_value: s10, is_luminance: bool) -> (bits[9], u8, bits[8], u8) {
     trace!(BoolList);
     trace!(Length);
 
-    let dc_value_s16 = dc_value as s16;
-
     let Code_list: bits[8] =
-    if dc_value_s16 <= s16:0 {
+    if dc_value <= s10:0 {
         let bin_value:bits[8] = (-dc_value) as bits[8];
         trace!(bin_value);
         let flipped:bits[8] = !bin_value;
@@ -244,7 +242,7 @@ fn Huffman_DCenc(matrix: s10[8][8], is_luminance: bool) -> (bits[9], bits[8], u8
 #[test]
 fn test0_Huffman_DCenc() {
     let test_matrix: s10[8][8] = [
-        [s10:7, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
+        [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
         [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0],
@@ -254,11 +252,11 @@ fn test0_Huffman_DCenc() {
         [s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0]
     ];
     
-    let expected_output: bits[9] = bits[9]:0b00000010;     
-    let expected_length: u8 = u8:3;  
-    let expected_code: bits[8] = bits[8]:7;      
-    let expected_code_size: u8 = u8:3;          
-    let (BooList, Length, CodeList, Code_size): (bits[9], u8, bits[8], u8) = Huffman_DCenc(test_matrix, true);  
+    let expected_output: bits[9] = bits[9]:0b01;     
+    let expected_length: u8 = u8:2;  
+    let expected_code: bits[8] = bits[8]:0b1111_1111;      
+    let expected_code_size: u8 = u8:0;          
+    let (BooList, Length, CodeList, Code_size): (bits[9], u8, bits[8], u8) = Huffman_DCenc(test_matrix, false);  
 
     assert_eq(BooList, expected_output);
     assert_eq(Length, expected_length);
