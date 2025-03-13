@@ -168,7 +168,6 @@ def main():
             uZCode = uZCode.astype(numpy.int32)
             vZCode = vZCode.astype(numpy.int32)
 
-
             yDC[blockNum] = yZCode[0]
             uDC[blockNum] = uZCode[0]
             vDC[blockNum] = vZCode[0]

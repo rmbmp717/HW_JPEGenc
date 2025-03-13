@@ -1154,7 +1154,7 @@ def encodeACBlock(bitStream,ACArray,isLuminance,debugMode = 0):
         while 1:
             if(ACArray[i]!=0 or i==maxI - 1 or run==15):
                 print("ACArray[i]=", ACArray[i])
-                print("run15")
+                print("run==15")
                 break
             else:
                 run = run + 1
