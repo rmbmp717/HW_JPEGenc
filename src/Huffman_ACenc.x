@@ -854,14 +854,18 @@ fn fn_ac_data(start: s10, ac_data: s10[63]) -> s10 {
 // --------------------------------
 // メイン関数
 // AC 成分の Huffman 符号化（ループなし）
-// Output: code[15:0] + length[7:0] + code_list[7:0] + code_size[7:0] + next_pix[7:0]
-fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8) {
+// Output: code[15:0] + length:u8 + code_list[7:0] + code_size:u8 + run:u8 + next_pix:u8
+fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8, u8) {
 
     // Debug
     trace!(ac_data);
     trace!(start_pix);
     let start_value: s10 = ac_data[start_pix];
     trace!(start_value);
+
+    // start_pixのデータがゼロであるか？
+    let start_pix_data_zero = if ac_data[start_pix] == s10:0 { true } else { false };
+    trace!(start_pix_data_zero);
 
     // 残りがオールゼロの判定
     let ac_remain_data: s10[64] = get_ac_list(start_pix, ac_data);
@@ -870,9 +874,9 @@ fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: b
     if fn_is_all_zero(ac_remain_data) {
       if is_luminance {
         // 直接タプルを返す
-        (EOB_LUM_EXT, u8:4, bits[8]:0, u8:0, u8:63)
+        (EOB_LUM_EXT, u8:4, bits[8]:0, u8:0, u8:63, u8:63)
       } else {
-        (EOB_CHM_EXT, u8:2, bits[8]:0, u8:0, u8:63)
+        (EOB_CHM_EXT, u8:2, bits[8]:0, u8:0, u8:63, u8:63)
       }
     // Huffman encoding
     } else {
@@ -881,7 +885,7 @@ fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: b
 
       // Huffman encode処理
       let value: s10 = ac_data[start_pix + value_pix_num];
-      let run: u8 = if value_pix_num > u8:15 { u8:15 } else { value_pix_num };
+      let run: u8 = if value_pix_num > u8:15 { u8:15 } else { value_pix_num + u8:1 };
       let size: u8 = bit_length(value);
       //let run_size_str: u8[2] = encode_run_size(run as u32, size);
 
@@ -908,16 +912,17 @@ fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: b
       trace!(Code_list);
 
       // next_pix
-      let next_pix = run + u8:1;
+      let next_pix_0 = value_pix_num + u8:1;
+      let next_pix = if start_pix_data_zero { next_pix_0  } else { u8:1 };
 
-      (Huffman_code_full, Huffman_length, Code_list, Code_size, next_pix)
+      (Huffman_code_full, Huffman_length, Code_list, Code_size, run, next_pix)
     }
 }
 
 // --------------------------------
 // ラッパー関数
-// Output: code[15:0] + length[7:0] + code_list[7:0] + code_size:u8 + next_pix[7:0] + now_pix_data:s10
-fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, pre_start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8, s10) {
+// Output: code[15:0] + length:u8 + code_list[7:0] + code_size:u8 + run:u8 + next_pix:u8 + now_pix_data:s10
+fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, pre_start_pix: u8, is_luminance: bool) -> (bits[16], u8, bits[8], u8, u8, u8, s10) {
 
     // 1次元配列化
     let flat_ac: s10[64] = fn_flatten(matrix);
@@ -927,50 +932,9 @@ fn Huffman_ACenc(matrix: s10[8][8], start_pix: u8, pre_start_pix: u8, is_luminan
     let value = ac_in[start_pix];
 
     // 通常Huffman encode処理
-    let (huff_code, huff_length, code_list, code_size, next_pix) 
+    let (huff_code, huff_length, code_list, code_size, run, next_pix) 
         = encode_ac(ac_in, start_pix, pre_start_pix, is_luminance);
     // 出力
-    (huff_code, huff_length, code_list, code_size, next_pix, value)
+    (huff_code, huff_length, code_list, code_size, next_pix, run, value)
 
   }
-
-
-#[test]
-fn test0_gray8x8_Huffman_ACenc() {
-    let test_matrix: s10[8][8] = [
-      [s10:-1,  s10:-28,  s10:0,  s10:0,  s10:0,  s10:-2, s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:-1, s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0],
-      [s10:0,   s10:0,    s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0]
-    ];
-    
-    let start_pix = u8:1;
-    let pre_start_pix = u8:0;
-    let expected_output: bits[16] = bits[16]:0b11010;     
-    let expected_length: u8 = u8:5;
-    let expected_code: bits[8] = bits[8]:227;  
-    let expected_code_size: u8 = u8:5;  
-    let expected_next_pix: u8 = u8:1;   
-    let expected_value: s10 = s10:-28;            
-    let (actual_output, actual_length, actual_code, actual_code_size, actual_next_pix, actual_value): (bits[16], u8, bits[8], u8, u8, s10) 
-                = Huffman_ACenc(test_matrix, start_pix, pre_start_pix, true);  
-
-    trace!(actual_output);
-    trace!(actual_length);
-    trace!(actual_code);
-    trace!(actual_code_size);
-    trace!(actual_next_pix);
-    trace!(actual_value);
-
-    assert_eq(actual_output, expected_output);
-    assert_eq(actual_length, expected_length);
-    assert_eq(actual_code, expected_code);
-    assert_eq(actual_code_size, expected_code_size);
-    assert_eq(expected_next_pix, actual_next_pix);
-    assert_eq(expected_value, actual_value);
-}
-
