@@ -291,6 +291,19 @@ async def dump_Zigzag_Y_output(dut):
     print("==========================================================================")
     print("5: Zigzaged Y Output Data (8x8 matrix):")
     # zigzag_pix_out の値を 640 ビットのビット文字列として取得する
+    zigzag_binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x10bit.zigzag_pix_out_tmp.value.binstr
+    print("zigzag_binstr length:", len(zigzag_binstr))
+
+    # LSB側から10ビットずつ取り出す：末尾から逆順にスライス
+    Zigzaned_list = [convert_s10(int(zigzag_binstr[i:i+10], 2))
+                    for i in range(len(zigzag_binstr)-10, -1, -10)]
+
+    # 8x8 のマトリックスに整形して出力
+    for i in range(8):
+        row = Zigzaned_list[i*8:(i+1)*8]
+        print(" ".join("{:4d}".format(x) for x in row))
+
+    # zigzag_pix_out の値を 640 ビットのビット文字列として取得する
     zigzag_binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x10bit.zigzag_pix_out.value.binstr
     print("zigzag_binstr length:", len(zigzag_binstr))
 

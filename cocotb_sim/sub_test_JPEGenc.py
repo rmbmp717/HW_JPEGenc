@@ -30,7 +30,7 @@ async def run_huffman_dc(module, name, final_dc_container, clock):
     # モジュールの state が 6 になるまで待機
     while True:
         await RisingEdge(clock)
-        if int(module.state.value) == 6:
+        if int(module.state.value) == 7:
             break
 
     # DC コード関連の信号を取得
@@ -86,22 +86,30 @@ async def run_huffman_ac(module, name, final_output_container, clock):
     local_output = ""
     logger.debug("==========================================================================")
     logger.debug("6.2: Huffman AC Code")
+    start_pix = int(module.start_pix.value)
     while num_detected < 63 and not done:
         # jpeg_out_enable の立ち上がりを待機
         await RisingEdge(module.jpeg_out_enable)
         await FallingEdge(clock)
 
+        logger.debug(f"{get_sim_time('ns')} ns:")
         huffman_code_bin = str(module.ac_out.value)
         huffman_code_length = int(module.length.value)
         trimmed_huffman_code = huffman_code_bin[-huffman_code_length:]
         code_out = str(module.code_out.value)
         code_size_out = int(module.code_size_out.value)
-        code_out_bin = code_out[-code_size_out:]
+        #code_out_bin = code_out[-code_size_out:]
+        code_out_bin = "" if code_size_out == 0 else code_out[-code_size_out:]
+        now_pix_data = sub_Debug_func.convert_s10(int(module.now_pix_data.value))
         
+        logger.debug(module)
+        logger.debug(f"start_pix = {start_pix}")
         logger.debug(f"huffman_code(bin) = {trimmed_huffman_code}")
+        logger.debug(f"huffman_code(int) = {int(module.ac_out.value)}")
         logger.debug(f"huffman_code_length = {huffman_code_length}")
         logger.debug(f"code_out(bin) = {code_out_bin}")
         logger.debug(f"code_size_out = {code_size_out}")
+        logger.debug(f"now_pix_data = {now_pix_data}")
         
         # ビット列を最終出力に連結
         if int(module.Huffmanenc_active.value) == 1:
@@ -119,9 +127,10 @@ async def run_huffman_ac(module, name, final_output_container, clock):
         # jpeg_out_enable が Low になる（立ち下がり）を待機する
         await FallingEdge(module.jpeg_out_enable)
         await RisingEdge(clock)
+        start_pix = int(module.start_pix.value)
     
         # デバッグ用：Huffmanenc_active の値を表示
-        logger.debug(f"Huffmanenc_active = {int(module.Huffmanenc_active.value)}")
+        #logger.debug(f"Huffmanenc_active = {int(module.Huffmanenc_active.value)}")
         
         # 状態が 0 になったら終了
         if int(module.Huffmanenc_active.value) == 0:
@@ -186,8 +195,8 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     if matrix_debug_out == 1:
         await sub_Debug_func.dump_Input_Y(dut)
-        #await sub_Debug_func.dump_Input_Cb(dut)
-        #await sub_Debug_func.dump_Input_Cr(dut)
+        await sub_Debug_func.dump_Input_Cb(dut)
+        await sub_Debug_func.dump_Input_Cr(dut)
 
     for _ in range(4):
         await RisingEdge(dut.clock)
@@ -216,8 +225,8 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     logger.debug("1.2: DCT 2D Output Data")
     if matrix_debug_out == 1:
         await sub_Debug_func.dump_Dct_Y_output(dut)
-        #await sub_Debug_func.dump_Dct_Cb_output(dut)
-        #await sub_Debug_func.dump_Dct_Cr_output(dut)
+        await sub_Debug_func.dump_Dct_Cb_output(dut)
+        await sub_Debug_func.dump_Dct_Cr_output(dut)
 
     logger.debug("==========================================================================")
     logger.debug("2: Quantize Start")
@@ -281,8 +290,8 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     if matrix_debug_out == 1:
         await sub_Debug_func.dump_Zigzag_Y_output(dut)
-        #await sub_Debug_func.dump_Zigzag_Cb_output(dut)
-        #await sub_Debug_func.dump_Zigzag_Cr_output(dut)
+        await sub_Debug_func.dump_Zigzag_Cb_output(dut)
+        await sub_Debug_func.dump_Zigzag_Cr_output(dut)
 
     logger.debug("==========================================================================")
     logger.debug("6: Huffman enc Start")

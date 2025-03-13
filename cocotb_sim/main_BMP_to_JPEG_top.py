@@ -30,8 +30,8 @@ async def generate_clock(dut, period=10):
 @cocotb.test()
 async def main_JPEGenc_top(dut):
 
-    srcFileName = "./image/image8x16.bmp"
-    outputJPEGFileName = "./image/image8x16.jpg"
+    srcFileName = "./image/image_red8x8.bmp"
+    outputJPEGFileName = "./image/image_red8x8.jpg"
 
     print("srcFileName:", srcFileName)
     print("outputJPEGFileName:", outputJPEGFileName)
@@ -62,6 +62,30 @@ async def main_JPEGenc_top(dut):
     # blockSum
     blockSum = imageWidth // 8 * imageHeight // 8
     print('blockSum = ', blockSum)
+
+    # 各チャネルのマトリックスを表示
+    print("R matrix:")
+    print(addedImageMatrix[:, :, 0])
+    print("G matrix:")
+    print(addedImageMatrix[:, :, 1])
+    print("B matrix:")
+    print(addedImageMatrix[:, :, 2])
+
+    # split y u v
+    yImage,uImage,vImage = Image.fromarray(addedImageMatrix).convert('YCbCr').split()
+
+    yImageMatrix = numpy.asarray(yImage).astype(int)
+    uImageMatrix = numpy.asarray(uImage).astype(int)
+    vImageMatrix = numpy.asarray(vImage).astype(int)
+
+
+    yImageMatrix = yImageMatrix - 127
+    uImageMatrix = uImageMatrix - 127
+    vImageMatrix = vImageMatrix - 127
+
+    print('yImageMatrix:\n', yImageMatrix)
+    print('uImageMatrix:\n', uImageMatrix)
+    print('vImageMatrix:\n', vImageMatrix)
 
     print("==========================================================================")
     # Start clock generation (if not already spawned by testbench)
