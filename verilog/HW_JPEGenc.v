@@ -143,6 +143,7 @@ module HW_JPEGenc(
     // Huffman エンコード インスタンス
     // ---------------------------------------------------------------------
     wire [7:0]  start_pix;
+    wire [7:0]  pre_start_pix;
     wire [9:0]  now_pix_data;
 
     // PIPE_LINE_STAGE = 1 と仮定
@@ -158,6 +159,7 @@ module HW_JPEGenc(
         .clk                (clock),
         .matrix             (ac_matrix),
         .start_pix          (start_pix),
+        .pre_start_pix      (pre_start_pix),
         .is_luminance       (is_luminance),
         .out                ({ac_out, length, code, code_size, next_pix, now_pix_data})
     );
@@ -172,6 +174,7 @@ module HW_JPEGenc(
         .dc_matrix          (dc_matrix),
         .ac_matrix          (ac_matrix),
         .start_pix          (start_pix),
+        .pre_start_pix      (pre_start_pix),
         .dc_out             (dc_out),
         .dc_out_length      (dc_out_length),
         .dc_out_code_list   (dc_out_code_list),
@@ -180,6 +183,7 @@ module HW_JPEGenc(
         .length             (length),
         .code               (code),
         .code_size          (code_size),
+        .now_pix_data       (now_pix_data),
         .next_pix           (next_pix),
         // JPEG Code Output
         .Huffmanenc_active      (),

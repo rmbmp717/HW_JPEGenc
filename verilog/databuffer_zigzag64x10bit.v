@@ -115,18 +115,15 @@ module databuffer_zigzag64x10bit #(
     // 中間信号 diff を符号付きワイヤとして宣言
     wire signed [639:0] diff;
 
-    genvar j;
-    generate
-        for (j = 0; j < 64; j = j + 1) begin : diff_gen
-            // 各10ビット要素ごとに符号付き減算を行う
-            assign diff[(j+1)*10-1 : j*10] = $signed(zigzag_pix_data[(j+1)*10-1 : j*10])
-                                            - $signed(zigzag_pix_out_pre[(j+1)*10-1 : j*10]);
-        end
-    endgenerate
+    assign diff[9:0] = $signed(zigzag_pix_data[9:0]) - $signed(zigzag_pix_out_pre[9:0]);
+    assign diff[639:10] = zigzag_pix_data[639:10];
 
     reg zigag_enable_d1;
     reg zigag_enable_d2;
     reg zigag_enable_d3;
+
+    // Debug
+    reg  [640-1:0]  zigzag_pix_out_tmp;
 
     // 1 CLK
     always @(posedge clock or negedge reset_n) begin
@@ -134,12 +131,14 @@ module databuffer_zigzag64x10bit #(
             zigag_enable_d1 <= 0;
             zigag_enable_d2 <= 0;
             zigag_enable_d3 <= 0;
+            zigzag_pix_out_tmp <= 0;
             zigzag_pix_out <= 0;
         end else begin
             zigag_enable_d1 <= zigag_enable;
             zigag_enable_d2 <= zigag_enable_d1;
             zigag_enable_d3 <= zigag_enable_d2;
             if(zigag_enable_d2) begin
+                zigzag_pix_out_tmp <= zigzag_pix_data;
                 zigzag_pix_out <= diff;
             end
         end
