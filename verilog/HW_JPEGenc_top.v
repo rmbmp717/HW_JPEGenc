@@ -16,8 +16,6 @@ module HW_JPEGenc_top(
     input  wire             dct_enable,
     input  wire             dct_end_enable,
     input  wire             zigzag_input_enable,
-    input  wire             zigag_enable,
-    input  wire [7:0]       matrix_row, 
     input  wire             Huffman_start,
     // JPEG Data 
     output wire             jpeg_out_enable,  
@@ -85,8 +83,6 @@ module HW_JPEGenc_top(
         .dct_enable             (dct_enable),
         .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
-        .zigag_enable           (zigag_enable),
-        .matrix_row             (matrix_row),
         .Huffman_start          (Huffman_start),
         //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
         .is_luminance           (1'b1),
@@ -111,8 +107,6 @@ module HW_JPEGenc_top(
         .dct_enable             (dct_enable),
         .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
-        .zigag_enable           (zigag_enable),
-        .matrix_row             (matrix_row),
         .Huffman_start          (Huffman_start),
         //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
         .is_luminance           (1'b0),
@@ -135,8 +129,6 @@ module HW_JPEGenc_top(
         .dct_enable             (dct_enable),
         .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
-        .zigag_enable           (zigag_enable),
-        .matrix_row             (matrix_row),
         .Huffman_start          (Huffman_start),
         //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
         .is_luminance           (1'b0),

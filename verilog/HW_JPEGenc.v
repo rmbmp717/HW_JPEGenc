@@ -12,9 +12,7 @@ module HW_JPEGenc(
     input  wire [11:0]      pix_1pix_data,  // s12
     input  wire             dct_enable,
     input  wire             dct_end_enable,
-    input  wire             zigag_enable,
     input  wire             zigzag_input_enable,
-    input  wire [7:0]       matrix_row, 
     input  wire             Huffman_start,
     input  wire [11:0]      pix_data [0:63], // 64個の12ビットピクセル（行優先）
     input  wire             is_luminance,
@@ -43,7 +41,7 @@ module HW_JPEGenc(
 
     // Quantize 用のバッファ（DCT2D 出力を Quantize 用にバッファリング）
     wire [768-1:0]          quantim_buffer;
-    wire [80-1:0]           quantim_out;
+    wire [80-1:0]           quantized_out;
 
     // Zigzag バッファ出力（最終出力）
     wire [640-1:0] pix_data_out;
@@ -112,14 +110,38 @@ module HW_JPEGenc(
     // Quantize モジュール インスタンス
     // ※ 各ポートの接続は、今後の設計に合わせて調整してください。
     // ---------------------------------------------------------------------
-    Quantize mQuantize (
-        .clk                (clock),
-        .dct_coeffs         (quantim_buffer),  
+    wire  [7:0]      matrix_row;
+    wire  [7:0]      quality;
+    wire  [95:0]     dct_coeffs0, dct_coeffs1, dct_coeffs2, dct_coeffs3;
+    wire  [95:0]     dct_coeffs4, dct_coeffs5, dct_coeffs6, dct_coeffs7;
+
+    assign dct_coeffs0 = quantim_buffer[96*1-1: 96*0];
+    assign dct_coeffs1 = quantim_buffer[96*2-1: 96*1];
+    assign dct_coeffs2 = quantim_buffer[96*3-1: 96*2];
+    assign dct_coeffs3 = quantim_buffer[96*4-1: 96*3];
+    assign dct_coeffs4 = quantim_buffer[96*5-1: 96*4];
+    assign dct_coeffs5 = quantim_buffer[96*6-1: 96*5];
+    assign dct_coeffs6 = quantim_buffer[96*7-1: 96*6];
+    assign dct_coeffs7 = quantim_buffer[96*8-1: 96*7];
+
+    Quantize_rapper mQuantize_rapper(
+        .clock              (clock),
+        .reset_n            (reset_n),
         .matrix_row         (matrix_row),  
         .is_luminance       (is_luminance),  
         .quantize_off       (1'b0),
-        .out                (quantim_out)  
-    );
+        .dct_coeffs0        (dct_coeffs0),
+        .dct_coeffs1        (dct_coeffs1),
+        .dct_coeffs2        (dct_coeffs2),
+        .dct_coeffs3        (dct_coeffs3),
+        .dct_coeffs4        (dct_coeffs4),
+        .dct_coeffs5        (dct_coeffs5),
+        .dct_coeffs6        (dct_coeffs6),
+        .dct_coeffs7        (dct_coeffs7),
+        // output 
+        .quantized_out      (quantized_out),
+        .quality            (quality)
+);
 
     // ---------------------------------------------------------------------
     // databuffer_zigzag64x10bit インスタンス (Zigzag スキャン)
@@ -130,11 +152,10 @@ module HW_JPEGenc(
     ) m_databuffer_zigzag64x10bit (
         .clock              (clock),
         .reset_n            (reset_n),
-        .input_enable       (1'b0),
-        .zigag_enable       (zigag_enable),
-        .matrix_row         (matrix_row),  
-        .row_data           (quantim_out),
-        .input_data_enable  (zigzag_input_enable),
+        .input_enable       (zigzag_input_enable),
+        .row_data           (quantized_out),
+        .input_data_enable  (1'b0),
+        .matrix_row         (matrix_row),
         .buffer             (),    
         .zigzag_pix_out     (pix_data_out)     // 最終 Zigzag 結果
     );
@@ -144,6 +165,7 @@ module HW_JPEGenc(
     // ---------------------------------------------------------------------
     wire [7:0]  start_pix;
     wire [7:0]  pre_start_pix;
+    wire [7:0]  run;
     wire [9:0]  now_pix_data;
 
     // PIPE_LINE_STAGE = 1 と仮定
@@ -161,7 +183,7 @@ module HW_JPEGenc(
         .start_pix          (start_pix),
         .pre_start_pix      (pre_start_pix),
         .is_luminance       (is_luminance),
-        .out                ({ac_out, length, code, code_size, next_pix, now_pix_data})
+        .out                ({ac_out, length, code, code_size, next_pix, run, now_pix_data})
     );
 
     // Huffman エンコード コントローラ

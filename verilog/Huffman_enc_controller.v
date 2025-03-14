@@ -35,6 +35,16 @@ module Huffman_enc_controller(
   output reg   [7:0]        code_size_out
 );
 
+  // Dataの順序逆転
+  wire [639:0]  data_fliped_640;
+
+  Data_flip64 mData_flip64 (
+      .clk                (clock),
+      .data_in            (zigzag_pix_in),
+      .is_flip            (1'b1),
+      .out                (data_fliped_640)
+  );
+
   // 状態レジスタ: 初回はDCを出力、その後はACを出力
   reg [3:0] state;  // 0: DC, 1: AC
   always @(posedge clock or negedge reset_n) begin
@@ -69,7 +79,7 @@ module Huffman_enc_controller(
         // DC enc Start
         1: begin
           jpeg_out_enable <= 0;
-          dc_matrix <= zigzag_pix_in;
+          dc_matrix <= data_fliped_640;
           start_pix <= 1;
           pre_start_pix <= 0;
           state <= 2;
@@ -84,7 +94,7 @@ module Huffman_enc_controller(
             Huffmanenc_active <= 0;
           end else begin
             jpeg_out_enable <= 0;
-            ac_matrix <= zigzag_pix_in;
+            ac_matrix <= data_fliped_640;
             state <= 4;
           end
         end
@@ -110,7 +120,7 @@ module Huffman_enc_controller(
         end
         9: begin
           start_pix <= start_pix + next_pix;
-          pre_start_pix <= start_pix;
+          //pre_start_pix <= start_pix;
           //start_pix <= start_pix + 1;
           huffman_code <= ac_out;
           huffman_code_length <= length;

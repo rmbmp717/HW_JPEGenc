@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+//`define TEST_MODE
 
 module databuffer_64x12bit #(
     parameter DATA_WIDTH = 12,
@@ -43,13 +44,28 @@ module databuffer_64x12bit #(
         end
     end
 
+`ifndef TEST_MODE
     // 64個の12ビットデータ（unpacked array: buffer）を768ビットにパックする
     genvar idx;
     generate
       for (idx = 0; idx < DEPTH; idx = idx + 1) begin : pack_gen
-        // buffer[idx] を 12 ビットずつ、最上位に buffer[0]、最下位に buffer[63] を配置
-        assign buffer_768bits[767 - idx*12 -: 12] = buffer[(DEPTH-1) - idx];
+        // buffer[idx] を 12 ビットずつ、最下位に buffer[0]、最上位に buffer[63] を配置
+        assign buffer_768bits[767 - idx*12 -: 12] = buffer[63-idx];
       end
     endgenerate
+`else 
+    // 64個の12ビットデータ（unpacked array: buffer）を768ビットにパックする
+    genvar idx;
+    generate
+      for (idx = 0; idx < DEPTH; idx = idx + 1) begin : pack_gen
+        // buffer[idx] を 12 ビットずつ、最下位に buffer[0]、最上位に buffer[63] を配置
+        if (idx < 64) begin
+            assign buffer_768bits[767 - idx*12 -: 12] = idx;
+        end else begin
+            assign buffer_768bits[767 - idx*12 -: 12] = 0;
+        end
+      end
+    endgenerate
+`endif
 
 endmodule

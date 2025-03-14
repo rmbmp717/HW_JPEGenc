@@ -8,12 +8,11 @@ module databuffer_zigzag64x10bit #(
     input  wire                          clock,
     input  wire                          reset_n,
     input  wire                          input_enable,
-    input  wire                          zigag_enable,
-    input  wire [7:0]                    matrix_row,   // 書き込み対象の行 (0～7)
-    input  wire [80-1:0]                 row_data,     // 64ビット入力。
+    output reg  [7:0]                    matrix_row,
+    input  wire [80-1:0]                 row_data,     // 80ビット入力。
     input  wire                          input_data_enable,
     output reg  [DATA_WIDTH-1:0]         buffer   [0:DEPTH-1],
-    output reg  [DEPTH-1:0]              buffer_80bit [0:DATA_WIDTH-1],
+    output reg  [80-1:0]                 buffer_80bit [0:7],
     output reg  [640-1:0]                zigzag_pix_out
 );
 
@@ -40,26 +39,20 @@ module databuffer_zigzag64x10bit #(
     assign debug_row7 = { buffer[63], buffer[62], buffer[61], buffer[60], buffer[59], buffer[58], buffer[57], buffer[56] };
 `endif
 
-    // Address Delay
-    reg   input_data_enable_d1;
-    reg   input_data_enable_d2;
-    reg   input_data_enable_d3;
-    reg [7:0]   matrix_row_d1;
-    reg [7:0]   matrix_row_d2;
-
+    // row Address
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
-            input_data_enable_d1 <= 0;
-            input_data_enable_d2 <= 0;
-            input_data_enable_d3 <= 0;
-            matrix_row_d1 <= 0;
-            matrix_row_d2 <= 0;
+            matrix_row <= 0;
         end else begin
-            input_data_enable_d1 <= input_data_enable;
-            input_data_enable_d2 <= input_data_enable_d1;
-            input_data_enable_d3 <= input_data_enable_d2;
-            matrix_row_d1 <= matrix_row;
-            matrix_row_d2 <= matrix_row_d1;
+            if(input_enable) begin
+                matrix_row <= 1;
+            end else begin
+                if(matrix_row == 11) begin
+                    matrix_row <= 0;
+                end else if(matrix_row != 0) begin
+                    matrix_row <= matrix_row + 1;
+                end
+            end
         end
     end
 
@@ -68,7 +61,11 @@ module databuffer_zigzag64x10bit #(
     // バッファ更新プロセス
     // - input_enable が有効の場合は、pix_data から一括でバッファへロード（ここでは省略）
     // - input_data_enable が有効の場合は、matrix_row で指定した行に対して row_data のデータを
-    //   64クロック（8要素）順番に書き込む
+    //   順番に書き込む
+    // Quantize PIPELINE = 2 と仮定
+    wire    matrix_write_enb;
+    assign  matrix_write_enb = (matrix_row > 2 && matrix_row < 11);
+
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
             // 非同期リセット：バッファ全体をゼロにクリア
@@ -79,27 +76,106 @@ module databuffer_zigzag64x10bit #(
                 buffer[i] <= 0;
             end
         end else begin
-            if (input_enable) begin
-                // ※ pix_data からの一括ロードの処理が必要な場合はここに記述
-            end else if (input_data_enable_d2) begin
-                buffer_80bit[matrix_row_d2] <= row_data;
+            if (matrix_write_enb) begin
+                buffer_80bit[matrix_row - 3] <= row_data;
             end
         end
     end
 
-    // ここで、buffer 配列（64×8ビット）を512ビットのベクトル matrix に再結合
+    // ここで、buffer 配列（80×8ビット）を640ビットのベクトル matrix に再結合
     // buffer から matrix への変換（各行は自然順：buffer[0]～buffer[7] の順）
     wire [639:0] zigzag_pix_in;
     //assign matrix = 640'h0F;
-    
-    assign zigzag_pix_in[639:560] = buffer_80bit[7];
-    assign zigzag_pix_in[559:480] = buffer_80bit[6];
-    assign zigzag_pix_in[479:400] = buffer_80bit[5];
-    assign zigzag_pix_in[399:320] = buffer_80bit[4];
-    assign zigzag_pix_in[319:240] = buffer_80bit[3];
-    assign zigzag_pix_in[239:160] = buffer_80bit[2];
-    assign zigzag_pix_in[159:80]  = buffer_80bit[1];
-    assign zigzag_pix_in[79:0]    = buffer_80bit[0];
+        
+    // 右側（MSB側）から左側（LSB側）への各80ビットブロックを8個の10ビットセグメント単位で左右反転して割り当て
+    assign zigzag_pix_in[639:560] = { 
+        buffer_80bit[0][9:0],
+        buffer_80bit[0][19:10],
+        buffer_80bit[0][29:20],
+        buffer_80bit[0][39:30],
+        buffer_80bit[0][49:40],
+        buffer_80bit[0][59:50],
+        buffer_80bit[0][69:60],
+        buffer_80bit[0][79:70]
+    };
+
+    assign zigzag_pix_in[559:480] = { 
+        buffer_80bit[1][9:0],
+        buffer_80bit[1][19:10],
+        buffer_80bit[1][29:20],
+        buffer_80bit[1][39:30],
+        buffer_80bit[1][49:40],
+        buffer_80bit[1][59:50],
+        buffer_80bit[1][69:60],
+        buffer_80bit[1][79:70]
+    };
+
+    assign zigzag_pix_in[479:400] = { 
+        buffer_80bit[2][9:0],
+        buffer_80bit[2][19:10],
+        buffer_80bit[2][29:20],
+        buffer_80bit[2][39:30],
+        buffer_80bit[2][49:40],
+        buffer_80bit[2][59:50],
+        buffer_80bit[2][69:60],
+        buffer_80bit[2][79:70]
+    };
+
+    assign zigzag_pix_in[399:320] = { 
+        buffer_80bit[3][9:0],
+        buffer_80bit[3][19:10],
+        buffer_80bit[3][29:20],
+        buffer_80bit[3][39:30],
+        buffer_80bit[3][49:40],
+        buffer_80bit[3][59:50],
+        buffer_80bit[3][69:60],
+        buffer_80bit[3][79:70]
+    };
+
+    assign zigzag_pix_in[319:240] = { 
+        buffer_80bit[4][9:0],
+        buffer_80bit[4][19:10],
+        buffer_80bit[4][29:20],
+        buffer_80bit[4][39:30],
+        buffer_80bit[4][49:40],
+        buffer_80bit[4][59:50],
+        buffer_80bit[4][69:60],
+        buffer_80bit[4][79:70]
+    };
+
+    assign zigzag_pix_in[239:160] = { 
+        buffer_80bit[5][9:0],
+        buffer_80bit[5][19:10],
+        buffer_80bit[5][29:20],
+        buffer_80bit[5][39:30],
+        buffer_80bit[5][49:40],
+        buffer_80bit[5][59:50],
+        buffer_80bit[5][69:60],
+        buffer_80bit[5][79:70]
+    };
+
+    assign zigzag_pix_in[159:80] = { 
+        buffer_80bit[6][9:0],
+        buffer_80bit[6][19:10],
+        buffer_80bit[6][29:20],
+        buffer_80bit[6][39:30],
+        buffer_80bit[6][49:40],
+        buffer_80bit[6][59:50],
+        buffer_80bit[6][69:60],
+        buffer_80bit[6][79:70]
+    };
+
+    assign zigzag_pix_in[79:0] = { 
+        buffer_80bit[7][9:0],
+        buffer_80bit[7][19:10],
+        buffer_80bit[7][29:20],
+        buffer_80bit[7][39:30],
+        buffer_80bit[7][49:40],
+        buffer_80bit[7][59:50],
+        buffer_80bit[7][69:60],
+        buffer_80bit[7][79:70]
+    };
+
     
     wire  [639:0]    zigzag_pix_data; 
 
@@ -108,7 +184,7 @@ module databuffer_zigzag64x10bit #(
     Zigzag_reorder zigzag_inst (
         .clk        (clock),
         .matrix     (zigzag_pix_in),
-        .is_enable  (zigag_enable),
+        .is_enable  (1'b1),
         .out        (zigzag_pix_data)
     );
 
@@ -118,50 +194,70 @@ module databuffer_zigzag64x10bit #(
     assign diff[9:0] = $signed(zigzag_pix_data[9:0]) - $signed(zigzag_pix_out_pre[9:0]);
     assign diff[639:10] = zigzag_pix_data[639:10];
 
-    reg zigag_enable_d1;
-    reg zigag_enable_d2;
-    reg zigag_enable_d3;
-
-    // Debug
-    reg  [640-1:0]  zigzag_pix_out_tmp;
-
     // 1 CLK
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
-            zigag_enable_d1 <= 0;
-            zigag_enable_d2 <= 0;
-            zigag_enable_d3 <= 0;
-            zigzag_pix_out_tmp <= 0;
             zigzag_pix_out <= 0;
         end else begin
-            zigag_enable_d1 <= zigag_enable;
-            zigag_enable_d2 <= zigag_enable_d1;
-            zigag_enable_d3 <= zigag_enable_d2;
-            if(zigag_enable_d2) begin
-                zigzag_pix_out_tmp <= zigzag_pix_data;
-                zigzag_pix_out <= diff;
-            end
+            zigzag_pix_out <= diff;
         end
     end
     
-    reg  [640-1:0]  zigzag_pix_out_pre;
+    wire [9:0]  zigzag_pix_out_now;
+    assign  zigzag_pix_out_now = zigzag_pix_out[9:0];
+    reg  [9:0]  zigzag_pix_out_pre;
 
     // クロックエッジで diff の値を zigzag_pix_out_1 に反映させる例
     always @(posedge clock or negedge reset_n) begin
     if (!reset_n)
         zigzag_pix_out_pre <= 0;
     else
-        if(input_data_enable_d3) begin
-            zigzag_pix_out_pre <= zigzag_pix_out;
+        if(input_data_enable) begin
+            zigzag_pix_out_pre <= zigzag_pix_out[9:0];
         end
     end
 
+
+
 `ifdef DEBUG
+    wire [9:0] row_data_0 = row_data[9 : 0];
+    wire [9:0] row_data_1 = row_data[19:10];
+    wire [9:0] row_data_2 = row_data[29:20];
+    wire [9:0] row_data_3 = row_data[39:30];
+    wire [9:0] row_data_4 = row_data[49:40];
+    wire [9:0] row_data_5 = row_data[59:50];
+    wire [9:0] row_data_6 = row_data[69:60];
+    wire [9:0] row_data_7 = row_data[79:70];
+
     wire [9:0] debug_zigzag_pix_out0 = zigzag_pix_out[9:0];
     wire [9:0] debug_zigzag_pix_data0 = zigzag_pix_data[9:0];
     wire [9:0] debug_zigzag_pix_out_pre0 = zigzag_pix_out_pre[9:0];
     wire [9:0] debug_diff0 = diff[9:0];
     wire [9:0] debug_calc_diff0 = $signed(debug_zigzag_pix_data0) - $signed(debug_zigzag_pix_out_pre0);
+
+    wire [79:0] buffer_80bit_0 = buffer_80bit[0];
+    wire [79:0] buffer_80bit_1 = buffer_80bit[1];
+    wire [79:0] buffer_80bit_2 = buffer_80bit[2];
+    wire [79:0] buffer_80bit_3 = buffer_80bit[3];
+    wire [79:0] buffer_80bit_4 = buffer_80bit[4];
+    wire [79:0] buffer_80bit_5 = buffer_80bit[5];
+    wire [79:0] buffer_80bit_6 = buffer_80bit[6];
+    wire [79:0] buffer_80bit_7 = buffer_80bit[7];
+
+    wire [9:0] buffer_80bit_0_0 = buffer_80bit_0[9:0];
+
+    wire [79:0] zigzag_pix_in_0 = zigzag_pix_in[79:0];
+    wire [79:0] zigzag_pix_in_1 = zigzag_pix_in[159:80];
+
+    wire [9:0] zigzag_pix_in_0_0 =  zigzag_pix_in_0[9:0];
+    wire [9:0] zigzag_pix_in_0_1 =  zigzag_pix_in_0[19:10];
+    wire [9:0] zigzag_pix_in_0_2 =  zigzag_pix_in_0[29:20];
+    wire [9:0] zigzag_pix_in_0_3 =  zigzag_pix_in_0[39:30];
+    wire [9:0] zigzag_pix_in_0_4 =  zigzag_pix_in_0[49:40];
+    wire [9:0] zigzag_pix_in_0_5 =  zigzag_pix_in_0[59:50];
+    wire [9:0] zigzag_pix_in_0_6 =  zigzag_pix_in_0[69:60];
+    wire [9:0] zigzag_pix_in_0_7 =  zigzag_pix_in_0[79:70];
+
 `endif
 
 endmodule
