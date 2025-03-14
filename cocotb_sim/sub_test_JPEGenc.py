@@ -7,6 +7,7 @@ import random
 import logging
 from cocotb.triggers import First, Timer, RisingEdge, FallingEdge
 from cocotb.utils import get_sim_time
+from cocotb.binary import BinaryValue
 
 import sys, os
 import math
@@ -15,17 +16,21 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../c
 import sub_Debug_func
 
 # ---------------------------------------------------
+# Debug 8x8 matrix out
+matrix_debug_out = 1
+
+# ---------------------------------------------------
 # sub DC 関数
 async def run_huffman_dc(module, name, final_dc_container, clock):
 
     # ログ設定: level を DEBUG にすれば詳細なログが出る
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)  # 明示的にレベルを DEBUG に設定
+    logger.setLevel(logging.INFO)  # 明示的にレベルを DEBUG に設定
 
     # モジュールの state が 6 になるまで待機
     while True:
@@ -74,12 +79,12 @@ async def run_huffman_ac(module, name, final_output_container, clock):
 
     # ログ設定: level を DEBUG にすれば詳細なログが出る
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)  # 明示的にレベルを DEBUG に設定
+    logger.setLevel(logging.INFO)  # 明示的にレベルを DEBUG に設定
 
     num_detected = 0
     done = False
@@ -143,9 +148,6 @@ async def run_huffman_ac(module, name, final_output_container, clock):
 # ---------------------------------------------------
 # sub メイン関数
 
-# Debug 8x8 matrix out
-matrix_debug_out = 1
-
 async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     # ログ設定: level を DEBUG にすれば詳細なログが出る
@@ -204,10 +206,11 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     logger.debug("==========================================================================")
     logger.debug("1: DCT 2D Start")
 
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Dct_Y_input(dut)
-        #await sub_Debug_func.dump_Dct_Cb_input(dut)
-        #await sub_Debug_func.dump_Dct_Cr_input(dut)
+    if matrix_debug_out == 1:
+        print(f"{get_sim_time('ns')} ns:")
+        await sub_Debug_func.dump_Dct_Y_input(dut)
+        await sub_Debug_func.dump_Dct_Cb_input(dut)
+        await sub_Debug_func.dump_Dct_Cr_input(dut)
 
     # DCT 2D Start
     await RisingEdge(dut.clock)
@@ -224,6 +227,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     logger.debug("1.2: DCT 2D Output Data")
     if matrix_debug_out == 1:
+        print(f"{get_sim_time('ns')} ns:")
         await sub_Debug_func.dump_Dct_Y_output(dut)
         await sub_Debug_func.dump_Dct_Cb_output(dut)
         await sub_Debug_func.dump_Dct_Cr_output(dut)
@@ -235,52 +239,47 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     await RisingEdge(dut.clock)
     dut.dct_end_enable.value = 0
 
-    await RisingEdge(dut.clock)
-    await RisingEdge(dut.clock)
-
-    dut.zigzag_input_enable.value = 1
-    for _ in range(8):
-        dut.matrix_row.value = _
+    for _ in range(4):
         await RisingEdge(dut.clock)
+
+    # Quantize start
+    dut.zigzag_input_enable.value = 1
+    await RisingEdge(dut.clock)
     dut.zigzag_input_enable.value = 0
 
-    for _ in range(4):
+    for _ in range(16):
         await RisingEdge(dut.clock)
     logger.debug("2: Quantize End")
 
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Quantized_Y_output(dut)
-        #await sub_Debug_func.dump_Quantized_Cb_output(dut)
-        #await sub_Debug_func.dump_Quantized_Cr_output(dut)
+    if matrix_debug_out == 1:
+        print(f"{get_sim_time('ns')} ns:")
+        await sub_Debug_func.dump_Quantized_Y_output(dut)
+        await sub_Debug_func.dump_Quantized_Cb_output(dut)
+        await sub_Debug_func.dump_Quantized_Cr_output(dut)
 
     logger.debug("==========================================================================")
     logger.debug("3: Zigzag scan Start")
 
     await RisingEdge(dut.clock)
 
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Zigzag_Y_output_pre(dut)
-
-    dut.zigag_enable.value = 1
-    await RisingEdge(dut.clock)
-    dut.zigag_enable.value = 0
-
     for _ in range(4):
         await RisingEdge(dut.clock)
 
     await RisingEdge(dut.clock)
-    #if matrix_debug_out == 1:
-        #await sub_Debug_func.dump_Zigzag_Y_output(dut)
-        #await sub_Debug_func.dump_Zigzag_Cb_output_pre(dut)
-        #await sub_Debug_func.dump_Zigzag_Cr_output_pre(dut)
+    if matrix_debug_out == 1:
+        print(f"{get_sim_time('ns')} ns:")
+        await sub_Debug_func.dump_Zigzag_Y_output_pre(dut)
+        await sub_Debug_func.dump_Zigzag_Cb_output_pre(dut)
+        await sub_Debug_func.dump_Zigzag_Cr_output_pre(dut)
 
     logger.debug("==========================================================================")
     logger.debug("4: Zigzag Input Data (8x8 matrix):")
     
     if matrix_debug_out == 1:
+        print(f"{get_sim_time('ns')} ns:")
         await sub_Debug_func.dump_Zigzag_Y_Input(dut)
-        #await sub_Debug_func.dump_Zigzag_Cb_Input(dut)
-        #await sub_Debug_func.dump_Zigzag_Cr_Input(dut)
+        await sub_Debug_func.dump_Zigzag_Cb_Input(dut)
+        await sub_Debug_func.dump_Zigzag_Cr_Input(dut)
 
     for _ in range(4):
         await RisingEdge(dut.clock)
@@ -289,9 +288,10 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     logger.debug("5: Zigzaged Data (8x8 matrix):")
 
     if matrix_debug_out == 1:
-        await sub_Debug_func.dump_Zigzag_Y_output(dut)
-        await sub_Debug_func.dump_Zigzag_Cb_output(dut)
-        await sub_Debug_func.dump_Zigzag_Cr_output(dut)
+        print(f"{get_sim_time('ns')} ns:")
+        await sub_Debug_func.dump_Zigzaged_Y_output(dut)
+        await sub_Debug_func.dump_Zigzaged_Cb_output(dut)
+        await sub_Debug_func.dump_Zigzaged_Cr_output(dut)
 
     logger.debug("==========================================================================")
     logger.debug("6: Huffman enc Start")
@@ -339,7 +339,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
     await task_cb
     await task_cr
 
-    # 各モジュールの結果を個別に表示する
+    # 各モジュールの結果を個別に表示する AC
     #print("Y final_output =", final_output_container.get("Y", ""))
     #print("Cb final_output =", final_output_container.get("Cb", ""))
     #print("Cr final_output =", final_output_container.get("Cr", ""))

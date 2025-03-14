@@ -3,13 +3,16 @@ NISHIHARU
 """
 import cocotb
 import random
+import numpy as np
 from cocotb.triggers import Timer, RisingEdge
 from cocotb.binary import BinaryValue
 
 import sys, os
 
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python/')))
-#import my_JPEG_dec
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../HW_python_model/')))
+import huffmanEncode
+
+from bitstring import BitStream
 
 def convert_s10(raw: int) -> int:
     """
@@ -42,7 +45,7 @@ async def test1_JPEGenc_top(dut):
     dut.ac_matrix.value     = 0
     dut.start_pix.value     = 0
     dut.pre_start_pix.value = 0
-    dut.is_luminance.value  = 0
+    dut.is_luminance.value  = 0     # Y mode
 
     for _ in range(10):
         await RisingEdge(dut.clock)
@@ -54,23 +57,24 @@ async def test1_JPEGenc_top(dut):
     # Set input_enable high and initialize pix_data with 1's
     #dut.input_enable.value = 1
 
+    # ここでHuffman符号化するデータを設定
     # input ac 
     input_ac_matrix = [
-        [9, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 3, 4],
-        [0, 0, 0, 1, 1, 0, 3, 4],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
+        [3,   0, 24,  0,  0, 0, 0, 0],
+        [0,  -2,  0,  0,  0, 0, 0, 0],
+        [0,   0,  0,  0,  0, 0, 0, 0],
+        [0,   0,  0,  1,  0, 0, 0, 0],
+        [0,   0,  0,  0,  0, 0, 0, 0],
+        [0,   0,  0,  0,  0, 0, 0, 0],
+        [0,   0,  0,  0,  0, 0, 0, 0],
+        [0,   0,  0,  0,  0, 0, 0, 0]
     ]
 
     # flat 
     flat_data = tuple(input_ac_matrix[i][j] for i in reversed(range(8)) for j in reversed(range(8)))
 
     # 各要素を10ビットのバイナリ文字列に変換して連結
-    bit_str = "".join(format(val, "010b") for val in flat_data)
+    bit_str = "".join(format(val & 0x3FF, "010b") for val in flat_data)
 
     await RisingEdge(dut.clock)
 
@@ -78,7 +82,6 @@ async def test1_JPEGenc_top(dut):
     dut.ac_matrix.value = BinaryValue(value=bit_str, n_bits=640)
     dut.start_pix.value = 1
     dut.pre_start_pix.value = 0
-    dut.is_luminance.value = 1
 
     await RisingEdge(dut.clock)
     print("start_pix : ", int(dut.start_pix.value))
@@ -93,8 +96,14 @@ async def test1_JPEGenc_top(dut):
         # 各要素のフラットインデックスは i*8 + j
         row_str = " ".join(f"({i*8+j:2d}:{x:3d})" for j, x in enumerate(row))
         print(row_str)
+    
+    final_huffman_ac_code = ""
 
-    for _ in range(20):
+    for _ in range(63):
+        huffman_code = str(dut.ac_out)
+        length = int(dut.length.value)
+        code_value = str(dut.code.value)
+        code_length = int(dut.code_size.value)
         print("------------------------------")
         print("Huffman AC Output Cycle : ", _)
         print("start_pix : ", int(dut.start_pix.value))
@@ -104,9 +113,19 @@ async def test1_JPEGenc_top(dut):
         print("code_size : ", int(dut.code_size.value))
         print("next_pix : ", int(dut.next_pix.value))
         print("run : ", int(dut.run.value))
-        print("now_pix_data : ", int(dut.now_pix_data.value))
+        print("now_pix_data : ", convert_s10(int(dut.now_pix_data.value)))
 
-        # Huffman AC code
+        # Huffman AC code のBit切り出し
+        trimmed_huffman_code = huffman_code[-length:]
+        code_out_bin = "" if code_length == 0 else code_value[-code_length:]
+        huffman_ac_out_bit = trimmed_huffman_code + code_out_bin
+        # 表示
+        print(f"huffman_code(bin) = {trimmed_huffman_code}")
+        print(f"code_out(bin) = {code_out_bin}")
+        print(f"huffman_ac_code(bin) = {huffman_ac_out_bit}")
+
+        # 追加してく
+        final_huffman_ac_code += huffman_ac_out_bit
 
         await RisingEdge(dut.clock)
         dut.start_pix.value =  int(dut.start_pix.value) + int(dut.next_pix.value)
@@ -119,5 +138,36 @@ async def test1_JPEGenc_top(dut):
         for _ in range(5):
             await RisingEdge(dut.clock)
 
+    print("------------------------------")
+    print(f"final huffman code= {final_huffman_ac_code}")
+
     # ここに追加の検証コードを記述する
-    print("Test completed.")
+    print("------------------------------")
+    if int(dut.is_luminance.value) == 1 :
+        luminance = 1
+    else :
+        luminance = 0
+
+    refmodel_input_data = np.array(input_ac_matrix, dtype=np.int32).flatten()
+    print(refmodel_input_data)
+
+    # DC
+    dc_code = huffmanEncode.encodeDCToBoolList(flat_data[63],luminance, 1)
+    print("dc_input :", flat_data[63])
+    print("dc_code :", dc_code)
+
+    # AC
+    sosBitStream = BitStream()
+    huffmanEncode.encodeACBlock(sosBitStream, refmodel_input_data[1:], luminance, 1)
+
+    print(sosBitStream.bin)
+
+    # リファレンスと比較
+    print("------------------------------")
+    if final_huffman_ac_code == sosBitStream.bin:
+        print("HW Output data match with Ref data !!")
+        print("Test completed.")
+    else :
+        print("Data dont match Err !!")
+
+    print("------------------------------")

@@ -52,7 +52,7 @@ async def file_write(dut, outputJPEGFileName, srcImageHeight, srcImageWidth, sos
     #print(type(sosBitStream))
     #print(sosBitStream)
 
-    quality = 95    # Quantize.x と合わせること！
+    quality = 25    # Quantize.x と合わせること！
     print("quality = ", quality)
 
     # ==============================================================

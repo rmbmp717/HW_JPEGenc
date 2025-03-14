@@ -30,8 +30,8 @@ async def generate_clock(dut, period=10):
 @cocotb.test()
 async def main_JPEGenc_top(dut):
 
-    srcFileName = "./image/image_red8x8.bmp"
-    outputJPEGFileName = "./image/image_red8x8.jpg"
+    srcFileName = "./image/image16x32.bmp"
+    outputJPEGFileName = "./image/output.jpg"
 
     print("srcFileName:", srcFileName)
     print("outputJPEGFileName:", outputJPEGFileName)
@@ -103,8 +103,6 @@ async def main_JPEGenc_top(dut):
     dut.dct_enable.value = 0
     dut.dct_end_enable.value = 0
     dut.zigzag_input_enable.value = 0
-    dut.zigag_enable.value = 0
-    dut.matrix_row.value = 0
     dut.Huffman_start.value = 0
 
     for _ in range(10):
