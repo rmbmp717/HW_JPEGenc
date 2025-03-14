@@ -1712,8 +1712,10 @@ def encodeDCToBoolList(value,isLuminance,debugMode = 0):
     boolList = boolList + codeList
     if(debugMode == 1):
         if(isLuminance==1):
+            print("value=", value)
             print('isLuminance=',isLuminance,'(size,value)=',size,value,'code=',DCLuminanceSizeToCode[size],codeList)
         else:
+            print("value=", value)
             print('isLuminance=', isLuminance, '(size,value)=', size, value, 'code=', DCChrominanceSizeToCode[size],codeList)
     return boolList
 

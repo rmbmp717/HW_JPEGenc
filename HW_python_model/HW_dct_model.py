@@ -4,6 +4,8 @@ from scipy.fftpack import dct
 import math
 import numpy
 
+import HW_jpegEncoder
+
 # =====================================
 # 固定小数点 1D DCT 実装 (Q8.8) 修正版
 # =====================================
@@ -122,3 +124,87 @@ def dct_1d_manual(x: numpy.ndarray) -> numpy.ndarray:
         out[k] = alpha * s * math.sqrt(2.0 / N)
     # fftpack と同様に rint で丸めた結果を返す
     return numpy.rint(out)
+
+# =====================================
+# 2D DCT function
+# =====================================
+
+def dct_2d_fftpack(img_u8: numpy.ndarray, level_shift_value) -> numpy.ndarray:
+    img_f = img_u8.astype(numpy.float64) - level_shift_value  # レベルシフト
+    return dct(dct(img_f, axis=0, norm='ortho'), axis=1, norm='ortho')
+
+def dct_2d_manual(img_u8: numpy.ndarray, level_shift_value) -> numpy.ndarray:
+    # まず画像全体からレベルシフト
+    img_f = img_u8.astype(numpy.float64) - level_shift_value
+    # 各行に対して1D DCT
+    temp = numpy.array([dct_1d_manual(row) for row in img_f])
+    # 各列に対して1D DCTを適用して転置して元の形に戻す
+    return numpy.array([dct_1d_manual(temp[:, i]) for i in range(temp.shape[1])]).T
+
+def dct_2d_q88(img_u8: numpy.ndarray, level_shift_value) -> numpy.ndarray:
+    img_f = img_u8.astype(numpy.float64) - level_shift_value
+    tmp = numpy.apply_along_axis(dct_1d_q88, axis=1, arr=img_f)  # 行ごとに DCT
+    return numpy.apply_along_axis(dct_1d_q88, axis=0, arr=tmp)   # 列ごとに DCT
+
+# =================================
+if __name__ == "__main__":
+    test_matrices = [
+        #(np.array([[i * j for j in range(8)] for i in range(8)], dtype=np.int16), "パターン1"),
+        #(np.array([[255 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 255"),
+        #(np.array([[-48 if i < 4 and j < 4 else -128 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 -48, 他 -128"),
+        (numpy.full((8, 8), 22, dtype=numpy.int16), "全体 22")
+        #(np.random.randint(0, 256, (8, 8), dtype=np.int16), "ランダムパターン"),
+        #(np.array([[80 if (i + j) % 2 == 0 else 80 for j in range(8)] for i in range(8)], dtype=np.int16), "ベタ"),
+        #(np.array([[80 if (i + j) % 2 == 0 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "チェッカーパターン"),
+        #(np.array([[80 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 80"),
+    ]
+
+    for img, label in test_matrices:
+        #y_q88_pre = dct_2d_q88_row(img)
+        y_q88 = dct_2d_q88(img, 0)
+        #y_q12 = dct_2d_q12(img)
+        y_manual = dct_2d_manual(img, 0)
+        y_fftpack = dct_2d_fftpack(img, 0)
+
+        #diff_q88_manual = y_q88.astype(int) - y_manual.astype(int)
+        #diff_q88_fftpack = y_q88.astype(int) - np.rint(y_fftpack).astype(int)
+        #iff_manual_fftpack = y_manual.astype(int) - np.rint(y_fftpack).astype(int)
+
+        print(f"\n【{label}】")
+        print("Input Image (uint8):\n", img)
+        #print("Q8.8 DCT row:\n", y_q88_pre)
+        print("Q8.8 DCT:\n", y_q88)
+        #print("Q12 DCT:\n", y_q12 * 8)
+        print("Manual DCT:\n", y_manual)
+        print("fftpack DCT:\n", numpy.rint(y_fftpack).astype(int))
+        #print("Diff (Q8.8 - Manual):\n", diff_q88_manual)
+        #print("Diff (Q8.8 - fftpack):\n", diff_q88_fftpack)
+        #print("Diff (Manual - fftpack):\n", diff_manual_fftpack)
+
+        # Quantize バグがあるのでは？
+        quality = 25
+
+        # 
+        if(quality <= 0):
+            quality = 1
+        if(quality > 100):
+            quality = 100
+        if(quality < 50):
+            qualityScale = 5000 / quality
+        else:
+            qualityScale = 200 - quality * 2
+        luminanceQuantTbl = numpy.array(numpy.floor((HW_jpegEncoder.std_luminance_quant_tbl * qualityScale + 50) / 100))
+        luminanceQuantTbl[luminanceQuantTbl == 0] = 1
+        luminanceQuantTbl[luminanceQuantTbl > 255] = 255
+        luminanceQuantTbl = luminanceQuantTbl.reshape([8, 8]).astype(int)
+        #print('luminanceQuantTbl:\n', luminanceQuantTbl)
+        chrominanceQuantTbl = numpy.array(numpy.floor((HW_jpegEncoder.std_chrominance_quant_tbl * qualityScale + 50) / 100))
+        chrominanceQuantTbl[chrominanceQuantTbl == 0] = 1
+        chrominanceQuantTbl[chrominanceQuantTbl > 255] = 255
+        chrominanceQuantTbl = chrominanceQuantTbl.reshape([8, 8]).astype(int)
+        #print('chrominanceQuantTbl:\n', chrominanceQuantTbl)
+
+        yQuantMatrix = numpy.rint(y_q88 / luminanceQuantTbl)
+        #uQuantMatrix = numpy.rint(y_q88 / chrominanceQuantTbl)
+        
+        print('yQuantMatrix:\n',yQuantMatrix)
