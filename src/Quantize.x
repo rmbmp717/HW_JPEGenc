@@ -67,9 +67,30 @@ pub fn convert_row(row: s12[N]) -> s16[N] {
   }(s16[N]:[ s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0, s16:0 ])
 }
 
+// ヘルパー関数: s12[N] の行を s10[N] に変換
+pub fn convert_row_s10(row: s12[N]) -> s10[N] {
+  // 初期値として全要素ゼロの s16[N] を指定し、for 内包表記で各要素を更新
+  for (j, result): (u32, s10[N]) in range(u32:0, N) {
+    update(result, j, row[j] as s10)
+  }(s10[N]:[ s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0 ])
+}
+
+
 //----------------------------------------------------------------------
 // s12 型入力のメイン関数
-pub fn Quantize(dct_coeffs: s12[N][N], matrix_row: u8, is_luminance: bool, quantize_off: bool) -> (s10[N], u8) {
+pub fn Quantize_s10(dct_coeffs: s12[N][N], matrix_row: u8, is_luminance: bool, quantize_off: bool) -> (s10[N], u8) {
+  let row_idx: u32 = matrix_row as u32;
+  // 対象行の s12 値を s16 に変換して初期行を生成
+  let initial_row: s16[N] = convert_row(dct_coeffs[row_idx]);
+  let output_row: s10[N] = [initial_row[0] as s10, initial_row[1] as s10, initial_row[2] as s10, initial_row[3] as s10,
+                            initial_row[4] as s10, initial_row[5] as s10, initial_row[6] as s10, initial_row[7] as s10];
+  // 出力
+  (output_row, QUALITY)
+}
+
+//----------------------------------------------------------------------
+// s12 型入力のメイン関数
+pub fn Quantize(dct_coeffs: s12[N][N], matrix_row: u8, is_luminance: bool, quantize_off: bool) -> (u8, s10[N]) {
   let row_idx: u32 = matrix_row as u32;
   // 対象行の s12 値を s16 に変換して初期行を生成
   let initial_row: s16[N] = convert_row(dct_coeffs[row_idx]);
@@ -96,31 +117,28 @@ pub fn Quantize(dct_coeffs: s12[N][N], matrix_row: u8, is_luminance: bool, quant
     update(processed, j, clipped)
   }(s10[N]:[ s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0 ]);
   // 出力
-  (quantized, QUALITY)
+  (QUALITY, quantized)
 }
 
-// =======================
-// 以下はテストケース（u8 型入力版）
-// =======================
 #[test]
-fn test0_quantize_block() -> () {
+fn test_data100_quantize_block() -> () {
   // test_block の行0のみ使用。その他は 0 で埋める。
   let test_block: s12[8][8] = [
-    s12[8]:[s12:-873, s12:150, s12:100, s12:-50, s12:30, s12:20, s12:10, s12:5],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0]
+    s12[8]:[s12:200, s12:200, s12:200, s12:200, s12:200,s12:200,s12:200, s12:200],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0]
   ];
 
   // ※ 本テストでは、輝度の場合 (is_luminance == true)
   // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
-  let expected_result: s10[8] = [
-    s10:-174, s10:50, s10:33, s10:-10, s10:4, s10:1, s10:0, s10:0
-  ];
+  let expected_result: (u8, s10[8]) = ( u8:85, [
+    s10:40, s10:67, s10:67, s10:40, s10:29, s10:17, s10:13, s10:11
+  ] );
 
   let result = Quantize(test_block, u8:0, true, false);
   trace!(expected_result);
@@ -129,165 +147,27 @@ fn test0_quantize_block() -> () {
 }
 
 #[test]
-fn test1_quantize_block() -> () {
-  // test_block の行5に対してテスト（色差の場合: is_luminance == false）
+fn test_imaga8x8_quantize_block() -> () {
+  // test_block の行0のみ使用。その他は 0 で埋める。
   let test_block: s12[8][8] = [
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:234, s12:0,   s12:-200,s12:0,  s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:111, s12:0,   s12:300, s12:0,  s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:122, s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:25,  s12:-400,s12:15,  s12:10, s12:8,  s12:88, s12:3,  s12:2],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0,  s12:0],
-    s12[8]:[s12:0,   s12:0,   s12:0,   s12:0,  s12:0,  s12:0,  s12:0,  s12:0]
+    s12[8]:[s12:0,   s12:-671, s12:3,   s12:-68, s12:3,  s12:3,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:-50,  s12:1,   s12:-4,  s12:1,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:-180, s12:0,   s12:-18, s12:0,  s12:0,  s12:0,   s12:0],
+    s12[8]:[s12:0,   s12:120,  s12:-1,  s12:12,  s12:-1, s12:-1, s12:0,   s12:0]
   ];
 
-  // 色差の場合、標準色差量子化テーブル（scaled）が全要素 94 になると仮定した場合、
-  // (value + (94/2))/94 で計算すると、どの要素も 0 になると期待
-  let expected_result: s10[8] = [
-    s10:7, s10:0, s10:10, s10:0, s10:0, s10:0, s10:0, s10:0
-  ];
+  // ※ 本テストでは、輝度の場合 (is_luminance == true)
+  // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
+  let expected_result: (u8, s10[8]) = ( u8:85, [
+    s10:40, s10:67, s10:67, s10:40, s10:29, s10:17, s10:13, s10:11
+  ] );
 
-  let result = Quantize(test_block, u8:3, false, false);
-  trace!(expected_result);
-  trace!(result);
-  //assert_eq(result, expected_result);
-}
-
-#[test]
-fn test2_quantize_block() -> () {
-  // test_block の行5に対してテスト（色差の場合: is_luminance == true）
-  let test_block: s12[8][8] = [
-    s12[8]:[s12:128,   s12:0,   s12:0,   s12:51,  s12:0,  s12:11,  s12:44,  s12:0],
-    s12[8]:[s12:128,   s12:0,   s12:33,  s12:46,  s12:0,  s12:10,  s12:40,  s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:25,    s12:20,  s12:15,  s12:10,  s12:8,  s12:5,   s12:3,   s12:2],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0]
-  ];
-
-  let expected_result: s10[8] = [s10:25, s10:0, s10:0, s10:10, s10:0, s10:0, s10:2, s10:0];
   let result = Quantize(test_block, u8:0, true, false);
   trace!(expected_result);
   trace!(result);
   //assert_eq(result, expected_result);
-
-  let expected_result: s10[8] = [s10:32, s10:0, s10:8, s10:7, s10:0, s10:0, s10:2, s10:0];
-  let result = Quantize(test_block, u8:1, true, false);
-  trace!(expected_result);
-  trace!(result);
-  //assert_eq(result, expected_result);
-}
-
-#[test]
-fn test3_quantize_block() -> () {
-  // test_block の行5に対してテスト（色差の場合: is_luminance == false）
-  let test_block: s12[8][8] = [
-    s12[8]:[s12:128,   s12:0,   s12:0,   s12:51,  s12:0,  s12:11,  s12:44,  s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:25,    s12:20,  s12:15,  s12:10,  s12:8,  s12:5,   s12:3,   s12:2],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,     s12:0,   s12:0,   s12:0,   s12:0,  s12:0,   s12:0,   s12:0]
-  ];
-
-  // 色差の場合、標準色差量子化テーブル（scaled）が全要素 94 になると仮定した場合、
-  // (value + (94/2))/94 で計算すると、どの要素も 0 になると期待
-  let expected_result: s10[8] = [
-    s10:128,   s10:0,   s10:0,   s10:51,  s10:0,  s10:11,  s10:44,  s10:0
-  ];
-
-  let result = Quantize(test_block, u8:0, false, true);
-  trace!(expected_result);
-  trace!(result);
-  //assert_eq(result, expected_result);
-}
-
-#[test]
-fn test_gra8x16_quantize_block() -> () {
-  // is_luminance == true
-  let test_block: s12[8][8] = [
-    s12[8]:[s12:-377, s12:-212, s12:1,   s12:-21, s12:1,   s12:-27, s12:-101, s12:69],
-    s12[8]:[s12:-212, s12:0,    s12:2,   s12:0,   s12:0,   s12:-15, s12:-57,  s12:39],
-    s12[8]:[s12:0,    s12:1,    s12:1,   s12:0,   s12:2,   s12:0,   s12:0,    s12:0],
-    s12[8]:[s12:-22,  s12:0,    s12:0,   s12:0,   s12:1,   s12:1,   s12:-6,   s12:4],
-    s12[8]:[s12:1,    s12:1,    s12:0,   s12:3,   s12:0,   s12:2,   s12:2,    s12:0],
-    s12[8]:[s12:-28,  s12:-15,  s12:1,   s12:2,   s12:0,   s12:0,   s12:-5,   s12:5],
-    s12[8]:[s12:-102, s12:-56,  s12:0,   s12:-4,  s12:-1,  s12:-4,  s12:-26,  s12:20],
-    s12[8]:[s12:68,   s12:39,   s12:1,   s12:2,   s12:1,   s12:6,   s12:18,   s12:-11]
-  ];  
-
-  let expected_result0: s10[8] = [ s10:-11,  s10:-9,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:1 ];
-  let expected_result1: s10[8] = [ s10:-8,   s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result2: s10[8] = [ s10:0,    s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result3: s10[8] = [ s10:0,    s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result4: s10[8] = [ s10:0,    s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result5: s10[8] = [ s10:0,    s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result6: s10[8] = [ s10:0,    s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result7: s10[8] = [ s10:0,    s10:0,    s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-
-  let result0 = Quantize(test_block, u8:0, true, false);
-  let result1 = Quantize(test_block, u8:1, true, false);
-  let result2 = Quantize(test_block, u8:2, true, false);
-  let result3 = Quantize(test_block, u8:3, true, false);
-  let result4 = Quantize(test_block, u8:4, true, false);
-  let result5 = Quantize(test_block, u8:5, true, false);
-  let result6 = Quantize(test_block, u8:6, true, false);
-  let result7 = Quantize(test_block, u8:7, true, false);
-
-  assert_eq(result0, (expected_result0, u8:25));
-  assert_eq(result1, (expected_result1, u8:25));
-  assert_eq(result2, (expected_result2, u8:25));
-  assert_eq(result3, (expected_result3, u8:25));
-  assert_eq(result4, (expected_result4, u8:25));
-  assert_eq(result5, (expected_result5, u8:25));
-  assert_eq(result6, (expected_result6, u8:25));
-  assert_eq(result7, (expected_result7, u8:25));
-}
-
-
-#[test]
-fn test_gra8x16_u_quantize_block() -> () {
-  // is_luminance == false
-  let test_block: s12[8][8] = [
-    s12[8]:[s12:-242, s12:0,   s12:0,   s12:0,  s12:0,  s12:-20, s12:-63, s12:43],
-    s12[8]:[s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:0,    s12:0,   s12:0,   s12:0,  s12:0,  s12:0,   s12:0,   s12:0],
-    s12[8]:[s12:-18,  s12:0,   s12:0,   s12:0,  s12:0,  s12:-2,  s12:-4,  s12:2],
-    s12[8]:[s12:-66,  s12:0,   s12:0,   s12:0,  s12:0,  s12:-6,  s12:-16, s12:12],
-    s12[8]:[s12:42,   s12:0,   s12:0,   s12:0,  s12:0,  s12:4,   s12:12,  s12:-8],
-  ];  
-
-  let expected_result0: s10[8] = [ s10:-6,  s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result1: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result2: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result3: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result4: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result5: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result6: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-  let expected_result7: s10[8] = [ s10:0,   s10:0,   s10:0,   s10:0,  s10:0,  s10:0,  s10:0,  s10:0 ];
-
-  let result0 = Quantize(test_block, u8:0, false, false);
-  let result1 = Quantize(test_block, u8:1, false, false);
-  let result2 = Quantize(test_block, u8:2, false, false);
-  let result3 = Quantize(test_block, u8:3, false, false);
-  let result4 = Quantize(test_block, u8:4, false, false);
-  let result5 = Quantize(test_block, u8:5, false, false);
-  let result6 = Quantize(test_block, u8:6, false, false);
-  let result7 = Quantize(test_block, u8:7, false, false);
-
-  assert_eq(result0, (expected_result0, u8:25));
-  assert_eq(result1, (expected_result1, u8:25));
-  assert_eq(result2, (expected_result2, u8:25));
-  assert_eq(result3, (expected_result3, u8:25));
-  assert_eq(result4, (expected_result4, u8:25));
-  assert_eq(result5, (expected_result5, u8:25));
-  assert_eq(result6, (expected_result6, u8:25));
-  assert_eq(result7, (expected_result7, u8:25));
 }

@@ -885,7 +885,8 @@ fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: b
 
       // Huffman encode処理
       let value: s10 = ac_data[start_pix + value_pix_num];
-      let run: u8 = if value_pix_num > u8:15 { u8:15 } else { value_pix_num + u8:1 };
+      let run_0: u8 = if value_pix_num > u8:15 { u8:15 } else { value_pix_num  };
+      let run = if start_pix_data_zero == false { u8:0 } else { run_0 };
       let size: u8 = bit_length(value);
       //let run_size_str: u8[2] = encode_run_size(run as u32, size);
 
@@ -913,7 +914,8 @@ fn encode_ac(ac_data: s10[64], start_pix: u8, pre_start_pix: u8, is_luminance: b
 
       // next_pix
       let next_pix_0 = value_pix_num + u8:1;
-      let next_pix = if start_pix_data_zero { next_pix_0  } else { u8:1 };
+      let next_pix_1 = if start_pix_data_zero { next_pix_0  } else { u8:1 };
+      let next_pix = if next_pix_1 > u8:16 { u8:16 } else { next_pix_1 };
 
       (Huffman_code_full, Huffman_length, Code_list, Code_size, run, next_pix)
     }
