@@ -76,7 +76,7 @@ def dct_1d_s16(x_u8: np.ndarray) -> np.ndarray:
     return result
 
 # =====================================
-# (2) 手計算ベースの 1D DCT 修正版
+# 手計算ベースの 1D DCT 修正版
 # =====================================
 def dct_1d_manual(x_u8: np.ndarray) -> np.ndarray:
     """ 手計算による 1D DCT (JPEG スケール) """
@@ -92,7 +92,7 @@ def dct_1d_manual(x_u8: np.ndarray) -> np.ndarray:
     return np.clip(np.rint(out_f + 128), -511, 512).astype(np.int16)  # レベルシフト復帰
 
 # =====================================
-# (4) 12bit精度 (Q12.12) 固定小数点版 1D DCT 実装
+# 12bit精度 (Q12.12) 固定小数点版 1D DCT 実装
 # =====================================
 
 # 4.1 固定小数点スケール定義 (Q12.12)
