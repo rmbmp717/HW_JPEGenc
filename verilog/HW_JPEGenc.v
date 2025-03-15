@@ -47,7 +47,7 @@ module HW_JPEGenc(
     wire [640-1:0] pix_data_out;
 
     // to Huffman enc
-    wire [640-1:0] dc_matrix;
+    wire [9:0]     dc_in;
     wire [640-1:0] ac_matrix;
 
     // Huffmann enc out
@@ -171,7 +171,7 @@ module HW_JPEGenc(
     // PIPE_LINE_STAGE = 1 と仮定
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
-        .matrix             (dc_matrix),
+        .dc_in              (dc_in),
         .is_luminance       (is_luminance),
         .out                ({dc_out, dc_out_length, dc_out_code_list, dc_out_code_size})
     );
@@ -193,7 +193,7 @@ module HW_JPEGenc(
         .is_luminance       (is_luminance),
         .Huffman_start      (Huffman_start),
         .zigzag_pix_in      (pix_data_out),
-        .dc_matrix          (dc_matrix),
+        .dc_data            (dc_in),
         .ac_matrix          (ac_matrix),
         .start_pix          (start_pix),
         .pre_start_pix      (pre_start_pix),

@@ -6,7 +6,7 @@ module Huffman_enc_controller(
   input  wire               is_luminance,
   input  wire               Huffman_start,
   input  wire  [639:0]      zigzag_pix_in,
-  output reg   [639:0]      dc_matrix,
+  output reg   [9:0]        dc_data,
   output reg   [639:0]      ac_matrix,
   output reg   [7:0]        start_pix,
   output reg   [7:0]        pre_start_pix,
@@ -38,6 +38,9 @@ module Huffman_enc_controller(
   // Dataの順序逆転
   wire [639:0]  data_fliped_640;
 
+  // 1 Block前の DC_data
+  reg [9:0]   pre_dc_data;
+
   Data_flip64 mData_flip64 (
       .clk                (clock),
       .data_in            (zigzag_pix_in),
@@ -51,7 +54,8 @@ module Huffman_enc_controller(
     if (!reset_n) begin
       state <= 0;
       Huffmanenc_active <= 0;
-      dc_matrix <= 0;
+      dc_data <= 0;
+      pre_dc_data <= 0;
       ac_matrix <= 0;
       start_pix <= 0;
       pre_start_pix <= 0;
@@ -68,7 +72,7 @@ module Huffman_enc_controller(
     end else begin
       case(state)
         0: begin
-          dc_matrix <= 0;
+          dc_data <= 0;
           jpeg_out_enable <= 0;
           jpeg_out_end <= 0;
           if(Huffman_start) begin
@@ -79,7 +83,7 @@ module Huffman_enc_controller(
         // DC enc Start
         1: begin
           jpeg_out_enable <= 0;
-          dc_matrix <= data_fliped_640;
+          dc_data <= $signed(data_fliped_640[9:0]) - $signed(pre_dc_data);
           start_pix <= 1;
           pre_start_pix <= 0;
           state <= 2;
@@ -113,6 +117,7 @@ module Huffman_enc_controller(
           state <= 7;
         end
         7: begin
+          pre_dc_data <= data_fliped_640[9:0];
           state <= 8;
         end
         8: begin
@@ -174,7 +179,6 @@ module Huffman_enc_controller(
 
   //Debug
   `ifdef Debug
-  wire [9:0] dc_input = dc_matrix[9:0];
 
   wire [9:0] ac_input0  = ac_matrix[9:0];
   wire [9:0] ac_input1  = ac_matrix[19:10];

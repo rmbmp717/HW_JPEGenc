@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`define DUMP_VCD
+//`define DUMP_VCD
 `define DEBUG
 
 module HW_JPEGenc_top(

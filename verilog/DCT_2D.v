@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`define DEBUG
+//`define DEBUG
 
 module DCT_2D(
   input  wire             clock,
@@ -19,191 +19,10 @@ module DCT_2D(
     end
   endgenerate
 
-  // Debug 
-  `ifdef DEBUG
-  // 行0 (out[0]～out[7]) を 96ビットにまとめる
-  wire [95:0] out_row0 = { out[7],  out[6],  out[5],  out[4],  out[3],  out[2],  out[1],  out[0]  },
-              out_row1 = { out[15], out[14], out[13], out[12], out[11], out[10], out[9],  out[8]  },
-              out_row2 = { out[23], out[22], out[21], out[20], out[19], out[18], out[17], out[16] },
-              out_row3 = { out[31], out[30], out[29], out[28], out[27], out[26], out[25], out[24] },
-              out_row4 = { out[39], out[38], out[37], out[36], out[35], out[34], out[33], out[32] },
-              out_row5 = { out[47], out[46], out[45], out[44], out[43], out[42], out[41], out[40] },
-              out_row6 = { out[55], out[54], out[53], out[52], out[51], out[50], out[49], out[48] },
-              out_row7 = { out[63], out[62], out[61], out[60], out[59], out[58], out[57], out[56] };
-
-  wire [11:0] row_in0_0;
-  wire [11:0] row_in0_1;
-  wire [11:0] row_in0_2;
-  wire [11:0] row_in0_3;
-  wire [11:0] row_in0_4;
-  wire [11:0] row_in0_5;
-  wire [11:0] row_in0_6;
-  wire [11:0] row_in0_7;
-
-  assign row_in0_0 = row_in0[12-1  :   0];
-  assign row_in0_1 = row_in0[12*2-1:12*1];
-  assign row_in0_2 = row_in0[12*3-1:12*2];
-  assign row_in0_3 = row_in0[12*4-1:12*3];
-  assign row_in0_4 = row_in0[12*5-1:12*4];
-  assign row_in0_5 = row_in0[12*6-1:12*5];
-  assign row_in0_6 = row_in0[12*7-1:12*6];
-  assign row_in0_7 = row_in0[12*8-1:12*7];
-
-  wire [95:0] row_in0;
-  wire [95:0] row_in1;
-  wire [95:0] row_in2;
-  wire [95:0] row_in3;
-  wire [95:0] row_in4;
-  wire [95:0] row_in5;
-  wire [95:0] row_in6;
-  wire [95:0] row_in7;
-
-  assign row_in0 = row_in[0];
-  assign row_in1 = row_in[1];
-  assign row_in2 = row_in[2];
-  assign row_in3 = row_in[3];
-  assign row_in4 = row_in[4];
-  assign row_in5 = row_in[5];
-  assign row_in6 = row_in[6];
-  assign row_in7 = row_in[7];
-
-  wire [11:0] col_buffer0_0;
-  wire [11:0] col_buffer0_1;
-  wire [11:0] col_buffer0_2;
-  wire [11:0] col_buffer0_3;
-  wire [11:0] col_buffer0_4;
-  wire [11:0] col_buffer0_5;
-  wire [11:0] col_buffer0_6;
-  wire [11:0] col_buffer0_7;
-
-  assign col_buffer0_0 = col_buffer0[12-1  :   0];
-  assign col_buffer0_1 = col_buffer0[12*2-1:12*1];
-  assign col_buffer0_2 = col_buffer0[12*3-1:12*2];
-  assign col_buffer0_3 = col_buffer0[12*4-1:12*3];
-
-  wire [95:0] col_buffer0;
-  wire [95:0] col_buffer1;
-  wire [95:0] col_buffer2;
-  wire [95:0] col_buffer3;
-  wire [95:0] col_buffer4;
-  wire [95:0] col_buffer5;
-  wire [95:0] col_buffer6;
-  wire [95:0] col_buffer7;
-
-  assign col_buffer0 = col_buffer[0];
-  assign col_buffer1 = col_buffer[1];
-  assign col_buffer2 = col_buffer[2];
-  assign col_buffer3 = col_buffer[3];
-  assign col_buffer4 = col_buffer[4];
-  assign col_buffer5 = col_buffer[5];
-  assign col_buffer6 = col_buffer[6];
-  assign col_buffer7 = col_buffer[7];
-
-  wire [11:0] row_buffer0_0;
-  wire [11:0] row_buffer0_1;
-  wire [11:0] row_buffer0_2;
-  wire [11:0] row_buffer0_3;
-  wire [11:0] row_buffer0_4;
-  wire [11:0] row_buffer0_5;
-  wire [11:0] row_buffer0_6;
-  wire [11:0] row_buffer0_7;
-
-  assign row_buffer0_0 = row_buffer0[12-1:0];
-  assign row_buffer0_1 = row_buffer0[12*2-1:12*1];
-  assign row_buffer0_2 = row_buffer0[12*3-1:12*2];
-  assign row_buffer0_3 = row_buffer0[12*4-1:12*3];
-  assign row_buffer0_4 = row_buffer0[12*5-1:12*4];
-  assign row_buffer0_5 = row_buffer0[12*6-1:12*5];
-  assign row_buffer0_6 = row_buffer0[12*7-1:12*6];
-  assign row_buffer0_7 = row_buffer0[12*8-1:12*7];
-
-  wire [95:0] row_buffer0;
-  wire [95:0] row_buffer1;
-  wire [95:0] row_buffer2;
-  wire [95:0] row_buffer3;
-  wire [95:0] row_buffer4;
-  wire [95:0] row_buffer5;
-  wire [95:0] row_buffer6;
-  wire [95:0] row_buffer7;
-
-  assign row_buffer0 = row_buffer[0];
-  assign row_buffer1 = row_buffer[1];
-  assign row_buffer2 = row_buffer[2];
-  assign row_buffer3 = row_buffer[3];
-  assign row_buffer4 = row_buffer[4];
-  assign row_buffer5 = row_buffer[5];
-  assign row_buffer6 = row_buffer[6];
-  assign row_buffer7 = row_buffer[7];
-
-  wire [11:0] col_vector0_0;
-  wire [11:0] col_vector0_1;
-  wire [11:0] col_vector0_2;
-  wire [11:0] col_vector0_3;
-
-  assign col_vector0_0 = col_vector0[12-1:0];
-  assign col_vector0_1 = col_vector0[12*2-1:12*1];
-  assign col_vector0_2 = col_vector0[12*3-1:12*2];
-  assign col_vector0_3 = col_vector0[12*4-1:12*3];
-
-  wire [95:0] col_vector0;
-  wire [95:0] col_vector1;
-  wire [95:0] col_vector2;
-  wire [95:0] col_vector3;
-  wire [95:0] col_vector4;
-  wire [95:0] col_vector5;
-  wire [95:0] col_vector6;
-  wire [95:0] col_vector7;
-
-  assign col_vector0 = col_vector[0];
-  assign col_vector1 = col_vector[1];
-  assign col_vector2 = col_vector[2];
-  assign col_vector3 = col_vector[3];
-  assign col_vector4 = col_vector[4];
-  assign col_vector5 = col_vector[5];
-  assign col_vector6 = col_vector[6];
-  assign col_vector7 = col_vector[7];
-
-  wire [11:0] dct_in_0_0;
-  wire [11:0] dct_in_0_1;
-  wire [11:0] dct_in_0_2;
-  wire [11:0] dct_in_0_3;
-  wire [11:0] dct_in_0_4;
-  wire [11:0] dct_in_0_5;
-  wire [11:0] dct_in_0_6;
-  wire [11:0] dct_in_0_7;
-
-  assign dct_in_0_0 = dct_in_0[12-1:0];
-  assign dct_in_0_1 = dct_in_0[12*2-1:12*1];
-  assign dct_in_0_2 = dct_in_0[12*3-1:12*2];
-  assign dct_in_0_3 = dct_in_0[12*4-1:12*3];
-  assign dct_in_0_4 = dct_in_0[12*5-1:12*4];
-  assign dct_in_0_5 = dct_in_0[12*6-1:12*5];
-  assign dct_in_0_6 = dct_in_0[12*7-1:12*6];
-  assign dct_in_0_7 = dct_in_0[12*8-1:12*7];
-
-  wire [11:0] dct_out_0_0;
-  wire [11:0] dct_out_0_1;
-  wire [11:0] dct_out_0_2;
-  wire [11:0] dct_out_0_3;
-  wire [11:0] dct_out_0_4;
-  wire [11:0] dct_out_0_5;
-  wire [11:0] dct_out_0_6;
-  wire [11:0] dct_out_0_7;
-
-  assign dct_out_0_0 = dct_out_0[12-1:0];
-  assign dct_out_0_1 = dct_out_0[12*2-1:12*1];
-  assign dct_out_0_2 = dct_out_0[12*3-1:12*2];
-  assign dct_out_0_3 = dct_out_0[12*4-1:12*3];
-  assign dct_out_0_4 = dct_out_0[12*5-1:12*4];
-  assign dct_out_0_5 = dct_out_0[12*6-1:12*5];
-  assign dct_out_0_6 = dct_out_0[12*7-1:12*6];
-  assign dct_out_0_7 = dct_out_0[12*8-1:12*7];
-  `endif
-  // Debug End
 
   // FSM 用の状態カウンタ：0～7: 行処理, 8～15: 列処理, 16: 出力再構成
-  reg [4:0] state_h;
-  reg [4:0] state_v;
+  reg [7:0] dct_state;
+  reg       dct_end;
   reg [3:0] row_idx;
   reg [3:0] col_idx;
 
@@ -240,6 +59,15 @@ module DCT_2D(
     end
   endgenerate
 
+  wire [95:0] row_in_0 = row_in[0];
+  wire [95:0] row_in_1 = row_in[1];
+  wire [95:0] row_in_2 = row_in[2];
+  wire [95:0] row_in_3 = row_in[3];
+  wire [95:0] row_in_4 = row_in[4];
+  wire [95:0] row_in_5 = row_in[5];
+  wire [95:0] row_in_6 = row_in[6];
+  wire [95:0] row_in_7 = row_in[7];
+
   // 列データのバッファ 12 bit x 8 pixls
   wire [95:0] col_vector [0:7];
   genvar col, row;
@@ -265,147 +93,164 @@ module DCT_2D(
 
   always @(posedge clock or negedge reset_n) begin
     if (!reset_n) begin
-      state_h   <= 0;
+      dct_state   <= 0;
+      dct_end     <= 0;
       dct_in_0    <= 0;
       dct_in_1    <= 0;
       row_idx   <= 0;
       col_idx   <= 0;
-      state_h_end <= 0;
-      state_v   <= 0;
-      state_v_end <= 0;
       for (sel = 0; sel < 8; sel = sel + 1) begin
         row_buffer[sel] <= 96'b0;
         col_buffer[sel] <= 96'b0;
       end
     end else begin
-      // H DCT
-      case(state_h) 
+      // H DCT Start
+      case(dct_state) 
         0: begin
-          state_h_end <= 0;
+          dct_end <= 0;
+          row_idx <= 0;
+          col_idx <= 0;
+          for (sel = 0; sel < 8; sel = sel + 1) begin
+            row_buffer[sel] <= 96'b0;
+            col_buffer[sel] <= 96'b0;
+          end
           if(dct_enable) begin
-            state_h <= 1;
+            dct_state <= 1;
           end
         end
         1: begin
             dct_in_0 <= row_in[row_idx];      // 入力をセット
             dct_in_1 <= row_in[row_idx+1];    // 入力をセット
+            //dct_in_0 <= 0;      // 入力をセット
+            //dct_in_1 <= 0;    // 入力をセット
             row_idx <= row_idx + 2;
-            state_h <= 2;
+            dct_state <= 2;
         end
         2: begin
             dct_in_0 <= row_in[row_idx];      // 入力をセット
             dct_in_1 <= row_in[row_idx+1];    // 入力をセット
+            //dct_in_0 <= 0;      // 入力をセット
+            //dct_in_1 <= 0;    // 入力をセット
             row_idx <= row_idx + 2;
-            state_h <= 3;
+            dct_state <= 3;
         end
         3: begin
             dct_in_0 <= row_in[row_idx];      // 入力をセット
             dct_in_1 <= row_in[row_idx+1];    // 入力をセット
+            //dct_in_0 <= 0;      // 入力をセット
+            //dct_in_1 <= 0;    // 入力をセット
             row_idx <= row_idx + 2;
-            state_h <= 4;
+            dct_state <= 4;
         end
         4: begin
             dct_in_0 <= row_in[row_idx];      // 入力をセット
             dct_in_1 <= row_in[row_idx+1];    // 入力をセット
-            state_h <= 5;
+            //dct_in_0 <= 0;      // 入力をセット
+            //dct_in_1 <= 0;    // 入力をセット
+            dct_state <= 5;
         end
         5: begin
-            state_h <= 6;
+            dct_state <= 6;
         end
         6: begin
             // 出力スタート
             row_idx <= row_idx + 2;
             row_buffer[row_idx-6]   <= dct_out_0;   
             row_buffer[row_idx+1-6] <= dct_out_1;   
-            state_h <= 7;
+            dct_state <= 7;
         end
         7: begin
             row_idx <= row_idx + 2;
             row_buffer[row_idx-6]   <= dct_out_0;   
             row_buffer[row_idx+1-6] <= dct_out_1;   
-            state_h <= 8;
+            dct_state <= 8;
         end
         8: begin
             row_idx <= row_idx + 2;
             row_buffer[row_idx-6]   <= dct_out_0;   
             row_buffer[row_idx+1-6] <= dct_out_1;   
-            state_h <= 9;
+            dct_state <= 9;
         end
         9: begin
             row_idx <= row_idx + 2;
             row_buffer[row_idx-6]   <= dct_out_0;   
             row_buffer[row_idx+1-6] <= dct_out_1;   
-            state_h <= 10;
+            dct_state <= 10;
         end
         10: begin
-            state_h_end <= 1;
-            state_h <= 0;
+            dct_state <= 11;
         end
-      endcase
+        11: begin
+            dct_state <= 12;
+        end
 
-      // V DCT
-      // state machine
-      case(state_v) 
-        0: begin
-          state_v_end <= 0;
-          if(state_h_end) begin
-            state_v <= 1;
-          end
+      // V DCT Start
+
+        12: begin
+            dct_state <= 13;
         end
-        1: begin
+        13: begin
             dct_in_0 <= col_vector[col_idx];    // 入力をセット
             dct_in_1 <= col_vector[col_idx+1];   
+            //dct_in_0 <= 0;    // 入力をセット
+            //dct_in_1 <= 0;   
             col_idx <= col_idx + 2;
-            state_v <= 2;
+            dct_state <= 14;
         end
-        2: begin
+        14: begin
             dct_in_0 <= col_vector[col_idx];    // 入力をセット
             dct_in_1 <= col_vector[col_idx+1];   
+            //dct_in_0 <= 0;    // 入力をセット
+            //dct_in_1 <= 0;   
             col_idx <= col_idx + 2;
-            state_v <= 3;
+            dct_state <= 15;
         end
-        3: begin
+        15: begin
             dct_in_0 <= col_vector[col_idx];    // 入力をセット
             dct_in_1 <= col_vector[col_idx+1];   
+            //dct_in_0 <= 0;    // 入力をセット
+            //dct_in_1 <= 0;   
             col_idx <= col_idx + 2;
-            state_v <= 4;
+            dct_state <= 16;
         end
-        4: begin
+        16: begin
             dct_in_0 <= col_vector[col_idx];    // 入力をセット
             dct_in_1 <= col_vector[col_idx+1];  
-            state_v <= 5;
+            //dct_in_0 <= 0;    // 入力をセット
+            //dct_in_1 <= 0;   
+            dct_state <= 17;
         end
-        5: begin
-            state_v <= 6;
+        17: begin
+            dct_state <= 18;
         end
-        6: begin 
+        18: begin 
             // 出力スタート
             col_buffer[col_idx-6] <= dct_out_0;    
             col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
-            state_v <= 7;
+            dct_state <= 19;
         end
-        7: begin
+        19: begin
             col_buffer[col_idx-6] <= dct_out_0;   
             col_buffer[col_idx-6+1] <= dct_out_1;   
             col_idx <= col_idx + 2;
-            state_v <= 8;
+            dct_state <= 20;
         end
-        8: begin
+        20: begin
             col_buffer[col_idx-6] <= dct_out_0;    
             col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
-            state_v <= 9;
+            dct_state <= 21;
         end
-        9: begin
+        21: begin
             col_buffer[col_idx-6] <= dct_out_0;    
             col_buffer[col_idx-6+1] <= dct_out_1; 
             col_idx <= col_idx + 2;
-            state_v <= 10;
+            dct_state <= 22;
         end
-        10: begin
-            state_v_end <= 1;
-            state_v <= 0;
+        22: begin
+            dct_end <= 1;
+            dct_state <= 0;
         end
       endcase
     end
@@ -444,7 +289,7 @@ module DCT_2D(
     if(!reset_n)
       for(integer i = 0; i < 64; i = i + 1)
         out[i] <= 12'd0;
-    else if(state_v_end) // V DCT が終了したタイミングで
+    else if(dct_end) // V DCT が終了したタイミングで
       for(integer i = 0; i < 64; i = i + 1)
         out[i] <= out_w[i];
   end

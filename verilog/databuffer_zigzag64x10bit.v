@@ -188,36 +188,14 @@ module databuffer_zigzag64x10bit #(
         .out        (zigzag_pix_data)
     );
 
-    // 中間信号 diff を符号付きワイヤとして宣言
-    wire signed [639:0] diff;
-
-    assign diff[9:0] = $signed(zigzag_pix_data[9:0]) - $signed(zigzag_pix_out_pre[9:0]);
-    assign diff[639:10] = zigzag_pix_data[639:10];
-
     // 1 CLK
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
             zigzag_pix_out <= 0;
         end else begin
-            zigzag_pix_out <= diff;
+            zigzag_pix_out <= zigzag_pix_data;
         end
     end
-    
-    wire [9:0]  zigzag_pix_out_now;
-    assign  zigzag_pix_out_now = zigzag_pix_out[9:0];
-    reg  [9:0]  zigzag_pix_out_pre;
-
-    // クロックエッジで diff の値を zigzag_pix_out_1 に反映させる例
-    always @(posedge clock or negedge reset_n) begin
-    if (!reset_n)
-        zigzag_pix_out_pre <= 0;
-    else
-        if(input_data_enable) begin
-            zigzag_pix_out_pre <= zigzag_pix_out[9:0];
-        end
-    end
-
-
 
 `ifdef DEBUG
     wire [9:0] row_data_0 = row_data[9 : 0];
@@ -228,12 +206,6 @@ module databuffer_zigzag64x10bit #(
     wire [9:0] row_data_5 = row_data[59:50];
     wire [9:0] row_data_6 = row_data[69:60];
     wire [9:0] row_data_7 = row_data[79:70];
-
-    wire [9:0] debug_zigzag_pix_out0 = zigzag_pix_out[9:0];
-    wire [9:0] debug_zigzag_pix_data0 = zigzag_pix_data[9:0];
-    wire [9:0] debug_zigzag_pix_out_pre0 = zigzag_pix_out_pre[9:0];
-    wire [9:0] debug_diff0 = diff[9:0];
-    wire [9:0] debug_calc_diff0 = $signed(debug_zigzag_pix_data0) - $signed(debug_zigzag_pix_out_pre0);
 
     wire [79:0] buffer_80bit_0 = buffer_80bit[0];
     wire [79:0] buffer_80bit_1 = buffer_80bit[1];
