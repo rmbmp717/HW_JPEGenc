@@ -30,7 +30,13 @@ async def generate_clock(dut, period=10):
 @cocotb.test()
 async def main_JPEGenc_top(dut):
 
-    srcFileName = "./image/image16x32.bmp"
+    #srcFileName = "./image/image_grad32x32.bmp"
+    #srcFileName = "./image/image16x32.bmp"
+    srcFileName = "./image/image64x64.bmp"
+    #srcFileName = "./image/image_diagonal_wave32x32.bmp"
+    #srcFileName = "./image/image8x16.bmp"
+    #srcFileName = "./image/lena.bmp"
+    #srcFileName = "./image/image_color_bar64x64.bmp"
     outputJPEGFileName = "./image/output.jpg"
 
     print("srcFileName:", srcFileName)

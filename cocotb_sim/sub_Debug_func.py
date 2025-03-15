@@ -331,27 +331,6 @@ async def dump_Zigzag_Cr_Input(dut):
         print(" ".join("{:4d}".format(x) for x in row))
 
 
-
-async def dump_Zigzag_Y_output_pre(dut):
-    print("==========================================================================")
-    print("5: Pre Data : Zigzaged Y Output Data (8x8 matrix):")
-    zigzag_binstr = dut.HW_JPEGenc_Y.m_databuffer_zigzag64x10bit.zigzag_pix_out_pre.value
-    print("zigzag_binstr:", convert_s10(int(zigzag_binstr)))
-
-async def dump_Zigzag_Cb_output_pre(dut):
-    print("==========================================================================")
-    print("5: Pre Data : Zigzaged Cb Output Data (8x8 matrix):")
-    zigzag_binstr = dut.HW_JPEGenc_Cb.m_databuffer_zigzag64x10bit.zigzag_pix_out_pre.value
-    print("zigzag_binstr:", convert_s10(int(zigzag_binstr)))
-
-async def dump_Zigzag_Cr_output_pre(dut):
-    print("==========================================================================")
-    print("5: Pre Data : Zigzaged Cr Output Data (8x8 matrix):")
-    zigzag_binstr = dut.HW_JPEGenc_Cr.m_databuffer_zigzag64x10bit.zigzag_pix_out_pre.value
-    print("zigzag_binstr:", convert_s10(int(zigzag_binstr)))
-
-
-
 async def dump_Zigzaged_Y_output(dut):
     print("==========================================================================")
     print("5: Zigzaged Y Output Data (8x8 matrix) [Flipped Horizontally & Vertically]:")

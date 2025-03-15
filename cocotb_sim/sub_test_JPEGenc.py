@@ -17,7 +17,7 @@ import sub_Debug_func
 
 # ---------------------------------------------------
 # Debug 8x8 matrix out
-matrix_debug_out = 1
+matrix_debug_out = 0
 
 # ---------------------------------------------------
 # sub DC 関数
@@ -157,7 +157,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)  # 明示的にログレベルを DEBUG に設定
+    logger.setLevel(logging.INFO)  # 明示的にログレベルを DEBUG に設定
 
     logger.debug("==========================================================================")
    
@@ -220,7 +220,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     # DCT 2D Endまで待つ
     for _ in range(50):
-        if dut.HW_JPEGenc_Y.mDCT_2D.state_v_end.value == 1:
+        if dut.HW_JPEGenc_Y.mDCT_2D.dct_end.value == 1:
             break
         await RisingEdge(dut.clock)
     await RisingEdge(dut.clock)
@@ -264,13 +264,6 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     for _ in range(4):
         await RisingEdge(dut.clock)
-
-    await RisingEdge(dut.clock)
-    if matrix_debug_out == 1:
-        print(f"{get_sim_time('ns')} ns:")
-        await sub_Debug_func.dump_Zigzag_Y_output_pre(dut)
-        await sub_Debug_func.dump_Zigzag_Cb_output_pre(dut)
-        await sub_Debug_func.dump_Zigzag_Cr_output_pre(dut)
 
     logger.debug("==========================================================================")
     logger.debug("4: Zigzag Input Data (8x8 matrix):")
