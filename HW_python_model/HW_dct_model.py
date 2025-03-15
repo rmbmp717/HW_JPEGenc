@@ -152,7 +152,7 @@ if __name__ == "__main__":
         #(np.array([[i * j for j in range(8)] for i in range(8)], dtype=np.int16), "パターン1"),
         #(np.array([[255 if i < 4 and j < 4 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 255"),
         #(np.array([[-48 if i < 4 and j < 4 else -128 for j in range(8)] for i in range(8)], dtype=np.int16), "左上 4x4 -48, 他 -128"),
-        (numpy.full((8, 8), 22, dtype=numpy.int16), "全体 22")
+        (numpy.full((8, 8), 51, dtype=numpy.int16), "全体 22")
         #(np.random.randint(0, 256, (8, 8), dtype=np.int16), "ランダムパターン"),
         #(np.array([[80 if (i + j) % 2 == 0 else 80 for j in range(8)] for i in range(8)], dtype=np.int16), "ベタ"),
         #(np.array([[80 if (i + j) % 2 == 0 else 0 for j in range(8)] for i in range(8)], dtype=np.int16), "チェッカーパターン"),

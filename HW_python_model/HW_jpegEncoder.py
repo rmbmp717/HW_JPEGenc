@@ -175,12 +175,12 @@ def main():
             #vDctMatrix = dct_2d_manual(vImageMatrix[y:y + 8, x:x + 8], 0)
             vDctMatrix = dct_2d_q88(vImageMatrix[y:y + 8, x:x + 8], 0)
             
-            if(blockSum<=8):
+            if(blockSum<=88):
                 print('yInMatrix:\n',yImageMatrix[y:y + 8, x:x + 8].astype(int32))
                 print('uInMatrix:\n',uImageMatrix[y:y + 8, x:x + 8].astype(int32))
                 print('vInMatrix:\n',vImageMatrix[y:y + 8, x:x + 8].astype(int32))
 
-            if(blockSum<=8):
+            if(blockSum<=88):
                 #print('yDctMatrix_fft:\n',yDctMatrix_fft.astype(int32))
                 print('yDctMatrix:\n',yDctMatrix.astype(int32))
                 #print('yDctMatrix_q88:\n',yDctMatrix_q88.astype(int32))
@@ -212,6 +212,9 @@ def main():
             uDC[blockNum] = uZCode[0]
             vDC[blockNum] = vZCode[0]
 
+            if(blockSum>1):
+                print("block num = ", blockNum, " pre_DC_data = ", yDC[blockNum-1], " DC_data = ", yDC[blockNum])
+
             if(blockNum==0):
                 dyDC[blockNum] = yDC[blockNum]
                 duDC[blockNum] = uDC[blockNum]
@@ -220,6 +223,9 @@ def main():
                 dyDC[blockNum] = yDC[blockNum] - yDC[blockNum-1]
                 duDC[blockNum] = uDC[blockNum] - uDC[blockNum-1]
                 dvDC[blockNum] = vDC[blockNum] - vDC[blockNum-1]
+
+            if(blockSum<=88):
+                print("block num = ", blockNum, " dy_DC_data = ", dyDC[blockNum])
 
             DEBUG_MODE = 0
 
@@ -253,7 +259,7 @@ def main():
 
             blockNum = blockNum + 1
 
-
+    #print("final sosBit : ", sosBitStream.bin)
 
     jpegFile = open(outputJPEGFileName, 'wb+')
     # write jpeg header
