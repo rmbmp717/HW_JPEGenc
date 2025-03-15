@@ -30,13 +30,16 @@ async def generate_clock(dut, period=10):
 @cocotb.test()
 async def main_JPEGenc_top(dut):
 
+    # Input / Output File name 
     #srcFileName = "./image/image_grad32x32.bmp"
     #srcFileName = "./image/image16x32.bmp"
-    srcFileName = "./image/image64x64.bmp"
+    #srcFileName = "./image/image64x64.bmp"
     #srcFileName = "./image/image_diagonal_wave32x32.bmp"
     #srcFileName = "./image/image8x16.bmp"
     #srcFileName = "./image/lena.bmp"
-    #srcFileName = "./image/image_color_bar64x64.bmp"
+    srcFileName = "./image/image_color_bar64x64.bmp"
+
+    # Outpu File name
     outputJPEGFileName = "./image/output.jpg"
 
     print("srcFileName:", srcFileName)
@@ -103,7 +106,6 @@ async def main_JPEGenc_top(dut):
     dut.Green.value = 0
     dut.Blue.value = 0
     dut.input_1pix_enable.value = 0
-    dut.pix_1pix_data.value = 0
     dut.input_enable.value = 0
 
     dut.dct_enable.value = 0
@@ -167,11 +169,17 @@ async def main_JPEGenc_top(dut):
     print("==========================================================================")
     print("Main test End")
 
-
     print("==========================================================================")
     print("JPEG File Write")
     
     await sub_test_JPEG_write.file_write(dut, outputJPEGFileName, srcImageHeight, srcImageWidth, sosBitStream)
+
+    file_size = os.path.getsize(srcFileName)
+    print(f"{srcFileName} のサイズは {file_size} バイトです。")
+    output_file_size = os.path.getsize(outputJPEGFileName)
+    print(f"JPEG変換後ののサイズは {output_file_size} バイトです。")
+    completed_ratio = output_file_size / file_size * 100
+    print(f"圧縮後のデータサイズは {completed_ratio} %です。")
 
     print("JPEG File Write End.")
 

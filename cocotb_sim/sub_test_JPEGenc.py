@@ -345,7 +345,7 @@ async def sub_test_JPEGenc(dut, input_matrix_r, input_matrix_g, input_matrix_b):
 
     logger.debug("==========================================================================")
     logger.debug("7: Huffman enc End")
-    logger.debug(f"count = {int(dut.counter.value)} clk")
+    print(f"{get_sim_time('ns')} ns:")
 
     logger.debug("==========================================================================")
     logger.debug("8: Final Output")
