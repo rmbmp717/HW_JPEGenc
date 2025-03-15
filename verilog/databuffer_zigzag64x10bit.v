@@ -83,99 +83,21 @@ module databuffer_zigzag64x10bit #(
     end
 
     // ここで、buffer 配列（80×8ビット）を640ビットのベクトル matrix に再結合
-    // buffer から matrix への変換（各行は自然順：buffer[0]～buffer[7] の順）
-    wire [639:0] zigzag_pix_in;
-    //assign matrix = 640'h0F;
-        
-    // 右側（MSB側）から左側（LSB側）への各80ビットブロックを8個の10ビットセグメント単位で左右反転して割り当て
-    assign zigzag_pix_in[639:560] = { 
-        buffer_80bit[0][9:0],
-        buffer_80bit[0][19:10],
-        buffer_80bit[0][29:20],
-        buffer_80bit[0][39:30],
-        buffer_80bit[0][49:40],
-        buffer_80bit[0][59:50],
-        buffer_80bit[0][69:60],
-        buffer_80bit[0][79:70]
-    };
+    wire  [639:0]      zigzag_pix_in;
+    assign  zigzag_pix_in = {
+                    buffer_80bit[7], buffer_80bit[6], buffer_80bit[5], buffer_80bit[4],
+                    buffer_80bit[3], buffer_80bit[2], buffer_80bit[1], buffer_80bit[0]
+                };
 
-    assign zigzag_pix_in[559:480] = { 
-        buffer_80bit[1][9:0],
-        buffer_80bit[1][19:10],
-        buffer_80bit[1][29:20],
-        buffer_80bit[1][39:30],
-        buffer_80bit[1][49:40],
-        buffer_80bit[1][59:50],
-        buffer_80bit[1][69:60],
-        buffer_80bit[1][79:70]
-    };
+    wire  [639:0]      fliped_zigzag_pix_in;
 
-    assign zigzag_pix_in[479:400] = { 
-        buffer_80bit[2][9:0],
-        buffer_80bit[2][19:10],
-        buffer_80bit[2][29:20],
-        buffer_80bit[2][39:30],
-        buffer_80bit[2][49:40],
-        buffer_80bit[2][59:50],
-        buffer_80bit[2][69:60],
-        buffer_80bit[2][79:70]
-    };
-
-    assign zigzag_pix_in[399:320] = { 
-        buffer_80bit[3][9:0],
-        buffer_80bit[3][19:10],
-        buffer_80bit[3][29:20],
-        buffer_80bit[3][39:30],
-        buffer_80bit[3][49:40],
-        buffer_80bit[3][59:50],
-        buffer_80bit[3][69:60],
-        buffer_80bit[3][79:70]
-    };
-
-    assign zigzag_pix_in[319:240] = { 
-        buffer_80bit[4][9:0],
-        buffer_80bit[4][19:10],
-        buffer_80bit[4][29:20],
-        buffer_80bit[4][39:30],
-        buffer_80bit[4][49:40],
-        buffer_80bit[4][59:50],
-        buffer_80bit[4][69:60],
-        buffer_80bit[4][79:70]
-    };
-
-    assign zigzag_pix_in[239:160] = { 
-        buffer_80bit[5][9:0],
-        buffer_80bit[5][19:10],
-        buffer_80bit[5][29:20],
-        buffer_80bit[5][39:30],
-        buffer_80bit[5][49:40],
-        buffer_80bit[5][59:50],
-        buffer_80bit[5][69:60],
-        buffer_80bit[5][79:70]
-    };
-
-    assign zigzag_pix_in[159:80] = { 
-        buffer_80bit[6][9:0],
-        buffer_80bit[6][19:10],
-        buffer_80bit[6][29:20],
-        buffer_80bit[6][39:30],
-        buffer_80bit[6][49:40],
-        buffer_80bit[6][59:50],
-        buffer_80bit[6][69:60],
-        buffer_80bit[6][79:70]
-    };
-
-    assign zigzag_pix_in[79:0] = { 
-        buffer_80bit[7][9:0],
-        buffer_80bit[7][19:10],
-        buffer_80bit[7][29:20],
-        buffer_80bit[7][39:30],
-        buffer_80bit[7][49:40],
-        buffer_80bit[7][59:50],
-        buffer_80bit[7][69:60],
-        buffer_80bit[7][79:70]
-    };
-
+    // データの並び順を０〜64で逆にする
+    Data_flip64 mData_flip64 (
+        .clk                (clock),
+        .data_in            (zigzag_pix_in),
+        .is_flip            (1'b1),
+        .out                (fliped_zigzag_pix_in)
+    );
     
     wire  [639:0]    zigzag_pix_data; 
 
@@ -183,7 +105,7 @@ module databuffer_zigzag64x10bit #(
     // 入力：640ビットの matrix、出力：640ビットの zigzag_pix_out
     Zigzag_reorder zigzag_inst (
         .clk        (clock),
-        .matrix     (zigzag_pix_in),
+        .matrix     (fliped_zigzag_pix_in),
         .is_enable  (1'b1),
         .out        (zigzag_pix_data)
     );

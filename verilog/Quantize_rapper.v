@@ -52,6 +52,7 @@ module Quantize_rapper(
         .out                ({quality, quantized_out})  
     );
 
+    // Debug
     wire [11:0]   input_data_0  = dct_coeffs0[11:0];
     wire [11:0]   input_data_1  = dct_coeffs0[23:12];
     wire [11:0]   input_data_2  = dct_coeffs0[35:24];
