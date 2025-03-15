@@ -69,7 +69,7 @@ module databuffer_zigzag64x10bit #(
     always @(posedge clock or negedge reset_n) begin
         if (!reset_n) begin
             // 非同期リセット：バッファ全体をゼロにクリア
-            for (i = 0; i < DATA_WIDTH; i = i + 1) begin
+            for (i = 0; i < 8; i = i + 1) begin
                 buffer_80bit[i] <= 0;
             end
             for (i = 0; i < DEPTH; i = i + 1) begin
