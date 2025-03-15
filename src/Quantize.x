@@ -1,16 +1,12 @@
 // NISHIHARU
 
-//if(quality < 50):
-//qualityScale = 5000 / quality
-
 pub const N: u32 = u32:8;
 pub const QUALITY: u8 = u8:25;      // JPEG Quality
 
-// quality >= 50
-//pub const QUALITY_SCALE: s16 = s16:200 - s16:2 * QUALITY as s16;
-
-// quality < 50
-pub const QUALITY_SCALE: s16 = s16:5000 / QUALITY as s16;
+// quality >= 50 or quality < 50
+pub const QUALITY_SCALE = if QUALITY < u8:50 { s16:5000 / QUALITY as s16 }
+else if QUALITY >= u8:50 { s16:200 - s16:2 * QUALITY as s16 }
+else { s16:255 };
 
 // JPEG 標準の輝度量子化テーブル (s16)
 // 標準の輝度量子化テーブル (s16)
@@ -135,15 +131,22 @@ fn test_data100_quantize_block() -> () {
   ];
 
   // ※ 本テストでは、輝度の場合 (is_luminance == true)
-  // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
-  let expected_result: (u8, s10[8]) = ( u8:85, [
+  let expected_result_85: (u8, s10[8]) = ( u8:85, [
     s10:40, s10:67, s10:67, s10:40, s10:29, s10:17, s10:13, s10:11
   ] );
+  let expected_result_25: (u8, s10[8]) = ( u8:25, [
+    s10:6, s10:9, s10:10, s10:6, s10:4, s10:3, s10:2, s10:2
+  ] );
+  trace!(expected_result_85);
+  trace!(expected_result_25);
 
   let result = Quantize(test_block, u8:0, true, false);
-  trace!(expected_result);
   trace!(result);
-  //assert_eq(result, expected_result);
+  if QUALITY == u8:85 {
+    assert_eq(result, expected_result_85)
+  } else if QUALITY == u8:85 {
+    assert_eq(result, expected_result_25)
+  } else { }
 }
 
 #[test]
@@ -162,12 +165,21 @@ fn test_imaga8x8_quantize_block() -> () {
 
   // ※ 本テストでは、輝度の場合 (is_luminance == true)
   // row0 の量子化処理結果は、以下の計算例に基づく（例：(200 + 7)/15 = 13, etc.）
-  let expected_result: (u8, s10[8]) = ( u8:85, [
-    s10:40, s10:67, s10:67, s10:40, s10:29, s10:17, s10:13, s10:11
+  let expected_result_85: (u8, s10[8]) = ( u8:85, [
+    s10:0, s10:-223, s10:1, s10:-13, s10:0, s10:0, s10:0, s10:0
   ] );
+  let expected_result_25: (u8, s10[8]) = ( u8:25, [
+    s10:6, s10:9, s10:10, s10:6, s10:4, s10:3, s10:2, s10:2
+  ] );
+  trace!(expected_result_85);
+  trace!(expected_result_25);
 
   let result = Quantize(test_block, u8:0, true, false);
-  trace!(expected_result);
   trace!(result);
-  //assert_eq(result, expected_result);
+  if QUALITY == u8:85 {
+    assert_eq(result, expected_result_85)
+  } else if QUALITY == u8:85 {
+    assert_eq(result, expected_result_25)
+  } else { }
 }
+
