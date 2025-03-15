@@ -5,15 +5,15 @@
 # Top-level module & source settings
 #TOP              := dct_2d_s12
 #TOP              := dct_1d_s12
-#TOP              := Huffman_DCenc
+TOP              := Huffman_DCenc
 #TOP              := Huffman_ACenc
-TOP              := Quantize
+#TOP              := Quantize
 #TOP		  	  := Data_flip64
 
-#INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
+INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
 #INPUT_FILE     := ./src/Huffman_ACenc.x   # PIPE_LINE_STAGE = 4
 #INPUT_FILE 	:= ./src/RGB_YCbCr.x
-INPUT_FILE 	:= ./src/Quantize.x			# PIPE_LINE_STAGE = 2
+#INPUT_FILE 	:= ./src/Quantize.x			# PIPE_LINE_STAGE = 2
 #INPUT_FILE 	:= ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE 	:= ./src/DCT_2D.x
 #INPUT_FILE 	:= ./src/Zigzag_scan.x
@@ -24,7 +24,7 @@ IR_FILE          := $(IR_DIR)/$(TOP).ir
 OPT_IR_FILE      := $(IR_DIR)/$(TOP)_opt.ir
 OUTPUT_FILE      := ./verilog/$(TOP).v
 
-PIPE_LINE_STAGE  := 2
+PIPE_LINE_STAGE  := 1
 SIM              := icarus
 COCOTB_DIR       := /home/haruhiko/Program/GoogleXLS_test-main/Crc32_Proc/cocotb
 
