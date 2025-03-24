@@ -16,6 +16,7 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 - verilog:ハードウェア JPEG エンコーダの Verilog HDL ソースコードを格納します。各モジュールの実装、テスト用トップモジュールなど、FPGA やシミュレーション向けの設計ファイルが集約されています。
 
 ## Block図
+- RGB to YCbCr変換回路後のブロック図
 ![回路ブロック図](image/HW_JPEGenc_block.jpg "Block図")
 
 ## Image
