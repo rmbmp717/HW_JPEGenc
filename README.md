@@ -37,6 +37,17 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 - Except for the 8x8 image data buffer, all blocks are described using DSLX.  
 ![Block Diagram](image/HW_JPEGenc_block.jpg "Block Diagram")
 
+## Module
+- When converting from DSLX code to Verilog code, please specify the following PIPELINE settings:
+
+| Module Name    | Function                          | PIPELINE Count |
+|--------------- |-----------------------------------|----------------|
+| DCT_1D         | DCT (Discrete Cosine Transform)   | 3              |
+| Zigzag_scan    | Zigzag Scan                       | 1              |
+| Quantize       | Quantization                      | 2              |
+| Huffman_DCenc  | DC Huffman Code Generation        | 1              |
+| Huffman_ACenc  | AC Huffman Code Generation        | 4              |
+
 ## Image
 
 - Q=25 Output JPEG Image <br>
