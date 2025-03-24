@@ -16,7 +16,7 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 - verilog:ハードウェア JPEG エンコーダの Verilog HDL ソースコードを格納します。各モジュールの実装、テスト用トップモジュールなど、FPGA やシミュレーション向けの設計ファイルが集約されています。
 
 ## Image
-![サンプル画像](images/lena_q25_output.jpg "Output JPEG Image")
+![サンプル画像](image/lena_q25_output.jpg "Output JPEG Image")
   
 ## Environment of Evaluation
 ### Simulation
