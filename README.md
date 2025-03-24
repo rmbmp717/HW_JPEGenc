@@ -7,6 +7,7 @@ This project was developed as an experimental design to realize JPEG encoding in
 By leveraging the high-level description of DSLX and the low-level implementation of Verilog HDL, the project pursues an efficient and flexible hardware design.
 
 *Note: This project was created for educational and experimental purposes. Advanced production features and high-speed optimizations are topics for future consideration.*
+*Note: This project was created for educational and experimental purposes. Advanced production features and high-speed optimizations are topics for future consideration. Code is currently being refactored.*
 
 ## Directories
 
