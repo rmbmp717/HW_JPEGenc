@@ -33,7 +33,7 @@ module HW_JPEGenc_top(
     output wire [7:0]       code_size_out,        // 最終 JPEG 出力 CODE
     // Cb
     output wire             Cb_jpeg_out_enable,  
-    output wire [8:0]       Cb_peg_dc_out,           // 最終 JPEG 出力 DC
+    output wire [8:0]       Cb_jpeg_dc_out,          // 最終 JPEG 出力 DC
     output reg  [7:0]       Cb_jpeg_dc_out_length,   // 最終 JPEG 出力 DC
     output reg  [7:0]       Cb_jpeg_dc_code_list,    // 最終 JPEG 出力 DC
     output reg  [7:0]       Cb_jpeg_dc_code_size,
@@ -43,7 +43,7 @@ module HW_JPEGenc_top(
     output wire [7:0]       Cb_code_size_out,        // 最終 JPEG 出力 CODE
     // Cr
     output wire             Cr_jpeg_out_enable, 
-    output wire [8:0]       Cr_peg_dc_out,           // 最終 JPEG 出力 DC
+    output wire [8:0]       Cr_jpeg_dc_out,           // 最終 JPEG 出力 DC
     output reg  [7:0]       Cr_jpeg_dc_out_length,   // 最終 JPEG 出力 DC
     output reg  [7:0]       Cr_jpeg_dc_code_list,    // 最終 JPEG 出力 DC
     output reg  [7:0]       Cr_jpeg_dc_code_size,

@@ -89,23 +89,12 @@ module databuffer_zigzag64x10bit #(
                     buffer_80bit[3], buffer_80bit[2], buffer_80bit[1], buffer_80bit[0]
                 };
 
-    wire  [639:0]      fliped_zigzag_pix_in;
-
-    // データの並び順を０〜64で逆にする
-    Data_flip64 mData_flip64 (
-        .clk                (clock),
-        .data_in            (zigzag_pix_in),
-        .is_flip            (1'b1),
-        .out                (fliped_zigzag_pix_in)
-    );
-    
-    wire  [639:0]    zigzag_pix_data; 
-
     // Zigzag 並べ替えモジュールのインスタンス化
     // 入力：640ビットの matrix、出力：640ビットの zigzag_pix_out
+    wire  [639:0]      zigzag_pix_data;
     Zigzag_reorder zigzag_inst (
         .clk        (clock),
-        .matrix     (fliped_zigzag_pix_in),
+        .matrix     (zigzag_pix_in),
         .is_enable  (1'b1),
         .out        (zigzag_pix_data)
     );
