@@ -33,4 +33,5 @@ NISHIHARU
 https://note.com/dreamy_stilt3370
 
 ## Special Thanks
-- TBD
+- Python JPEGエンコーダー https://github.com/fangwei123456/python-jpeg-encoder
+- Python JPEGデコーダー https://github.com/yohhoy/picojdec
