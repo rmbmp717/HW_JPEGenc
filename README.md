@@ -7,24 +7,30 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 ※なお、本プロジェクトは教育・実験目的で作成されています。実際の製品向け機能や高速化は今後の検討課題となります。
 
 ## Directories
-- core: Core of KASUMI
-- cache: (Under Construction) Cache Memory
-- test_mem: Register File and Block RAM for Test
-- kasumi.v: (Under Construction) Top of KASUMI
-- kasumi_test.v: Top of KASUMI for Test
-
+- HW_python_model:
+- cocotb_sim:
+- image:
+- ir_dir:
+- python:
+- src:
+- verilog:
+  
 ## Environment of Evaluation
 ### Simulation
 Icarus Verilog and GtkWave on ubuntu linux
 
 ### FPGA
-gowin
+gowin GW5AST-LV138PG484 向けに合成可能でした。
 
 ## License
 MIT License
 
+## 日本語説明Note
+https://note.com/dreamy_stilt3370/n/n9b90f30129b8
+
 ## Written by
 NISHIHARU
+https://note.com/dreamy_stilt3370
 
 ## Special Thanks
 - TBD
