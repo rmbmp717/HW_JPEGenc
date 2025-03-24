@@ -15,6 +15,9 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 - src:プロジェクトのソースコード全体をまとめたディレクトリです。DSLX で記述されたコードや、その他設計に必要なソースファイルが含まれます。
 - verilog:ハードウェア JPEG エンコーダの Verilog HDL ソースコードを格納します。各モジュールの実装、テスト用トップモジュールなど、FPGA やシミュレーション向けの設計ファイルが集約されています。
 
+## Block図
+![回路ブロック図](HW_JPEGenc_block.jpg "Block図")
+
 ## Image
 - Q=25 Output JPEG Image <br>
 ![サンプル画像](image/lena_q25_output.jpg "Output JPEG Image")
