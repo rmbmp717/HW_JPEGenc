@@ -36,8 +36,10 @@ async def main_JPEGenc_top(dut):
     #srcFileName = "./image/image64x64.bmp"
     #srcFileName = "./image/image_diagonal_wave32x32.bmp"
     #srcFileName = "./image/image8x16.bmp"
-    #srcFileName = "./image/lena.bmp"
-    srcFileName = "./image/image_color_bar64x64.bmp"
+    srcFileName = "./image/lena.bmp"
+    #srcFileName = "./image/image_color_bar64x64.bmp"
+    #srcFileName = "./image/P1000264_512.bmp"
+    #srcFileName = "./image/P1000264_2048.bmp"
 
     # Outpu File name
     outputJPEGFileName = "./image/output.jpg"
@@ -73,12 +75,12 @@ async def main_JPEGenc_top(dut):
     print('blockSum = ', blockSum)
 
     # 各チャネルのマトリックスを表示
-    print("R matrix:")
-    print(addedImageMatrix[:, :, 0])
-    print("G matrix:")
-    print(addedImageMatrix[:, :, 1])
-    print("B matrix:")
-    print(addedImageMatrix[:, :, 2])
+    #print("R matrix:")
+    #print(addedImageMatrix[:, :, 0])
+    #print("G matrix:")
+    #print(addedImageMatrix[:, :, 1])
+    #print("B matrix:")
+    #print(addedImageMatrix[:, :, 2])
 
     # split y u v
     yImage,uImage,vImage = Image.fromarray(addedImageMatrix).convert('YCbCr').split()
@@ -177,9 +179,9 @@ async def main_JPEGenc_top(dut):
     file_size = os.path.getsize(srcFileName)
     print(f"{srcFileName} のサイズは {file_size} バイトです。")
     output_file_size = os.path.getsize(outputJPEGFileName)
-    print(f"JPEG変換後ののサイズは {output_file_size} バイトです。")
+    print(f"JPEG変換後のサイズは {output_file_size} バイトです。")
     completed_ratio = output_file_size / file_size * 100
-    print(f"圧縮後のデータサイズは {completed_ratio} %です。")
+    print(f"圧縮後のデータサイズは元画像の {completed_ratio} %です。")
 
     print("JPEG File Write End.")
 
