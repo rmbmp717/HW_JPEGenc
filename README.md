@@ -14,6 +14,9 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 - python:プロジェクト全体で利用する補助的な Python スクリプトやツール群を配置します。シミュレーションの自動化、データ解析、結果の可視化などに使用されます。
 - src:プロジェクトのソースコード全体をまとめたディレクトリです。DSLX で記述されたコードや、その他設計に必要なソースファイルが含まれます。
 - verilog:ハードウェア JPEG エンコーダの Verilog HDL ソースコードを格納します。各モジュールの実装、テスト用トップモジュールなど、FPGA やシミュレーション向けの設計ファイルが集約されています。
+
+## Image
+![サンプル画像](images/lena_q25_output.jpg "Output JPEG Image")
   
 ## Environment of Evaluation
 ### Simulation
