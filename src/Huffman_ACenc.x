@@ -386,20 +386,41 @@ fn lookup_ACChrominanceToCode_test() {
   assert_eq(length, u8:5)
 }
 
+fn fn_reverse(row: s10[8]) -> s10[8] {
+  [ row[7], row[6], row[5], row[4], row[3], row[2], row[1], row[0] ]
+  //[ row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7] ]
+}
 
 // 8×8 の u8 行列を平坦化して 64 要素の u8 配列にする関数
 fn fn_flatten(matrix: s10[8][8]) -> s10[64] {
-  let row0: s10[8] = matrix[0];
-  let row1: s10[8] = matrix[1];
-  let row2: s10[8] = matrix[2];
-  let row3: s10[8] = matrix[3];
-  let row4: s10[8] = matrix[4];
-  let row5: s10[8] = matrix[5];
-  let row6: s10[8] = matrix[6];
-  let row7: s10[8] = matrix[7];
+  let row0: s10[8] = fn_reverse(matrix[0]);
+  let row1: s10[8] = fn_reverse(matrix[1]);
+  let row2: s10[8] = fn_reverse(matrix[2]);
+  let row3: s10[8] = fn_reverse(matrix[3]);
+  let row4: s10[8] = fn_reverse(matrix[4]);
+  let row5: s10[8] = fn_reverse(matrix[5]);
+  let row6: s10[8] = fn_reverse(matrix[6]);
+  let row7: s10[8] = fn_reverse(matrix[7]);
 
-  let flat: s10[64] = row0 ++ row1 ++ row2 ++ row3 ++ row4 ++ row5 ++ row6 ++ row7;
+  let flat: s10[64] = row7 ++ row6 ++ row5 ++ row4 ++ row3 ++ row2 ++ row1 ++ row0;   // データ順を逆に
+  //let flat: s10[64] = row0 ++ row1 ++ row2 ++ row3 ++ row4 ++ row5 ++ row6 ++ row7;
   flat
+}
+
+#[test]
+fn test0_fn_flatten() {
+  let test_matrix: s10[8][8] = [
+    [s10:0,  s10:11, s10:5,  s10:0,  s10:0,  s10:6,  s10:2,  s10:4],
+    [s10:4,  s10:4,  s10:3,  s10:2,  s10:4,  s10:2,  s10:2,  s10:56],
+    [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:48],
+    [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:32],
+    [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:24],
+    [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:16],
+    [s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:8],
+    [s10:0,  s10:0,  s10:0,  s10:0,  s10:4,  s10:3,  s10:2,  s10:1]
+  ];
+  let result: s10[64] = fn_flatten(test_matrix);
+  trace!(result);
 }
 
 // AC 成分（63 要素）のすべてが 0 かどうか判定する関数
