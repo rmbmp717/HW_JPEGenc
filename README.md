@@ -42,7 +42,7 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 - Q=25 Output JPEG Image <br>
 ![Sample Image](image/lena_q25_output.jpg "Output JPEG Image")
 
-- 2048x1153. Q=25 Output JPEG Image <br>
+- 2048x1153 pixels. Q=25 Output JPEG Image <br>
 ![Sample Image](image/BOTTOLE_q25_Large.jpg "Output JPEG Image")
 
 ## Environment of Evaluation
