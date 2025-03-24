@@ -21,7 +21,8 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 ![回路ブロック図](image/HW_JPEGenc_block.jpg "Block図")
 
 ## モジュール仕様
-- DSLXコードからVerilogコードに変換する時は下記のPIPELINEを指定してください。
+- DSLXコードからVerilogコードに変換する時は下記のPIPELINEを指定してください。 <br>
+
 | モジュール名    | 機能                    | PIPELINE数 |
 |-----------------|-------------------------|------------|
 | DCT_1D          | DCT(離散コサイン変換)  | 3          |
