@@ -37,7 +37,7 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 - Except for the 8x8 image data buffer, all blocks are described using DSLX.  
 ![Block Diagram](image/HW_JPEGenc_block.jpg "Block Diagram")
 
-## Module
+## Module Specifications
 - When converting from DSLX code to Verilog code, please specify the following PIPELINE settings:
 
 | Module Name    | Function                          | PIPELINE Count |
