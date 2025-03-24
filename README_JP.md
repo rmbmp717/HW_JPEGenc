@@ -20,6 +20,15 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 - 8x8画像データバッファ以外の各ブロックはDSLXで記述されています。
 ![回路ブロック図](image/HW_JPEGenc_block.jpg "Block図")
 
+## モジュール仕様
+| モジュール名    | 機能                    | PIPELINE数 |
+|-----------------|-------------------------|------------|
+| DCT_1D          | DCT(離散コサイン変換)  | 3          |
+| Zigzag_scan     | ジグザグスキャン       | 1          |
+| Quantize        | 量子化                 | 2          |
+| Huffman_DCenc   | DCハフマンコード生成   | 1          |
+| Huffman_ACenc   | ACハフマンコード生成   | 4          |
+
 ## Image
 - Q=25 Output JPEG Image <br>
 ![サンプル画像](image/lena_q25_output.jpg "Output JPEG Image")
