@@ -60,7 +60,7 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 
 ### Google DSLX
 
-- Google DSLX https://google.github.io/xls/dslx_reference/
+- [Google DSLX](https://google.github.io/xls/dslx_reference/)
 
 ### Simulation
 
