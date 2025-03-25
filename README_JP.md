@@ -40,10 +40,10 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 - [Google DSLX](https://google.github.io/xls/dslx_reference/)
 
 ### Simulation
-Icarus Verilog and GtkWave on ubuntu linux
+- Icarus Verilog and GtkWave on ubuntu linux
 
 ### FPGA
-gowin GW5AST-LV138PG484 向けに合成可能でした。
+- gowin GW5AST-LV138PG484 向けに合成可能でした。
 
 ## License
 MIT License
