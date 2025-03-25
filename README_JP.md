@@ -36,6 +36,9 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 ![サンプル画像](image/lena_q25_output.jpg "Output JPEG Image")
   
 ## Environment of Evaluation
+### Google DSLX
+- Google DSLX https://google.github.io/xls/dslx_reference/
+
 ### Simulation
 Icarus Verilog and GtkWave on ubuntu linux
 
