@@ -35,7 +35,7 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 
 - The block diagram shows the circuit after the RGB to YCbCr conversion stage.
 - Except for the 8x8 image data buffer, all blocks are described using DSLX.
-- 
+
 ![Block Diagram](image/HW_JPEGenc_block.jpg "Block Diagram")
 
 ## Module Specifications
