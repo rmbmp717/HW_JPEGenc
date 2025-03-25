@@ -58,6 +58,10 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 
 ## Environment of Evaluation
 
+### Google DSLX
+
+- Google DSLX https://google.github.io/xls/dslx_reference/
+
 ### Simulation
 
 - Icarus Verilog and GtkWave on Ubuntu Linux
