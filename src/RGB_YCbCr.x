@@ -1,6 +1,6 @@
 // NISHIHARU
 
-// 入力された s10 型の値を -511 ～ 511 の範囲にクリップする関数
+// Function to clip the input s10 value to the range -511 to 511
 fn clip_s12(input: s12) -> s12 {
     let output: s12 = if input > s12:511 {
         s12:511
@@ -12,67 +12,67 @@ fn clip_s12(input: s12) -> s12 {
     output
 }
 
-// 2 つの s16 値の乗算を行い、255 で除算して結果を s32 で返す
+// Multiply two s16 values, extend the product to a 32-bit integer, and return the result as s32
 fn mul_s16x2(a_in: s16, b_in: s16) -> s32 {
-    // a_in * b_in を 32 ビット整数に拡張してから計算
-    let outdata: s32 = (a_in as s32 * b_in as s32) ;
+    // Extend a_in * b_in to 32 bits before calculating
+    let outdata: s32 = (a_in as s32 * b_in as s32);
     outdata
 }
 
-// RGB 8bit 値 (r, g, b) を YCbCr 色空間 (s10 型) に変換する関数
+// Function to convert 8-bit RGB values (r, g, b) to the YCbCr color space (s10 type)
 //
-// 変換式（近似値、整数演算）:
-//   Y  = (77 * R + 150 * G + 29 * B) >> 8  (計算後、128 を引いて中心化)
+// Conversion formulas (approximate values, integer arithmetic):
+//   Y  = (77 * R + 150 * G + 29 * B) >> 8  (then subtract 128 to center)
 //   Cb = (-43 * R - 85 * G + 128 * B) >> 8 
 //   Cr = (128 * R - 107 * G - 21 * B) >> 8 
 //
-// ※各成分は clip_s12 で -511～511 にクリップされる
+// ※ Each component is clipped to the range -511 to 511 using clip_s12
 fn RGB_to_YCbCr(r: u8, g: u8, b: u8) -> (s12, s12, s12) {
-    // 8bit の RGB 値を s16 に変換
+    // Convert 8-bit RGB values to s16
     let r_16bit = r as s16;
     let g_16bit = g as s16;
     let b_16bit = b as s16;
     
-    // 輝度 Y の計算
+    // Compute luminance Y
     let y_16: s16 = ((mul_s16x2(s16:77, r_16bit) +
                       mul_s16x2(s16:150, g_16bit) +
                       mul_s16x2(s16:29, b_16bit)) / s32:255 ) as s16;
-    // レベルシフト：DCT前に中心化するために128を引く
+    // Level shift: subtract 128 to center before DCT
     let y = clip_s12((y_16 as s12 - s12:128) as s12);
     
-    // 青色差成分 Cb の計算
+    // Compute blue-difference chroma component Cb
     let cb_16: s16 = ((mul_s16x2(s16:-43, r_16bit) +
                        mul_s16x2(s16:-85, g_16bit) +
                        mul_s16x2(s16:128, b_16bit)) / s32:255 ) as s16 ;
-    // レベルシフトしない
+    // No level shifting
     let cb = clip_s12(cb_16 as s12);
 
-    // 赤色差成分 Cr の計算
+    // Compute red-difference chroma component Cr
     let cr_16: s16 = ((mul_s16x2(s16:128, r_16bit) +
                        mul_s16x2(s16:-107, g_16bit) +
                        mul_s16x2(s16:-21, b_16bit)) / s32:255 ) as s16;
-    // レベルシフトしない
+    // No level shifting
     let cr = clip_s12(cr_16 as s12);
 
     trace!(y);
     trace!(cb);
     trace!(cr);
 
-    // 変換後の Y, Cb, Cr 値を返す
+    // Return the converted Y, Cb, Cr values
     (y, cb, cr)
 }
 
-// --- テストコード ---
+// --- Test Code ---
 //
-// 各テストは RGB 値から YCbCr への変換結果が期待通りであるかを検証します。
+// Each test verifies that the conversion result from RGB to YCbCr is as expected.
 #[test]
 fn test1_rgb_to_ycbcr() {
-    // テスト：純粋な赤 (255, 0, 0)
+    // Test: Pure red (255, 0, 0)
     let r = u8:255;
     let g = u8:0;
     let b = u8:0;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
-    // 期待値はそれぞれの計算結果に基づく（ここでは例として設定）
+    // Expected values are based on the respective calculation results (set as an example here)
     assert_eq(y, s12:-51);
     assert_eq(cb, s12:-43);
     assert_eq(cr, s12:128);
@@ -80,12 +80,12 @@ fn test1_rgb_to_ycbcr() {
 
 #[test]
 fn test2_rgb_to_ycbcr() {
-    // テスト：黒 (0, 0, 0)
+    // Test: Black (0, 0, 0)
     let r = u8:0;
     let g = u8:0;
     let b = u8:0;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
-    // 黒の場合、Y, Cb, Cr それぞれ -128 となる（レベルシフト後）
+    // In the case of black, Y, Cb, and Cr are all -128 (after level shift)
     assert_eq(y, s12:-128);
     assert_eq(cb, s12:0);
     assert_eq(cr, s12:0);
@@ -93,12 +93,12 @@ fn test2_rgb_to_ycbcr() {
 
 #[test]
 fn test3_rgb_to_ycbcr() {
-    // テスト：白 (255, 255, 255)
+    // Test: White (255, 255, 255)
     let r = u8:255;
     let g = u8:255;
     let b = u8:255;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
-    // 白の場合、Y は 128 (中心化後) となり、Cb, Cr は -128（中心化後）となる
+    // For white, Y becomes 128 (after centering), and Cb, Cr become -128 (after centering)
     assert_eq(y, s12:128);
     assert_eq(cb, s12:0);
     assert_eq(cr, s12:0);
@@ -106,12 +106,12 @@ fn test3_rgb_to_ycbcr() {
 
 #[test]
 fn test4_rgb_to_ycbcr() {
-    // テスト：純粋な緑 (0, 255, 0)
+    // Test: Pure green (0, 255, 0)
     let r = u8:0;
     let g = u8:255;
     let b = u8:0;
     let (y, cb, cr) = RGB_to_YCbCr(r, g, b);
-    // 期待値は計算結果に依存します。ここでは例として設定（適宜調整してください）
+    // Expected values depend on the calculation results. Set as an example here (adjust as necessary)
     assert_eq(y, s12:22);
     assert_eq(cb, s12:-85);
     assert_eq(cr, s12:-107);
@@ -119,7 +119,7 @@ fn test4_rgb_to_ycbcr() {
 
 #[test]
 fn test5_rgb_to_ycbcr() {
-    // テスト：白 (255, 255, 255) の再確認
+    // Test: Recheck white (255, 255, 255)
     let r = u8:255;
     let g = u8:255;
     let b = u8:255;
@@ -131,7 +131,7 @@ fn test5_rgb_to_ycbcr() {
 
 #[test]
 fn test6_rgb_to_ycbcr() {
-    // テスト：白 (255, 255, 255) の再確認
+    // Test: Gray (80, 80, 80)
     let r = u8:80;
     let g = u8:80;
     let b = u8:80;
