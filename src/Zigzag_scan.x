@@ -1,6 +1,6 @@
 // NISHIHARU
 
-/// 8×8 の行列を 1 次元（64 要素）の配列に平坦化（行優先）する関数。
+/// Function to flatten an 8×8 matrix into a 1-dimensional (64-element) array (row-major order).
 fn flatten_matrix(matrix: s10[8][8]) -> s10[64] {
   [
     matrix[7][7], matrix[7][6], matrix[7][5], matrix[7][4], matrix[7][3], matrix[7][2], matrix[7][1], matrix[7][0],
@@ -25,7 +25,7 @@ const ZERO64: s10[64] = [
   s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0, s10:0,
 ];
 
-/// 平坦化した配列を zigzag 順に並び替える関数。
+/// Function to reorder the flattened array into zigzag order.
 fn Zigzag_reorder(matrix: s10[8][8], is_enable: bool) -> s10[64] {
   if is_enable  {
     let flat = flatten_matrix(matrix);
@@ -100,8 +100,11 @@ fn Zigzag_reorder(matrix: s10[8][8], is_enable: bool) -> s10[64] {
   }
 }
 
+//----------------------------------------------------------------------
+// Test
 #[test]
 fn test0_zigzag_reorder() {
+  // Input matrix with reversed values (64 to 1)
   let reversed_matrix: s10[8][8] = [
     [ s10:64, s10:63, s10:62, s10:61, s10:60, s10:59, s10:58, s10:57 ],
     [ s10:56, s10:55, s10:54, s10:53, s10:52, s10:51, s10:50, s10:49 ],
@@ -112,10 +115,11 @@ fn test0_zigzag_reorder() {
     [ s10:16, s10:15, s10:14, s10:13, s10:12, s10:11, s10:10, s10:9  ],
     [ s10:8,  s10:7,  s10:6,  s10:5,  s10:4,  s10:3,  s10:2,  s10:1  ]
   ];
+
   let result = Zigzag_reorder(reversed_matrix, true);
   //trace!(result);
 
-  // 期待される結果（実行結果は以下の通り）
+  // Expected zigzag reordered result
   let expected_reversed: s10[64] = [
     s10:1,  s10:2,  s10:9,  s10:17, s10:10, s10:3,  s10:4,  s10:11,
     s10:18, s10:25, s10:33, s10:26, s10:19, s10:12, s10:5,  s10:6,
@@ -125,14 +129,15 @@ fn test0_zigzag_reorder() {
     s10:30, s10:23, s10:16, s10:24, s10:31, s10:38, s10:45, s10:52,
     s10:59, s10:60, s10:53, s10:46, s10:39, s10:32, s10:40, s10:47,
     s10:54, s10:61, s10:62, s10:55, s10:48, s10:56, s10:63, s10:64
-  ];  
+  ];
 
-  // 結果が期待値と一致することを検証する
+  // Verify result matches expected zigzag order
   assert_eq(result, expected_reversed);
 }
 
 #[test]
 fn test1_zigzag_reorder() {
+  // Input matrix with sequential values (1 to 64)
   let matrix: s10[8][8] = [
     [ s10:1,  s10:2,  s10:3,  s10:4,  s10:5,  s10:6,  s10:7,  s10:8 ],
     [ s10:9,  s10:10, s10:11, s10:12, s10:13, s10:14, s10:15, s10:16 ],
@@ -143,10 +148,11 @@ fn test1_zigzag_reorder() {
     [ s10:49, s10:50, s10:51, s10:52, s10:53, s10:54, s10:55, s10:56 ],
     [ s10:57, s10:58, s10:59, s10:60, s10:61, s10:62, s10:63, s10:64 ]
   ];
+
   let result = Zigzag_reorder(matrix, false);
   //trace!(result);
 
-  // 期待される結果（実行結果は以下の通り）
+  // Expected result is all zeros when is_enable is false
   let expected: s10[64] = [
     s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,
     s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,
@@ -158,6 +164,6 @@ fn test1_zigzag_reorder() {
     s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0,  s10:0
   ];
 
-  // 結果が期待値と一致することを検証する
+  // Verify result matches expected zero array
   assert_eq(result, expected);
 }
