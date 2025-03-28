@@ -1,6 +1,6 @@
 /*
 NISHIHARU
-HW JPEC encorder
+HW JPEG Encoder
 */
 
 `timescale 1ns / 1ps
@@ -13,9 +13,9 @@ module HW_JPEGenc_top(
     input  wire [7:0]       Red,
     input  wire [7:0]       Green,
     input  wire [7:0]       Blue,
-    // 設計段階での制御端子
+    // Control terminals for design phase
     input  wire             input_enable,  
-    //output wire [7:0]       pix_data [0:63], // 64個の16ビット入力：インデックス 0～63
+    //output wire [7:0]       pix_data [0:63], // 64 16-bit inputs: index 0–63
     input  wire             dct_enable,
     input  wire             dct_end_enable,
     input  wire             zigzag_input_enable,
@@ -23,37 +23,37 @@ module HW_JPEGenc_top(
     // JPEG encoded Data 
     // Y
     output wire             jpeg_out_enable,  
-    output wire [8:0]       jpeg_dc_out,          // 最終 JPEG 出力 DC
-    output reg  [7:0]       jpeg_dc_out_length,   // 最終 JPEG 出力 DC
-    output reg  [7:0]       jpeg_dc_code_list,    // 最終 JPEG 出力 DC
+    output wire [8:0]       jpeg_dc_out,          // Final JPEG output DC
+    output reg  [7:0]       jpeg_dc_out_length,   // Final JPEG output DC
+    output reg  [7:0]       jpeg_dc_code_list,    // Final JPEG output DC
     output reg  [7:0]       jpeg_dc_code_size,
-    output wire [15:0]      huffman_code,         // 最終 JPEG 出力（16ビット）
-    output wire [7:0]       huffman_code_length,  // 最終 JPEG 出力のビット幅
-    output wire [7:0]       code_out,             // 最終 JPEG 出力 CODE
-    output wire [7:0]       code_size_out,        // 最終 JPEG 出力 CODE
+    output wire [15:0]      huffman_code,         // Final JPEG output (16-bit)
+    output wire [7:0]       huffman_code_length,  // Bit length of final JPEG output
+    output wire [7:0]       code_out,             // Final JPEG output CODE
+    output wire [7:0]       code_size_out,        // Final JPEG output CODE
     // Cb
     output wire             Cb_jpeg_out_enable,  
-    output wire [8:0]       Cb_jpeg_dc_out,          // 最終 JPEG 出力 DC
-    output reg  [7:0]       Cb_jpeg_dc_out_length,   // 最終 JPEG 出力 DC
-    output reg  [7:0]       Cb_jpeg_dc_code_list,    // 最終 JPEG 出力 DC
+    output wire [8:0]       Cb_jpeg_dc_out,          // Final JPEG output DC
+    output reg  [7:0]       Cb_jpeg_dc_out_length,   // Final JPEG output DC
+    output reg  [7:0]       Cb_jpeg_dc_code_list,    // Final JPEG output DC
     output reg  [7:0]       Cb_jpeg_dc_code_size,
-    output wire [15:0]      Cb_huffman_code,         // 最終 JPEG 出力（16ビット）
-    output wire [7:0]       Cb_huffman_code_length,  // 最終 JPEG 出力のビット幅
-    output wire [7:0]       Cb_code_out,             // 最終 JPEG 出力 CODE
-    output wire [7:0]       Cb_code_size_out,        // 最終 JPEG 出力 CODE
+    output wire [15:0]      Cb_huffman_code,         // Final JPEG output (16-bit)
+    output wire [7:0]       Cb_huffman_code_length,  // Bit length of final JPEG output
+    output wire [7:0]       Cb_code_out,             // Final JPEG output CODE
+    output wire [7:0]       Cb_code_size_out,        // Final JPEG output CODE
     // Cr
     output wire             Cr_jpeg_out_enable, 
-    output wire [8:0]       Cr_jpeg_dc_out,           // 最終 JPEG 出力 DC
-    output reg  [7:0]       Cr_jpeg_dc_out_length,   // 最終 JPEG 出力 DC
-    output reg  [7:0]       Cr_jpeg_dc_code_list,    // 最終 JPEG 出力 DC
+    output wire [8:0]       Cr_jpeg_dc_out,           // Final JPEG output DC
+    output reg  [7:0]       Cr_jpeg_dc_out_length,   // Final JPEG output DC
+    output reg  [7:0]       Cr_jpeg_dc_code_list,    // Final JPEG output DC
     output reg  [7:0]       Cr_jpeg_dc_code_size,
-    output wire [15:0]      Cr_huffman_code,         // 最終 JPEG 出力（16ビット）
-    output wire [7:0]       Cr_huffman_code_length,  // 最終 JPEG 出力のビット幅
-    output wire [7:0]       Cr_code_out,             // 最終 JPEG 出力 CODE
-    output wire [7:0]       Cr_code_size_out         // 最終 JPEG 出力 CODE
+    output wire [15:0]      Cr_huffman_code,         // Final JPEG output (16-bit)
+    output wire [7:0]       Cr_huffman_code_length,  // Bit length of final JPEG output
+    output wire [7:0]       Cr_code_out,             // Final JPEG output CODE
+    output wire [7:0]       Cr_code_size_out         // Final JPEG output CODE
 );
 
-    // VCD ダンプ用ブロック
+    // VCD dump block
     `ifdef DUMP_VCD
     initial begin
         $dumpfile("./vcd/hw_jpeg_top.vcd");
@@ -61,7 +61,7 @@ module HW_JPEGenc_top(
     end
     `endif
 
-    // RGB -> YCbCr 変換
+    // RGB to YCbCr conversion
     wire [11:0]  Y_data, Cb_data, Cr_data;   // s12
 
     RGB_to_YCbCr mRGB_to_YCbCr(
@@ -72,7 +72,7 @@ module HW_JPEGenc_top(
         .out           ({{Y_data}, {Cb_data}, {Cr_data}})
     );
 
-    // Y JPEGenc module
+    // Y JPEG encoder module
     HW_JPEGenc HW_JPEGenc_Y(
         .clock                  (clock),
         .reset_n                (reset_n),
@@ -84,7 +84,7 @@ module HW_JPEGenc_top(
         .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
         .Huffman_start          (Huffman_start),
-        //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
+        //.pix_data               (pix_data),      // Connect to pix_data array ([0:63])
         .is_luminance           (1'b1),
         .jpeg_out_enable        (jpeg_out_enable),
         .jpeg_dc_out            (jpeg_dc_out),
@@ -96,7 +96,7 @@ module HW_JPEGenc_top(
         .code_size_out          (code_size_out)
     );
 
-    // Cb JPEGenc module
+    // Cb JPEG encoder module
     HW_JPEGenc HW_JPEGenc_Cb(
         .clock                  (clock),
         .reset_n                (reset_n),
@@ -108,7 +108,7 @@ module HW_JPEGenc_top(
         .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
         .Huffman_start          (Huffman_start),
-        //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
+        //.pix_data               (pix_data),      // Connect to pix_data array ([0:63])
         .is_luminance           (1'b0),
         .jpeg_out_enable        (Cb_jpeg_out_enable),
         .jpeg_dc_out            (Cb_jpeg_dc_out),
@@ -120,7 +120,7 @@ module HW_JPEGenc_top(
         .code_size_out          (Cb_code_size_out)
     );
 
-    // Cr JPEGenc module
+    // Cr JPEG encoder module
     HW_JPEGenc HW_JPEGenc_Cr(
         .clock                  (clock),
         .reset_n                (reset_n),
@@ -132,7 +132,7 @@ module HW_JPEGenc_top(
         .dct_end_enable         (dct_end_enable),
         .zigzag_input_enable    (zigzag_input_enable),
         .Huffman_start          (Huffman_start),
-        //.pix_data               (pix_data),      // pix_data 配列の接続（[0:63] と一致）
+        //.pix_data               (pix_data),      // Connect to pix_data array ([0:63])
         .is_luminance           (1'b0),
         .jpeg_out_enable        (Cr_jpeg_out_enable),
         .jpeg_dc_out            (Cr_jpeg_dc_out),
