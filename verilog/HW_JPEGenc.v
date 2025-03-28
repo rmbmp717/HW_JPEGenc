@@ -1,6 +1,6 @@
 /*
 NISHIHARU
-JPEG HW Encorder
+JPEG HW Encoder
 */
 `timescale 1ns / 1ps
 
@@ -14,7 +14,7 @@ module HW_JPEGenc(
     input  wire             dct_end_enable,
     input  wire             zigzag_input_enable,
     input  wire             Huffman_start,
-    input  wire [11:0]      pix_data [0:63], // 64個の12ビットピクセル（行優先）
+    input  wire [11:0]      pix_data [0:63], // 64 12-bit pixels (row-major)
     input  wire             is_luminance,
     // JPEG Output
     output wire             jpeg_out_enable,
@@ -22,35 +22,35 @@ module HW_JPEGenc(
     output wire [7:0]       jpeg_dc_out_length,
     output wire [7:0]       jpeg_dc_code_list,
     output wire [7:0]       jpeg_dc_code_size,
-    output wire [15:0]      huffman_code,           // 最終 JPEG 出力（16ビット）
-    output wire [7:0]       huffman_code_length,    // 最終 JPEG 出力のビット幅
+    output wire [15:0]      huffman_code,           // Final JPEG output (16-bit)
+    output wire [7:0]       huffman_code_length,    // Bit width of final JPEG output
     output wire [7:0]       code_out,
     output wire [7:0]       code_size_out
 );
 
-    // パラメータ定義
+    // Parameter definitions
     localparam DATA_WIDTH = 12;
     localparam DEPTH      = 64;
     
-    // 内部信号の宣言
-    // 入力データバッファ（databuffer_64x8bit の出力）
+    // Internal signal declarations
+    // Input data buffer (output of databuffer_64x8bit)
     wire [DATA_WIDTH-1:0] buffer [0:DEPTH-1];
 
-    // 2D DCT の出力
+    // Output of 2D DCT
     wire [11:0] dct2d_out [0:63];
 
-    // Quantize 用のバッファ（DCT2D 出力を Quantize 用にバッファリング）
+    // Buffer for Quantize (buffering DCT2D output for Quantize)
     wire [768-1:0]          quantim_buffer;
     wire [80-1:0]           quantized_out;
 
-    // Zigzag バッファ出力（最終出力）
+    // Output of Zigzag buffer (final output)
     wire [640-1:0] pix_data_out;
 
-    // to Huffman enc
+    // to Huffman encoder
     wire [9:0]     dc_in;
     wire [640-1:0] ac_matrix;
 
-    // Huffmann enc out
+    // Huffman encoder output
     wire [8:0]  dc_out;             // 9 bits
     wire [7:0]  dc_out_length;
     wire [7:0]  dc_out_code_list;
@@ -62,7 +62,7 @@ module HW_JPEGenc(
     wire [7:0]  next_pix;
 
     // ---------------------------------------------------------------------
-    // databuffer_64x120bit インスタンス (入力データのバッファ)
+    // databuffer_64x12bit instance (buffering input data)
     // ---------------------------------------------------------------------
     databuffer_64x12bit #(
         .DATA_WIDTH         (DATA_WIDTH),
@@ -73,24 +73,24 @@ module HW_JPEGenc(
         .input_enable       (input_enable),
         .input_1pix_enable  (input_1pix_enable),
         .pix_1pix_data      (pix_1pix_data),     
-        .pix_data           (pix_data),   // 64個のピクセル 一括書き込み用
+        .pix_data           (pix_data),   // 64 pixels, batch write
         .buffer             (buffer),
         .buffer_768bits     ()
     );
     
     // ---------------------------------------------------------------------
-    // DCT_2D モジュール インスタンス (2D DCT 処理)
+    // DCT_2D module instance (2D DCT processing)
     // ---------------------------------------------------------------------
     DCT_2D mDCT_2D (
         .clock          (clock),
         .reset_n        (reset_n),
         .dct_enable     (dct_enable),   
-        .pix_data       (buffer),   // 入力ピクセル（[0:63]）
-        .out            (dct2d_out)   // 2D DCT 結果
+        .pix_data       (buffer),   // Input pixels ([0:63])
+        .out            (dct2d_out)   // 2D DCT result
     );
 
     // ---------------------------------------------------------------------
-    // databuffer_64x12bit インスタンス (DCT2D 結果のバッファ)
+    // databuffer_64x12bit instance (buffer for DCT2D result)
     // ---------------------------------------------------------------------
     databuffer_64x12bit #(
         .DATA_WIDTH         (DATA_WIDTH),
@@ -101,14 +101,14 @@ module HW_JPEGenc(
         .input_enable       (dct_end_enable),
         .input_1pix_enable  (1'b0),
         .pix_1pix_data      (12'd0),     
-        .pix_data           (dct2d_out),       // DCT_2D の出力を接続
+        .pix_data           (dct2d_out),       // Output from DCT_2D
         .buffer             (),
         .buffer_768bits     (quantim_buffer)
     );
 
     // ---------------------------------------------------------------------
-    // Quantize モジュール インスタンス
-    // ※ 各ポートの接続は、今後の設計に合わせて調整してください。
+    // Quantize module instance
+    // * Port connections should be adjusted in future designs
     // ---------------------------------------------------------------------
     wire  [7:0]      matrix_row;
     wire  [7:0]      quality;
@@ -141,10 +141,10 @@ module HW_JPEGenc(
         // output 
         .quantized_out      (quantized_out),
         .quality            (quality)
-);
+    );
 
     // ---------------------------------------------------------------------
-    // databuffer_zigzag64x10bit インスタンス (Zigzag スキャン)
+    // databuffer_zigzag64x10bit instance (Zigzag scan)
     // ---------------------------------------------------------------------
     databuffer_zigzag64x10bit #(
         .DATA_WIDTH         (DATA_WIDTH),
@@ -157,18 +157,18 @@ module HW_JPEGenc(
         .input_data_enable  (1'b0),
         .matrix_row         (matrix_row),
         .buffer             (),    
-        .zigzag_pix_out     (pix_data_out)     // 最終 Zigzag 結果
+        .zigzag_pix_out     (pix_data_out)     // Final Zigzag result
     );
 
     // ---------------------------------------------------------------------
-    // Huffman エンコード インスタンス
+    // Huffman encoding instance
     // ---------------------------------------------------------------------
     wire [7:0]  start_pix;
     wire [7:0]  pre_start_pix;
     wire [7:0]  run;
     wire [9:0]  now_pix_data;
 
-    // PIPE_LINE_STAGE = 1 と仮定
+    // Assuming PIPE_LINE_STAGE = 1
     Huffman_DCenc mHuffman_DCenc (
         .clk                (clock),
         .dc_in              (dc_in),
@@ -176,7 +176,7 @@ module HW_JPEGenc(
         .out                ({dc_out, dc_out_length, dc_out_code_list, dc_out_code_size})
     );
 
-    // PIPE_LINE_STAGE = 4 と仮定
+    // Assuming PIPE_LINE_STAGE = 4
     Huffman_ACenc mHuffman_ACenc (
         .clk                (clock),
         .matrix             (ac_matrix),
@@ -186,7 +186,7 @@ module HW_JPEGenc(
         .out                ({ac_out, length, code, code_size, next_pix, run, now_pix_data})
     );
 
-    // Huffman エンコード コントローラ
+    // Huffman encoder controller
     Huffman_enc_controller mHuffman_enc_controller (
         .clock              (clock),
         .reset_n            (reset_n),
