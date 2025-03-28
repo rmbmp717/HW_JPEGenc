@@ -71,7 +71,8 @@ async def test1_JPEGenc_top(dut):
     ]
 
     # flat 
-    flat_data = tuple(input_ac_matrix[i][j] for i in reversed(range(8)) for j in reversed(range(8)))
+    #flat_data = tuple(input_ac_matrix[i][j] for i in reversed(range(8)) for j in reversed(range(8)))
+    flat_data = tuple(input_ac_matrix[i][j] for i in range(8) for j in range(8))
 
     # 各要素を10ビットのバイナリ文字列に変換して連結
     bit_str = "".join(format(val & 0x3FF, "010b") for val in flat_data)
