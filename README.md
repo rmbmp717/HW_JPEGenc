@@ -59,6 +59,8 @@ By leveraging the high-level description of DSLX and the low-level implementatio
 
 ![Sample Image](image/BOTTOLE_q25_Large.jpg "Output JPEG Image")
 
+The compressed data size in this case was 2.86% of the original image size.
+
 ## Environment of Evaluation
 
 ### Google DSLX
