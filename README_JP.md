@@ -34,6 +34,8 @@ DSLX による高水準な記述と、Verilog HDL による低水準な実装の
 ## Image
 - Q=25 Output JPEG Image <br>
 ![サンプル画像](image/lena_q25_output.jpg "Output JPEG Image")
+- 2048 x 1153 pixels. Q=25 Output JPEG Image <br>
+![Sample Image](image/BOTTOLE_q25_Large.jpg "Output JPEG Image")
   
 ## Environment of Evaluation
 ### Google DSLX
