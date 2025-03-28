@@ -12,9 +12,9 @@ TOP				:= RGB_to_YCbCr
 #TOP		  	  := Data_flip64
 #TOP				:= Zigzag_reorder
 
+INPUT_FILE 	:= ./src/RGB_YCbCr.x
 #INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
 #INPUT_FILE     := ./src/Huffman_ACenc.x   # PIPE_LINE_STAGE = 4
-INPUT_FILE 	:= ./src/RGB_YCbCr.x
 #INPUT_FILE 	:= ./src/Quantize.x			# PIPE_LINE_STAGE = 2
 #INPUT_FILE 	:= ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE 	:= ./src/DCT_2D.x
@@ -85,6 +85,19 @@ codegen: optimize
 	  --delay_model=unit \
 	  --use_system_verilog=false \
 	  $(OPT_IR_FILE) > $(OUTPUT_FILE)
+
+# ----------------------------------------------------------------
+# Batch codegen for all modules
+# ----------------------------------------------------------------
+all_codegen:
+	$(MAKE) codegen TOP=RGB_to_YCbCr         INPUT_FILE=./src/RGB_YCbCr.x         PIPE_LINE_STAGE=1
+	$(MAKE) codegen TOP=Huffman_DCenc        INPUT_FILE=./src/Huffman_DCenc.x     PIPE_LINE_STAGE=1
+	$(MAKE) codegen TOP=Huffman_ACenc        INPUT_FILE=./src/Huffman_ACenc.x     PIPE_LINE_STAGE=4
+	$(MAKE) codegen TOP=Quantize             INPUT_FILE=./src/Quantize.x          PIPE_LINE_STAGE=2
+	$(MAKE) codegen TOP=dct_1d_s12           INPUT_FILE=./src/DCT_1D.x            PIPE_LINE_STAGE=3
+	$(MAKE) codegen TOP=dct_2d_s12           INPUT_FILE=./src/DCT_2D.x            PIPE_LINE_STAGE=3
+	$(MAKE) codegen TOP=Zigzag_reorder       INPUT_FILE=./src/Zigzag_scan.x       PIPE_LINE_STAGE=1
+	$(MAKE) codegen TOP=Data_flip64          INPUT_FILE=./src/Data_flip64.x       PIPE_LINE_STAGE=1
 
 #----------------------------------------------------------------
 # Cocotb simulation target
