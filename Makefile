@@ -3,16 +3,18 @@
 #================================================================
 
 # Top-level module & source settings
+TOP				:= RGB_to_YCbCr
 #TOP              := dct_2d_s12
 #TOP              := dct_1d_s12
-TOP              := Huffman_DCenc
+#TOP              := Huffman_DCenc
 #TOP              := Huffman_ACenc
 #TOP              := Quantize
 #TOP		  	  := Data_flip64
+#TOP				:= Zigzag_reorder
 
-INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
+#INPUT_FILE 	:= ./src/Huffman_DCenc.x # PIPE_LINE_STAGE = 1
 #INPUT_FILE     := ./src/Huffman_ACenc.x   # PIPE_LINE_STAGE = 4
-#INPUT_FILE 	:= ./src/RGB_YCbCr.x
+INPUT_FILE 	:= ./src/RGB_YCbCr.x
 #INPUT_FILE 	:= ./src/Quantize.x			# PIPE_LINE_STAGE = 2
 #INPUT_FILE 	:= ./src/DCT_1D.x		# PIPE_LINE_STAGE = 3
 #INPUT_FILE 	:= ./src/DCT_2D.x
@@ -126,4 +128,4 @@ activate:
 # Gowin EDA 用ファイルコピーターゲット
 #----------------------------------------------------------------
 gowin_copy:
-	@cp $(VERILOG_FILES) /home/haruhiko/gowin/IDE/bin/HW_JPEGenc/src/
+	@cp $(VERILOG_FILES) /home/haruhiko/gowinV199/IDE/bin/HW_JPEGenc/src/
